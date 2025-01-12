@@ -1,50 +1,95 @@
-# React + TypeScript + Vite
+# Online Course System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern online learning platform built with React, TypeScript, and Material-UI that allows users to preview and take courses.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Guest Features
+- Preview courses without signing in
+- View course structure and first lesson of each unit
+- Browse available courses and their descriptions
 
-## Expanding the ESLint configuration
+### User Features (Coming Soon)
+- Sign up/sign in functionality
+- Course registration and progress tracking
+- Note-taking for lessons
+- Quiz participation
+- Group joining and collaboration
+- Progress-based lesson unlocking
+- Personal dashboard
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### Admin Features (Coming Soon)
+- Course management (create/edit/delete)
+- Unit and lesson management
+- Quiz creation and management
+- Group management
+- Grade tracking and monitoring
 
-- Configure the top-level `parserOptions` property like this:
+## Technical Stack
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Frontend**:
+  - React 18
+  - TypeScript
+  - Material-UI v5
+  - React Router v6
+  - Firebase Auth (planned)
+  - Real-time sync (planned)
+  - Responsive design
+  - PWA support (planned)
+
+- **Backend**:
+  - Firebase Realtime Database (planned)
+
+- **Testing**:
+  - Vitest (planned)
+
+## Getting Started
+
+1. Clone the repository
+```bash
+git clone [repository-url]
+cd online-course-system
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+2. Install dependencies
+```bash
+npm install
 ```
+
+3. Start the development server
+```bash
+npm run dev
+```
+
+4. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+## Project Structure
+
+```
+src/
+├── components/        # Reusable UI components
+├── pages/            # Page components
+├── contexts/         # React contexts
+├── types/           # TypeScript type definitions
+├── config/          # Configuration files
+└── mockData.ts      # Temporary mock data
+```
+
+## Development
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run preview` - Preview production build
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details
