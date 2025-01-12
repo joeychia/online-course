@@ -1,31 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
-
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+import Layout from './components/Layout';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
+    <Router>
+      <Layout>
         <Routes>
           <Route path="/" element={<CourseList />} />
-          <Route path="/course/:courseId" element={<CourseView />} />
+          <Route path="/courses/:courseId/units/:unitId" element={<CourseView />} />
         </Routes>
-      </Router>
-    </ThemeProvider>
+      </Layout>
+    </Router>
   );
 }
 

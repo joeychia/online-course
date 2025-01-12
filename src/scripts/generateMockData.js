@@ -38,7 +38,8 @@ function processMarkdownFile(filePath) {
     type: 'text',
     content: mainContent,
     completed: false,
-    notes: {}
+    notes: {},
+    isPublic: true
   };
 }
 
@@ -60,7 +61,8 @@ function processWeekFolder(folderPath) {
     id: weekId,
     name: `第${weekNumber}週`,
     description: `第${weekNumber}週的每日讀經內容`,
-    lessons
+    lessons,
+    isPublic: true
   };
 }
 
@@ -84,7 +86,8 @@ function generateMockData() {
       description: '兩年讀經計劃的每日靈修材料',
       units,
       groups: {},
-      grades: {}
+      grades: {},
+      isPublic: true
     }
   ];
 

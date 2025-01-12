@@ -24,40 +24,28 @@ export interface Course {
   id: string;
   name: string;
   description: string;
-  units: {
-    [unitId: string]: Unit;
-  };
-  groups: {
-    [groupId: string]: Group;
-  };
-  grades: {
-    [userId: string]: {
-      grade: number;
-    };
-  };
+  units: Record<string, Unit>;
+  groups: Record<string, any>;
+  grades: Record<string, any>;
+  isPublic?: boolean;
 }
 
 export interface Unit {
   id: string;
   name: string;
   description: string;
-  lessons: {
-    [lessonId: string]: Lesson;
-  };
+  lessons: Record<string, Lesson>;
+  isPublic?: boolean;
 }
 
 export interface Lesson {
   id: string;
   name: string;
-  type: 'video' | 'text' | 'image' | 'quiz';
+  type: string;
   content: string;
-  quiz?: Quiz;
   completed: boolean;
-  notes: {
-    [userId: string]: {
-      text: string;
-    };
-  };
+  notes: Record<string, any>;
+  isPublic?: boolean;
 }
 
 export interface Quiz {

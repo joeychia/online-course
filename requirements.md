@@ -12,10 +12,10 @@
 
 ### For User
 - User can sign up/sign in/sign out
-- User can preview a course without sign in
-- User can view a course
-- User can view a unit
-- User can view a lesson
+- User can preview a course without sign in - done
+- User can view a course - done
+- User can view a unit - done
+- User can view a lesson - done
 - User can do a quiz for a lesson if any
 - User can register/drop a course
 - User can join/quit a group
