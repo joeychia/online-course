@@ -1,150 +1,61 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Toast UI Editor customization */
-.toastui-editor-defaultUI {
-  border: none !important;
+/* Toast UI Editor customizations */
+.toastui-editor-contents {
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 16px;
 }
 
-.toastui-editor-defaultUI-toolbar {
-  @apply border-b border-gray-200 bg-gray-50;
+.toastui-editor-contents h1,
+.toastui-editor-contents h2,
+.toastui-editor-contents h3,
+.toastui-editor-contents h4,
+.toastui-editor-contents h5,
+.toastui-editor-contents h6 {
+  margin: 24px 0 16px;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
-.toastui-editor-toolbar-icons {
-  @apply border-gray-300;
+.toastui-editor-contents p {
+  margin: 16px 0;
 }
 
-.toastui-editor-defaultUI .ProseMirror {
-  @apply p-4;
+.toastui-editor-contents blockquote {
+  margin: 16px 0;
+  padding: 0 16px;
+  border-left: 4px solid #ddd;
+  color: #666;
 }
 
-.toastui-editor-main {
-  @apply border-t border-gray-200;
+.toastui-editor-contents ul,
+.toastui-editor-contents ol {
+  margin: 16px 0;
+  padding-left: 32px;
 }
 
-.toastui-editor-main .toastui-editor-md-preview {
-  @apply bg-gray-50;
+.toastui-editor-contents code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
 }
 
-/* Custom styles for markdown content */
-.prose {
-  @apply text-gray-800 leading-relaxed;
+.toastui-editor-contents pre {
+  margin: 16px 0;
+  padding: 16px;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  overflow: auto;
 }
 
-.prose h1 {
-  @apply text-3xl font-bold mb-6 text-gray-900 border-b pb-4;
+.toastui-editor-contents img {
+  max-width: 100%;
+  margin: 16px 0;
 }
 
-.prose h2 {
-  @apply text-2xl font-semibold mb-4 text-gray-800 mt-8;
-}
-
-.prose h3 {
-  @apply text-xl font-medium mb-3 text-gray-800 mt-6;
-}
-
-.prose p {
-  @apply mb-4 text-gray-700 leading-relaxed;
-}
-
-.prose ul {
-  @apply list-disc list-inside mb-4 space-y-2 text-gray-700;
-}
-
-.prose ol {
-  @apply list-decimal list-inside mb-4 space-y-2 text-gray-700;
-}
-
-.prose a {
-  @apply text-blue-600 hover:text-blue-800 underline transition-colors;
-}
-
-.prose blockquote {
-  @apply border-l-4 border-blue-500 bg-blue-50 pl-4 py-2 my-4 text-gray-700 rounded-r;
-}
-
-/* Custom styles for the layout */
-.layout-container {
-  @apply min-h-screen bg-gray-50;
-}
-
-.header {
-  @apply bg-white border-b border-gray-200 sticky top-0 z-50;
-}
-
-.header nav {
-  @apply shadow-sm bg-gradient-to-r from-blue-600 to-blue-700;
-}
-
-.main-content {
-  @apply container mx-auto py-8 px-4;
-}
-
-/* Course view specific styles */
-.lesson-list {
-  @apply bg-white border-gray-200 h-full;
-}
-
-.lesson-list h2 {
-  @apply text-xl font-bold text-gray-800 bg-gray-50 border-b border-gray-200;
-}
-
-.lesson-item {
-  @apply px-6 py-4 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ease-in-out flex items-center gap-3 text-gray-700 hover:text-blue-700;
-}
-
-.lesson-item::before {
-  content: "📚";
-  @apply text-lg opacity-70;
-}
-
-.lesson-item.active {
-  @apply bg-blue-50 text-blue-700 font-medium border-l-4 border-blue-600;
-}
-
-.lesson-item.active::before {
-  content: "📖";
-}
-
-.lesson-content {
-  @apply bg-white shadow-lg p-8 rounded-lg max-w-4xl mx-auto;
-}
-
-/* Progress indicators */
-.progress-bar {
-  @apply h-1 bg-gray-200 rounded-full overflow-hidden;
-}
-
-.progress-bar-fill {
-  @apply h-full bg-blue-600 transition-all duration-300;
-}
-
-/* Navigation buttons */
-.nav-button {
-  @apply px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
-}
-
-/* Course header */
-.course-header {
-  @apply mb-8 pb-6 border-b border-gray-200;
-}
-
-.course-header h1 {
-  @apply text-3xl font-bold text-gray-900 mb-4;
-}
-
-.course-header p {
-  @apply text-gray-600 text-lg;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .lesson-content {
-    @apply p-6;
-  }
-  
-  .lesson-item {
-    @apply px-4 py-3;
-  }
+.toastui-editor-contents hr {
+  margin: 24px 0;
+  border: 0;
+  border-top: 1px solid #eee;
 }

@@ -28,96 +28,141 @@
 frontend:
   - React
   - TypeScript
-  - Firebase Auth (could replace with Azure auth)
-  - Real-time sync
+  - Azure Auth
   - Responsive design
   - PWA support
 
 backend:
-  - Firebase realtime database (could replace with Azure Cosmos DB)
+  - Azure Cosmos DB
 
 test:
   - vitest
 
 data model:
-### Firebase Realtime Database Schema (JSON)
+Courses
 ```json
-{
-  "courses": {
-    "$courseId": {
-      "name": "",
-      "description": "",
-      "units": {
-        "$unitId": {
-          "name": "",
-          "description": "",
-          "lessons": {
-            "$lessonId": {
-              "name": "",
-              "type": "", // video, text, image, quiz
-              "content": "", // URL or text content
-              "quiz": {
-                "type": "", // multiple choice, true/false, short answer
-                "questions": {
-                  "$questionId": {
-                    "text": "",
-                    "options": {
-                      "$optionId": {
-                        "text": "",
-                        "isCorrect": false
-                      }
-                    }
-                  }
-                }
-              },
-              "completed": false,
-              "notes": {
-                "$userId": {
-                  "text": ""
-                }
-              }
-            }
-          }
-        }
-      },
-      "groups": {
-        "$groupId": {
-          "name": "",
-          "description": "",
-          "members": {
-            "$userId": true
-          }
-        }
-      },
-      "grades": {
-        "$userId": {
-          "grade": 0
-        }
-      }
+"courses": {
+  "$courseId": {
+    "name": "Course Name",
+    "description": "Course Description",
+    "unitIds": {
+      "$unitId": true,
+      "$unitId2": true
+    },
+    "groupIds": {
+      "$groupId": true,
+      "$groupId2": true
     }
-  },
-  "users": {
-    "$userId": {
-      "name": "",
-      "email": "",
-      "courses": {
-        "$courseId": {
-          "registered": true,
-          "progress": {
-            "$unitId": {
-              "$lessonId": {
-                "completed": false,
-                "note": ""
-              }
-            }
+    // You might also store top-level stats or metadata here.
+  }
+}
+```
+Units
+```json
+"units": {
+  "$unitId": {
+    "courseId": "courseId",
+    "name": "Unit Name",
+    "description": "Unit Description",
+    "lessonIds": {
+      "$lessonId": true,
+      "$lessonId2": true
+    }
+  }
+}
+```
+
+Lessons
+```json
+"lessons": {
+  "$lessonId": {
+    "unitId": "unitId",
+    "name": "Lesson Title",
+    "content": "markdown content",
+    "quizId": "quizIdIfAny", // reference a quiz in quizzes collection
+    "orderIndex": 1 // helpful for controlling locked/unlocked lesson progression
+  }
+}
+```
+Quizzes
+```json
+"quizzes": {
+  "$quizId": {
+    "type": "multiple choice",
+    "questions": {
+      "$questionId": {
+        "text": "Question text",
+        "options": {
+          "$optionId": {
+            "text": "Option text",
+            "isCorrect": false
           }
         }
-      },
-      "groups": {
-        "$groupId": true
       }
     }
   }
 }
+```
 
+Groups
+```json
+"groups": {
+  "$groupId": {
+    "courseId": "courseId",
+    "name": "Group Name",
+    "description": "Group Description",
+    "members": {
+      "$userId1": true,
+      "$userId2": true,
+      // Add more users as needed
+    }
+  }
+}
+```
 
+Grades
+```json
+"grades": {
+  "$courseId_$userId": {
+    "courseId": "courseId",
+    "userId": "userId",
+    "grade": 85
+  }
+}
+```
+
+Notes
+```json
+"notes": {
+  "$lessonId_$userId": {
+    "lessonId": "lessonId",
+    "userId": "userId",
+    "text": "User's note here"
+  }
+}
+```
+
+User Profiles & Progress
+```json
+"users": {
+  "$userId": {
+    "name": "",
+    "email": "",
+    "registeredCourses": {
+      "$courseId": true
+    },
+    "progress": {
+      "$courseId": {
+        "$lessonId": {
+          "completed": false
+        }
+      }
+    },
+    "groupIds": {
+      "$groupId1": true,
+      "$groupId2": true,
+      // Add more groupIds as needed
+    }
+  }
+}
+```

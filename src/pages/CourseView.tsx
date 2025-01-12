@@ -10,17 +10,19 @@ import {
   List,
   ListItemButton,
   Stack,
-  Container,
-  Grid,
-  Divider
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
-import { mockCourses } from '../mockData';
-import { Course, Unit, Lesson } from '../types';
+import { Course, Unit, Lesson, UserProfile } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
 
 interface LessonListProps {
   unit: Unit;
+  lessons: { [key: string]: Lesson };
+  progress: { [key: string]: { completed: boolean } };
   onSelectLesson: (lesson: Lesson) => void;
   selectedLessonId?: string;
 }
@@ -31,31 +33,62 @@ const StyledListItem = styled(ListItemButton)(({ theme }) => ({
     '&:hover': {
       backgroundColor: theme.palette.primary.light,
     }
+  },
+  '&.Mui-disabled': {
+    opacity: 0.7,
+    cursor: 'not-allowed'
   }
 }));
 
-const LessonList = ({ unit, onSelectLesson, selectedLessonId }: LessonListProps) => {
+const LessonList = ({ unit, lessons, progress, onSelectLesson, selectedLessonId }: LessonListProps) => {
+  const unitLessons = Object.values(lessons)
+    .filter(lesson => lesson.unitId === unit.id)
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+
+  const completedCount = Object.values(progress).filter(p => p.completed).length;
+  const totalCount = unitLessons.length;
+  const progressPercentage = (completedCount / totalCount) * 100;
+
+  const isLessonAccessible = (lesson: Lesson) => {
+    if (lesson.orderIndex === 1) return true;
+    const previousLesson = unitLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
+    return previousLesson ? progress[previousLesson.id]?.completed : false;
+  };
+
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Typography variant="h6" component="h2">{unit.name}</Typography>
         <Box sx={{ mt: 2 }}>
-          <LinearProgress variant="determinate" value={60} />
+          <LinearProgress variant="determinate" value={progressPercentage} />
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            60% Complete
+            {completedCount} of {totalCount} completed ({Math.round(progressPercentage)}%)
           </Typography>
         </Box>
       </Box>
       <List sx={{ flex: 1, overflow: 'auto' }}>
-        {Object.values(unit.lessons).map((lesson) => (
-          <StyledListItem
-            key={lesson.id}
-            onClick={() => onSelectLesson(lesson)}
-            selected={selectedLessonId === lesson.id}
-          >
-            <Typography>{lesson.name}</Typography>
-          </StyledListItem>
-        ))}
+        {unitLessons.map((lesson) => {
+          const isAccessible = isLessonAccessible(lesson);
+          const isCompleted = progress[lesson.id]?.completed;
+
+          return (
+            <StyledListItem
+              key={lesson.id}
+              onClick={() => isAccessible && onSelectLesson(lesson)}
+              selected={selectedLessonId === lesson.id}
+              disabled={!isAccessible}
+            >
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                <Typography sx={{ flex: 1 }}>{lesson.name}</Typography>
+                {isCompleted ? (
+                  <CheckCircleIcon color="success" fontSize="small" />
+                ) : !isAccessible ? (
+                  <LockIcon color="disabled" fontSize="small" />
+                ) : null}
+              </Stack>
+            </StyledListItem>
+          );
+        })}
       </List>
     </Box>
   );
@@ -67,16 +100,27 @@ interface LessonContentProps {
   onPrevious?: () => void;
   hasNext?: boolean;
   hasPrevious?: boolean;
+  onComplete?: (lessonId: string) => void;
+  isCompleted?: boolean;
 }
 
-const LessonContent = ({ lesson, onNext, onPrevious, hasNext, hasPrevious }: LessonContentProps) => {
-  const [note, setNote] = useState<string>(
-    lesson?.notes?.content || "### My Notes\n\nAdd your notes here..."
-  );
+const LessonContent = ({ 
+  lesson, 
+  onNext, 
+  onPrevious, 
+  hasNext, 
+  hasPrevious,
+  onComplete,
+  isCompleted 
+}: LessonContentProps) => {
+  const [note, setNote] = useState<string>("");
 
   const handleSaveNote = () => {
     if (lesson && note) {
-      console.log('Saving note:', note);
+      // Here you would typically save the note to your backend
+      console.log('Saving note:', { lessonId: lesson.id, note });
+      // Mark lesson as completed when note is saved
+      onComplete?.(lesson.id);
     }
   };
 
@@ -98,12 +142,19 @@ const LessonContent = ({ lesson, onNext, onPrevious, hasNext, hasPrevious }: Les
   return (
     <Box sx={{ height: '100%', p: 3 }}>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {lesson.name}
-        </Typography>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="h4" component="h1">
+            {lesson.name}
+          </Typography>
+          {isCompleted && (
+            <Tooltip title="Lesson completed">
+              <CheckCircleIcon color="success" />
+            </Tooltip>
+          )}
+        </Stack>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
           <Typography color="text.secondary">
-            Estimated time: 30 mins
+            Lesson {lesson.orderIndex}
           </Typography>
           <Stack direction="row" spacing={2}>
             <Button
@@ -132,13 +183,19 @@ const LessonContent = ({ lesson, onNext, onPrevious, hasNext, hasPrevious }: Les
       
       <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Typography variant="h6">Personal Notes</Typography>
+          <Typography variant="h6">
+            Personal Notes
+            <Typography variant="body2" color="text.secondary">
+              You must write a note to complete this lesson
+      </Typography>
+      </Typography>
           <Button 
             onClick={handleSaveNote}
             variant="contained"
             color="primary"
+            disabled={!note.trim()}
           >
-            Save Notes
+            Save Notes & Complete Lesson
           </Button>
         </Stack>
         <RichTextEditor
@@ -151,32 +208,58 @@ const LessonContent = ({ lesson, onNext, onPrevious, hasNext, hasPrevious }: Les
   );
 };
 
+interface CourseData {
+  courses: { [key: string]: Course };
+  units: { [key: string]: Unit };
+  lessons: { [key: string]: Lesson };
+  users: { [key: string]: UserProfile };
+}
+
+// This would come from your data fetching layer
+const mockData: CourseData = {
+  courses: {},
+  units: {},
+  lessons: {},
+  users: {}
+};
+
 export default function CourseView() {
   const { courseId, unitId } = useParams<{ courseId: string; unitId: string }>();
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
-  const course = mockCourses.find((c) => c.id === courseId);
-  const unit = course?.units[unitId || ''];
+  const course = mockData.courses[courseId || ''];
+  const unit = mockData.units[unitId || ''];
+  const currentUser = mockData.users['demo_user']; // In a real app, this would come from auth
+  const userProgress = currentUser?.progress[courseId || ''] || {};
 
   if (!course || !unit) {
     return <Typography>Course or unit not found</Typography>;
   }
 
-  const lessons = Object.values(unit.lessons);
-  const currentIndex = selectedLesson ? lessons.findIndex(l => l.id === selectedLesson.id) : -1;
-  const hasNext = currentIndex < lessons.length - 1;
+  const unitLessons = Object.values(mockData.lessons)
+    .filter(lesson => lesson.unitId === unit.id)
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+
+  const currentIndex = selectedLesson ? unitLessons.findIndex(l => l.id === selectedLesson.id) : -1;
+  const hasNext = currentIndex < unitLessons.length - 1;
   const hasPrevious = currentIndex > 0;
 
   const handleNext = () => {
     if (hasNext) {
-      setSelectedLesson(lessons[currentIndex + 1]);
+      setSelectedLesson(unitLessons[currentIndex + 1]);
     }
   };
 
   const handlePrevious = () => {
     if (hasPrevious) {
-      setSelectedLesson(lessons[currentIndex - 1]);
+      setSelectedLesson(unitLessons[currentIndex - 1]);
     }
+  };
+
+  const handleComplete = (lessonId: string) => {
+    // In a real app, this would update the backend
+    console.log('Marking lesson as completed:', lessonId);
+    userProgress[lessonId] = { completed: true };
   };
 
   return (
@@ -189,6 +272,8 @@ export default function CourseView() {
       <Box sx={{ width: 320, borderRight: 1, borderColor: 'divider' }}>
         <LessonList
           unit={unit}
+          lessons={mockData.lessons}
+          progress={userProgress}
           onSelectLesson={setSelectedLesson}
           selectedLessonId={selectedLesson?.id}
         />
@@ -200,6 +285,8 @@ export default function CourseView() {
           onPrevious={handlePrevious}
           hasNext={hasNext}
           hasPrevious={hasPrevious}
+          onComplete={handleComplete}
+          isCompleted={selectedLesson ? userProgress[selectedLesson.id]?.completed : false}
         />
       </Box>
     </Paper>

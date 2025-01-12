@@ -74,26 +74,4 @@ export interface UserProfile {
     };
   };
   groupIds: { [key: string]: boolean };
-}
-
-export interface MockData {
-  courses: { [key: string]: Course };
-  units: { [key: string]: Unit };
-  lessons: { [key: string]: Lesson };
-  quizzes: { [key: string]: Quiz };
-  groups: { [key: string]: Group };
-  grades: { [key: string]: Grade };
-  notes: { [key: string]: Note };
-  users: { [key: string]: UserProfile };
-}
-
-export const mockData: MockData = {
-  courses: {},
-  units: {},
-  lessons: {},
-  quizzes: {},
-  groups: {},
-  grades: {},
-  notes: {},
-  users: {}
-}; 
+} 

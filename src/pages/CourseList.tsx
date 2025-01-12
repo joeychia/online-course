@@ -1,35 +1,80 @@
-import { Link } from 'react-router-dom';
-import { mockCourses } from '../mockData';
+import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Card,
+  CardContent,
+  CardActionArea,
+  Typography,
+  Grid,
+  Container,
+  Chip,
+  Stack,
+  CircularProgress
+} from '@mui/material';
+import { Course } from '../types';
 
-export default function CourseList() {
+interface CourseCardProps {
+  course: Course;
+}
+
+const CourseCard = ({ course }: CourseCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/courses/${course.id}`);
+  };
+
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Available Courses</h1>
-      
-      <div className="space-y-8">
-        {mockCourses.map((course) => (
-          <div key={course.id} className="border rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">{course.name}</h2>
-            <p className="text-gray-600 mb-6">{course.description}</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.values(course.units).map((unit) => (
-                <Link
-                  key={unit.id}
-                  to={`/courses/${course.id}/units/${unit.id}`}
-                  className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <h3 className="font-semibold mb-2">{unit.name}</h3>
-                  <p className="text-sm text-gray-600">{unit.description}</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {Object.keys(unit.lessons).length} lessons
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card>
+      <CardActionArea onClick={handleClick}>
+        <CardContent>
+          <Typography variant="h5" component="h2" gutterBottom>
+            {course.name}
+          </Typography>
+          <Typography color="text.secondary" paragraph>
+            {course.description}
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            {course.isPublic && (
+              <Chip 
+                label="Public" 
+                color="primary" 
+                size="small" 
+                variant="outlined" 
+              />
+            )}
+          </Stack>
+        </CardContent>
+      </CardActionArea>
+    </Card>
+  );
+};
+
+interface CourseListProps {
+  courses?: { [key: string]: Course };
+}
+
+export default function CourseList({ courses = {} }: CourseListProps) {
+  const courseArray = Object.values(courses);
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Available Courses
+      </Typography>
+      {courseArray.length === 0 ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Grid container spacing={3}>
+          {courseArray.map((course) => (
+            <Grid item key={course.id} xs={12} sm={6} md={4}>
+              <CourseCard course={course} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+    </Container>
   );
 } 
