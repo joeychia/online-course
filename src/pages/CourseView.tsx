@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Viewer } from '@toast-ui/react-editor';
+import { 
+  Box, 
+  Button, 
+  Typography, 
+  Paper, 
+  LinearProgress,
+  List,
+  ListItemButton,
+  Stack,
+  Container,
+  Grid,
+  Divider
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { mockCourses } from '../mockData';
 import { Course, Unit, Lesson } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
@@ -11,32 +25,39 @@ interface LessonListProps {
   selectedLessonId?: string;
 }
 
+const StyledListItem = styled(ListItemButton)(({ theme }) => ({
+  '&.Mui-selected': {
+    backgroundColor: theme.palette.primary.light,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.light,
+    }
+  }
+}));
+
 const LessonList = ({ unit, onSelectLesson, selectedLessonId }: LessonListProps) => {
   return (
-    <div className="lesson-list h-full">
-      <div className="p-4 border-b">
-        <h2 className="text-xl font-bold">{unit.name}</h2>
-        <div className="mt-2">
-          <div className="progress-bar">
-            <div className="progress-bar-fill" style={{ width: '60%' }} />
-          </div>
-          <p className="text-sm text-gray-600 mt-2">60% Complete</p>
-        </div>
-      </div>
-      <div className="divide-y">
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Typography variant="h6" component="h2">{unit.name}</Typography>
+        <Box sx={{ mt: 2 }}>
+          <LinearProgress variant="determinate" value={60} />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            60% Complete
+          </Typography>
+        </Box>
+      </Box>
+      <List sx={{ flex: 1, overflow: 'auto' }}>
         {Object.values(unit.lessons).map((lesson) => (
-          <button
+          <StyledListItem
             key={lesson.id}
             onClick={() => onSelectLesson(lesson)}
-            className={`lesson-item w-full text-left ${
-              selectedLessonId === lesson.id ? 'active' : ''
-            }`}
+            selected={selectedLessonId === lesson.id}
           >
-            {lesson.name}
-          </button>
+            <Typography>{lesson.name}</Typography>
+          </StyledListItem>
         ))}
-      </div>
-    </div>
+      </List>
+    </Box>
   );
 };
 
@@ -55,65 +76,78 @@ const LessonContent = ({ lesson, onNext, onPrevious, hasNext, hasPrevious }: Les
 
   const handleSaveNote = () => {
     if (lesson && note) {
-      // Here you would typically save the note to your backend
       console.log('Saving note:', note);
     }
   };
 
   if (!lesson) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-gray-500">Select a lesson to view its content</p>
-      </div>
+      <Box sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}>
+        <Typography color="text.secondary">
+          Select a lesson to view its content
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="lesson-content h-full">
-      <div className="course-header">
-        <h1>{lesson.name}</h1>
-        <div className="flex justify-between items-center">
-          <p className="text-gray-600">Estimated time: 30 mins</p>
-          <div className="flex gap-4">
-            <button
+    <Box sx={{ height: '100%', p: 3 }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          {lesson.name}
+        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography color="text.secondary">
+            Estimated time: 30 mins
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <Button
               onClick={onPrevious}
               disabled={!hasPrevious}
-              className="nav-button"
+              variant="outlined"
+              startIcon={<span>←</span>}
             >
-              ← Previous
-            </button>
-            <button
+              Previous
+            </Button>
+            <Button
               onClick={onNext}
               disabled={!hasNext}
-              className="nav-button"
+              variant="outlined"
+              endIcon={<span>→</span>}
             >
-              Next →
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="prose max-w-none mb-8">
-        <Viewer initialValue={lesson.content} />
-      </div>
+              Next
+            </Button>
+          </Stack>
+        </Stack>
+      </Box>
       
-      {/* Notes Section */}
-      <div className="bg-gray-50 rounded-lg p-6 mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Personal Notes</h2>
-          <button
+      <Box sx={{ mb: 4 }}>
+        <Viewer initialValue={lesson.content} />
+      </Box>
+      
+      <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Typography variant="h6">Personal Notes</Typography>
+          <Button 
             onClick={handleSaveNote}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            variant="contained"
+            color="primary"
           >
             Save Notes
-          </button>
-        </div>
+          </Button>
+        </Stack>
         <RichTextEditor
           value={note}
           onChange={setNote}
           placeholder="Write your notes here..."
         />
-      </div>
-    </div>
+      </Paper>
+    </Box>
   );
 };
 
@@ -125,7 +159,7 @@ export default function CourseView() {
   const unit = course?.units[unitId || ''];
 
   if (!course || !unit) {
-    return <div>Course or unit not found</div>;
+    return <Typography>Course or unit not found</Typography>;
   }
 
   const lessons = Object.values(unit.lessons);
@@ -146,18 +180,20 @@ export default function CourseView() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Left Panel - Lesson List */}
-      <div className="w-80 border-r">
+    <Paper sx={{ 
+      display: 'flex', 
+      height: 'calc(100vh - 64px)', 
+      overflow: 'hidden',
+      borderRadius: 1
+    }}>
+      <Box sx={{ width: 320, borderRight: 1, borderColor: 'divider' }}>
         <LessonList
           unit={unit}
           onSelectLesson={setSelectedLesson}
           selectedLessonId={selectedLesson?.id}
         />
-      </div>
-
-      {/* Right Panel - Lesson Content */}
-      <div className="flex-1 overflow-y-auto">
+      </Box>
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
         <LessonContent 
           lesson={selectedLesson}
           onNext={handleNext}
@@ -165,7 +201,7 @@ export default function CourseView() {
           hasNext={hasNext}
           hasPrevious={hasPrevious}
         />
-      </div>
-    </div>
+      </Box>
+    </Paper>
   );
 } 
