@@ -7,6 +7,7 @@ interface MockData {
   lessons: { [key: string]: Lesson & { quizId: string | null } };
   notes: { [key: string]: Note };
   users: { [key: string]: UserProfile };
+  quizzes: { [key: string]: any }; // TODO: Add proper Quiz type
 }
 
 const mockData = mockDataJson as unknown as MockData;
@@ -24,6 +25,7 @@ export const getMockLesson = (lessonId: string): Lesson => {
 };
 export const getMockUser = (userId: string) => mockData.users[userId];
 export const getMockNote = (noteId: string) => mockData.notes[noteId];
+export const getMockQuiz = (quizId: string) => mockData.quizzes[quizId];
 
 export const getMockLessonsForUnit = (unitId: string): Lesson[] => {
   const unit = mockData.units[unitId];

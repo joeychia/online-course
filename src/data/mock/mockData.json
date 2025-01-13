@@ -155,7 +155,7 @@
       "video-title": "本週經文回顧: 創世記 1-11 神的愛充滿萬事",
       "video-url": "https://youtu.be/RKiyf4ys_UY",
        "meditation": "",
-      "quizId": null,
+      "quizId": "quiz_week1",
       "orderIndex": 7
     },
     "lesson_wr99gp6um": {
@@ -309,6 +309,241 @@
       "orderIndex": 7
     }
   },
+    "quizzes": {
+      "quiz_week1": {
+        "id": "quiz_week1",
+        "questions": {
+          "q1": {
+            "type": "single_choice",
+            "text": "《創世記》第1章描述了上帝創造天地的順序，以下哪一天上帝創造了光？",
+            "options": {
+              "a": {
+                "text": "第一天",
+                "isCorrect": true
+              },
+              "b": {
+                "text": "第二天",
+                "isCorrect": false
+              },
+              "c": {
+                "text": "第三天",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "第四天",
+                "isCorrect": false
+              }
+            }
+          },
+          "q2": {
+            "type": "single_choice",
+            "text": "《創世記》第2章中，上帝安息的是哪一天？",
+            "options": {
+              "a": {
+                "text": "第五天",
+                "isCorrect": false
+              },
+              "b": {
+                "text": "第六天",
+                "isCorrect": false
+              },
+              "c": {
+                "text": "第七天",
+                "isCorrect": true
+              },
+              "d": {
+                "text": "第八天",
+                "isCorrect": false
+              }
+            }
+          },
+          "q3": {
+            "type": "single_choice",
+            "text": "在《創世記》第3章中，誘惑夏娃的是什麼動物？",
+            "options": {
+              "a": {
+                "text": "獅子",
+                "isCorrect": false
+              },
+              "b": {
+                "text": "蛇",
+                "isCorrect": true
+              },
+              "c": {
+                "text": "鳥",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "羊",
+                "isCorrect": false
+              }
+            }
+          },
+          "q4": {
+            "type": "single_choice",
+            "text": "《創世記》第4章記載了誰殺害了他的兄弟？",
+            "options": {
+              "a": {
+                "text": "亞當",
+                "isCorrect": false
+              },
+              "b": {
+                "text": "挪亞",
+                "isCorrect": false
+              },
+              "c": {
+                "text": "亞伯",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "该隐",
+                "isCorrect": true
+              }
+            }
+          },
+          "q5": {
+            "type": "single_choice",
+            "text": "《創世記》第5章是一系列的家譜，記錄了從亞當到誰的後代？",
+            "options": {
+              "a": {
+                "text": "挪亞",
+                "isCorrect": true
+              },
+              "b": {
+                "text": "亞伯拉罕",
+                "isCorrect": false
+              },
+              "c": {
+                "text": "瑪土撒拉",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "雅各",
+                "isCorrect": false
+              }
+            }
+          },
+          "q6": {
+            "type": "single_choice",
+            "text": "《創世記》第6章中，上帝對人類的壽命作出了限制，將其定為多少年？",
+            "options": {
+              "a": {
+                "text": "120年",
+                "isCorrect": true
+              },
+              "b": {
+                "text": "100年",
+                "isCorrect": false
+              },
+              "c": {
+                "text": "800年",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "900年",
+                "isCorrect": false
+              }
+            }
+          },
+          "q7": {
+            "type": "single_choice",
+            "text": "在《創世記》第7章中，大洪水持續了多少天？",
+            "options": {
+              "a": {
+                "text": "40天40夜",
+                "isCorrect": false
+              },
+              "b": {
+                "text": "150天",
+                "isCorrect": true
+              },
+              "c": {
+                "text": "365天",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "30天30夜",
+                "isCorrect": false
+              }
+            }
+          },
+          "q8": {
+        "type": "single_choice",
+            "text": "《創世記》第8章記載了挪亞放出哪種鳥來探查洪水是否退去？",
+            "options": {
+              "a": {
+                "text": "麻雀",
+                "isCorrect": false
+              },
+              "b": {
+                "text": "鴿子",
+                "isCorrect": true
+              },
+              "c": {
+                "text": "鷹",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "烏鴉",
+                "isCorrect": false
+              }
+            }
+          },
+          "q9": {
+        "type": "single_choice",
+            "text": "《創世記》第9章中，上帝與挪亞和他的後代立了什麼標誌作為不再用洪水毀滅世界的盟約？",
+            "options": {
+              "a": {
+                "text": "彩虹",
+                "isCorrect": true
+              },
+              "b": {
+                "text": "星星",
+                "isCorrect": false
+              },
+              "c": {
+                "text": "月亮",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "太陽",
+                "isCorrect": false
+              }
+            }
+          },
+          "q10": {
+            "type": "single_choice",
+            "text": "《創世記》第11章描述了人類建造巴別塔，其結果是什麼？",
+            "options": {
+              "a": {
+                "text": "上帝賜福他們",
+                "isCorrect": false
+              },
+              "b": {
+                "text": "上帝混亂了他們的語言",
+                "isCorrect": true
+              },
+              "c": {
+                "text": "塔建成後人類獲得永生",
+                "isCorrect": false
+              },
+              "d": {
+                "text": "塔成為世界奇觀",
+                "isCorrect": false
+              }
+            }
+          },
+          "q11": {
+            "type": "free_form",
+            "text": "請在下方輸入你本週背誦的經文。"
+          },
+          "q12": {
+            "type": "free_form",
+            "text": "請舉例分享，本週的經文在你生活中如何被應用或活出來？"
+          }
+        }
+      }
+    },
   "users": {
     "system": {
       "name": "System",

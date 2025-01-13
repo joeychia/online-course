@@ -16,7 +16,7 @@
 - User can view a course - done
 - User can view a unit - done
 - User can view a lesson - done
-- User can do a quiz for a lesson if any
+- User can do a quiz for a lesson if any - done
 - User can register/drop a course
 - User can join/quit a group
 - User must put down a note for a lesson in order to complete the lesson - done
@@ -28,6 +28,7 @@
 frontend:
   - React
   - TypeScript
+  - Material UI
   - Azure Auth
   - Responsive design
   - PWA support
@@ -94,9 +95,9 @@ Quizzes
 ```json
 "quizzes": {
   "$quizId": {
-    "type": "multiple choice",
     "questions": {
       "$questionId": {
+        "type": "single_choice|free_form",
         "text": "Question text",
         "options": {
           "$optionId": {
