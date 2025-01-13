@@ -1,12 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import matter from 'gray-matter';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PROCESSED_DIR = path.join(__dirname, '..', 'data', 'processed');
-const OUTPUT_DIR = path.join(__dirname, '..', 'data', 'mock');
+const DAILY_MD_DIR = path.join(__dirname, '../data/daily_md');
+const NOTES_DIR = path.join(__dirname, '../data/notes');
+const OUTPUT_DIR = path.join(__dirname, '../data/mock');
 
 // Ensure output directory exists
 if (!fs.existsSync(OUTPUT_DIR)) {
@@ -17,15 +19,52 @@ function generateUniqueId(prefix) {
   return `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+function readMarkdownFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    return matter(content);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      // File doesn't exist - return null silently
+      return null;
+    }
+    // Log other errors
+    console.error(`Error reading file ${filePath}:`, error);
+    return null;
+  }
+}
+
+function extractVideoInfo(qianliContent) {
+  if (!qianliContent) return {};
+  
+  // Try HTML format first
+  const htmlMatch = qianliContent.match(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/);
+  if (htmlMatch) {
+    return {
+      'video-title': htmlMatch[2],
+      'video-url': htmlMatch[1].replace('_blank', '')
+    };
+  }
+  
+  // Fallback to markdown format
+  const markdownMatch = qianliContent.match(/\[([^\]]+)\]\((https:\/\/youtu[^\)]+)\)/);
+  if (markdownMatch) {
+    return {
+      'video-title': markdownMatch[1],
+      'video-url': markdownMatch[2]
+    };
+  }
+  
+  return {};
+}
+
 function generateMockData() {
-  // Read all processed files
-  const files = fs.readdirSync(PROCESSED_DIR)
-    .filter(file => file.endsWith('.json'))
-    .sort((a, b) => {
-      const [aWeek, aDay] = a.match(/wk(\d+)-day(\d+)/).slice(1).map(Number);
-      const [bWeek, bDay] = b.match(/wk(\d+)-day(\d+)/).slice(1).map(Number);
-      return aWeek === bWeek ? aDay - bDay : aWeek - bWeek;
-    });
+  // Read all markdown files
+  const files = fs.readdirSync(DAILY_MD_DIR)
+    .filter(file => file.endsWith('-daily.md'))
+    .sort((a, b) => a.localeCompare(b));
+
+  console.log(`Found ${files.length} daily markdown files to process`);
 
   // Generate course data
   const courseId = generateUniqueId('course');
@@ -40,7 +79,6 @@ function generateMockData() {
   // Generate units (one per week)
   const units = {};
   const lessons = {};
-  const notes = {};
   const users = {
     "system": {
       name: "System",
@@ -56,52 +94,67 @@ function generateMockData() {
 
   let currentWeek = 0;
   let currentUnit = null;
+  let processedCount = 0;
 
   for (const file of files) {
-    const content = JSON.parse(fs.readFileSync(path.join(PROCESSED_DIR, file)));
-    const [week, day] = file.match(/wk(\d+)-day(\d+)/).slice(1).map(Number);
+    const dailyContent = readMarkdownFile(path.join(DAILY_MD_DIR, file));
+    if (!dailyContent) {
+      console.log(`Skipping ${file} - could not read content`);
+      continue;
+    }
+
+    const { data: frontmatter, content } = dailyContent;
+    const { weekNum, dayNum, date } = frontmatter;
 
     // Create new unit for each week
-    if (week !== currentWeek) {
-      currentWeek = week;
+    if (weekNum !== currentWeek) {
+      currentWeek = weekNum;
       const unitId = generateUniqueId('unit');
       currentUnit = {
         id: unitId,
         courseId: courseId,
-        name: `Week ${week}`,
-        description: `Bible study materials for week ${week}`,
+        name: `Week ${weekNum}`,
+        description: `Bible study materials for week ${weekNum}`,
         lessonIds: {}
       };
       units[unitId] = currentUnit;
       course.unitIds[unitId] = true;
+      console.log(`Created unit for week ${weekNum}`);
     }
+
+    // Get meditation content from zhuolin's notes
+    const dateStr = date.toISOString().split('T')[0];
+    const zhuolinPath = path.join(NOTES_DIR, `${dateStr}-zhuolin.md`);
+    const zhuolinContent = readMarkdownFile(zhuolinPath);
+
+    // Get video info from qianli's notes
+    const qianliPath = path.join(NOTES_DIR, `${dateStr}-qianli.md`);
+    const qianliContent = readMarkdownFile(qianliPath);
+    const videoInfo = extractVideoInfo(qianliContent?.content || '');
 
     // Create lesson
     const lessonId = generateUniqueId('lesson');
     const lesson = {
       id: lessonId,
       unitId: currentUnit.id,
-      name: content.title,
-      orderIndex: day,
-      content: generateLessonContent(content),
-      quizId: null // No quiz for now
+      name: frontmatter.title,
+      content: content,
+      ...videoInfo,
+      meditation: zhuolinContent?.content || '',
+      quizId: null,
+      orderIndex: dayNum
     };
 
     lessons[lessonId] = lesson;
     currentUnit.lessonIds[lessonId] = true;
 
-    // Add system note
-    const noteId = `${lessonId}_system`;
-    notes[noteId] = {
-      lessonId: lessonId,
-      userId: "system",
-      text: content.meditation.my_story.content
-    };
-
     // Update system user progress
     users.system.progress[courseId][lessonId] = {
       completed: true
     };
+
+    processedCount++;
+    console.log(`Processed ${file} (${processedCount}/${files.length})`);
   }
 
   // Save all data
@@ -109,7 +162,6 @@ function generateMockData() {
     courses: { [courseId]: course },
     units,
     lessons,
-    notes,
     users
   };
 
@@ -118,51 +170,10 @@ function generateMockData() {
     JSON.stringify(mockData, null, 2)
   );
 
-  console.log('Mock data generated successfully!');
+  console.log('\nMock data generated successfully!');
   console.log(`Course ID: ${courseId}`);
   console.log(`Total units: ${Object.keys(units).length}`);
   console.log(`Total lessons: ${Object.keys(lessons).length}`);
-}
-
-function generateLessonContent(data) {
-  return `# ${data.title}
-
-${data.date}
-
-## Question
-${data.question}
-
-## Bible Reading
-
-### Main Reading
-${data.readings.main.text}
-
-* [Traditional Chinese](${data.readings.main.links.traditional})
-* [Simplified Chinese](${data.readings.main.links.simplified})
-* [NIV](${data.readings.main.links.niv})
-* [YouVersion](${data.readings.main.links.youversion})
-
-### Psalm Reading
-${data.readings.psalm.text}
-
-* [Traditional Chinese](${data.readings.psalm.links.traditional})
-* [Simplified Chinese](${data.readings.psalm.links.simplified})
-* [NIV](${data.readings.psalm.links.niv})
-* [YouVersion](${data.readings.psalm.links.youversion})
-
-## Meditation
-
-### ${data.meditation.gods_story.title}
-${data.meditation.gods_story.content}
-
-### ${data.meditation.my_story.title}
-${data.meditation.my_story.content}
-
-${data.qianli ? `## Video Sharing
-[${data.qianli.youtube?.text || 'Watch Video'}](${data.qianli.youtube?.url})` : ''}
-
-## Additional Resources
-${data.sharing_links.map(link => `* [${link.title}](${link.url})`).join('\n')}`;
 }
 
 // Run the script

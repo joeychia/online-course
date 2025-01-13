@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Viewer } from '@toast-ui/react-editor';
 import { 
   Box, 
@@ -32,6 +32,11 @@ export default function LessonView({
   isCompleted 
 }: LessonViewProps) {
   const [note, setNote] = useState<string>("");
+
+  // Reset note when lesson changes
+  useEffect(() => {
+    setNote("");
+  }, [lesson?.id]);
 
   const handleSaveNote = () => {
     if (lesson && note) {
@@ -96,7 +101,10 @@ export default function LessonView({
       </Box>
       
       <Box sx={{ mb: 4 }}>
-        <Viewer initialValue={lesson.content} />
+        <Viewer 
+          key={lesson.id}
+          initialValue={lesson.content} 
+        />
       </Box>
       
       <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>

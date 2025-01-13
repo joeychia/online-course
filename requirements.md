@@ -79,6 +79,9 @@ Lessons
     "unitId": "unitId",
     "name": "Lesson Title",
     "content": "markdown content",
+    "video-title": "video title",
+    "video-url": "video url",
+    "meditation": "meditation markdown content",
     "quizId": "quizIdIfAny", // reference a quiz in quizzes collection
     "orderIndex": 1 // helpful for controlling locked/unlocked lesson progression
   }
