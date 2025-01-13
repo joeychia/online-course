@@ -40,6 +40,15 @@ const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   }
 }));
 
+const StyledUnitListItem = styled(ListItemButton)(({ theme }) => ({
+  '&.Mui-selected': {
+    backgroundColor: theme.palette.grey[200],
+    '&:hover': {
+      backgroundColor: theme.palette.grey[300],
+    }
+  }
+}));
+
 const DRAWER_WIDTH = 350;
 const COLLAPSED_WIDTH = 0;
 const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
@@ -126,7 +135,7 @@ export default function NavPanel({
 
           return (
             <Box key={unit.id}>
-              <StyledListItem 
+              <StyledUnitListItem 
                 onClick={() => toggleUnit(unit.id)}
                 selected={unit.id === selectedUnitId}
               >
@@ -143,7 +152,7 @@ export default function NavPanel({
                   sx={{ m: isCollapsed ? 0 : undefined }}
                 />
                 {!isCollapsed && (expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />)}
-              </StyledListItem>
+              </StyledUnitListItem>
               {!isCollapsed && (
                 <Collapse in={expandedUnits[unit.id]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
