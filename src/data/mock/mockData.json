@@ -2,12 +2,12 @@
   "courses": {
     "course_rbh7nhons": {
       "id": "course_rbh7nhons",
-      "name": "Bible Study 2024",
-      "description": "A two-year Bible reading and study program",
+      "name": "「謙理之行」兩年讀經計劃",
       "settings": {
       "unlockLessonIndex": 1
     },
       "unitIds": {
+        "unit_0": true,
         "unit_185zenr2y": true,
         "unit_9orkr92md": true,
         "unit_auv6m5lgv": true
@@ -16,6 +16,15 @@
     }
   },
   "units": {
+    "unit_0": {
+      "id": "unit_0",
+      "courseId": "course_rbh7nhons",
+      "name": "公告事項",
+      "description": "Announcements",
+      "lessonIds": {
+        "lesson_0": true
+      }
+    },
     "unit_185zenr2y": {
       "id": "unit_185zenr2y",
       "courseId": "course_rbh7nhons",
@@ -63,6 +72,15 @@
     }
   },
   "lessons": {
+    "lesson_0": {
+      "id": "lesson_0",
+      "unitId": "unit_0",
+      "name": "如何參加耕心禱讀課程",
+      "content": "### 如何參加耕心禱讀課程\n\n1. **請先登入，或是註冊賬號**\n    * 點選頁面右上角的「登入」。\n    * 若是第一次訪客，請選擇「申請新帳號」完成註冊流程。\n2. **進入課程首頁**\n    * 登入後，點選「首頁 (HOME)」。\n    * 在首頁中找到並點選「耕心禱讀兩年讀經計劃」。\n3. **加入課程**\n    * 進入課程後，點選「為我加選這一課程」。\n    * 系統將提示選課完成。\n4. **開始課程**\n    * 進入「謙理之行兩年讀經計劃」課程，根據您的進度選擇某一週開始（2025年1月應該是第53週）\n    * 完成當日內容後，請按右邊「標記為完成」，系統將自動解鎖下一課內容，並在儀表板中更新進度。\n5. **查看學習進度**\n    * 在「儀表板」頁面可以隨時查看自己的學習進度，了解每日完成情況及已解鎖的內容。\n\n***\n\n#### 謙理之行內容\n\n### \n\n##### 每日讀經包含：\n\n\n* **牧師晨禱分享**：觀看牧師的本日晨禱靈修分享與導讀短片。\n* **默讀思想經文**：安靜默讀經文，深思其中涵義。\n* **本日背誦經文**：挑戰每日記住一節經文，將神話語藏在心中。\n* **靈修分享文章**：閱讀師母當日的靈修分享，加深屬靈理解。\n* **禱告回應筆記**：將禱告、心得、回應記錄下來。\n\n\n##### 每週回顧包含：\n\n\n* **每週經文回顧**：觀看師母的每週經文回顧。\n* **每週總結測試**：完成每週測試內容。",
+      "meditation": null,
+      "quizId": null,
+      "orderIndex": 1
+    },
     "lesson_pbtjxm1sg": {
       "id": "lesson_pbtjxm1sg",
       "unitId": "unit_185zenr2y",

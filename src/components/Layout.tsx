@@ -39,7 +39,7 @@ export default function Layout({ children }: LayoutProps) {
         <Toolbar>
           <Container maxWidth="lg" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
-              Online Course
+              ECC Online Classes
             </Typography>
             <Stack direction="row" spacing={4}>
               <StyledLink to="/">Courses</StyledLink>
