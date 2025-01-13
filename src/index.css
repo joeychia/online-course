@@ -59,3 +59,11 @@
   border: 0;
   border-top: 1px solid #eee;
 }
+
+.toastui-editor-contents thead tr {
+  display: none;
+} 
+
+.toastui-editor-contents table {
+  border-collapse: collapse;
+}
