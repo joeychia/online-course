@@ -82,11 +82,13 @@ export default function LessonView({
   }, [lesson?.id]);
 
   const handleSaveNote = () => {
-    if (lesson && note) {
+    if (lesson && note.trim()) {
       // Here you would typically save the note to your backend
       console.log('Saving note:', { lessonId: lesson.id, note });
       // Mark lesson as completed when note is saved
       onComplete?.(lesson.id);
+      // Clear the note after saving
+      setNote("");
     }
   };
 
@@ -266,7 +268,7 @@ export default function LessonView({
       </Dialog>
       
       {/* Notes Section */}
-      {(
+      {!quizAnswers && (
         <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">
