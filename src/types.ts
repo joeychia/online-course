@@ -2,6 +2,9 @@ export interface Course {
   id: string;
   name: string;
   description: string;
+  settings?: {
+    unlockLessonIndex?: number;
+  };
   unitIds: { [key: string]: boolean };
   groupIds: { [key: string]: boolean };
   isPublic?: boolean;
@@ -14,6 +17,7 @@ export interface Unit {
   description: string;
   lessonIds: { [key: string]: boolean };
   isPublic?: boolean;
+  orderIndex?: number;
 }
 
 export interface Lesson {

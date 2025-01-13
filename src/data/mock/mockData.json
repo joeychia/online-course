@@ -4,6 +4,9 @@
       "id": "course_rbh7nhons",
       "name": "Bible Study 2024",
       "description": "A two-year Bible reading and study program",
+      "settings": {
+      "unlockLessonIndex": 1
+    },
       "unitIds": {
         "unit_185zenr2y": true,
         "unit_9orkr92md": true,

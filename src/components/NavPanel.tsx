@@ -80,7 +80,16 @@ export default function NavPanel({
   };
 
   const isLessonAccessible = (unit: Unit, lesson: Lesson, allLessons: Lesson[]) => {
+    // If course has unlockLessonIndex, only that lesson is accessible in each unit
+    if (course.settings?.unlockLessonIndex !== undefined) {
+      return lesson.orderIndex === course.settings.unlockLessonIndex;
+    }
+
+    // Otherwise use the default progression logic:
+    // First lesson of each unit is always accessible
     if (lesson.orderIndex === 1) return true;
+
+    // Other lessons require previous lesson to be completed
     const previousLesson = allLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
     return previousLesson ? progress[previousLesson.id]?.completed : false;
   };
@@ -153,10 +162,10 @@ export default function NavPanel({
                             <Typography sx={{ flex: 1 }}>
                               {lesson.orderIndex}. {lesson.name}
                             </Typography>
-                            {isCompleted ? (
-                              <CheckCircleIcon color="success" fontSize="small" />
-                            ) : !isAccessible ? (
+                            {!isAccessible ? (
                               <LockIcon color="disabled" fontSize="small" />
+                            ) : isCompleted ? (
+                              <CheckCircleIcon color="success" fontSize="small" />
                             ) : null}
                           </Stack>
                         </StyledListItem>

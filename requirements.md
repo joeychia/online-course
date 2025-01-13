@@ -45,6 +45,9 @@ Courses
   "$courseId": {
     "name": "Course Name",
     "description": "Course Description",
+    "settings": {
+      "unlockLessonIndex": 1
+    },
     "unitIds": {
       "$unitId": true,
       "$unitId2": true
