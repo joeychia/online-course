@@ -49,10 +49,6 @@ interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title' | 'med
 
 interface LessonViewProps {
   lesson: ExtendedLesson | null;
-  onNext?: () => void;
-  onPrevious?: () => void;
-  hasNext?: boolean;
-  hasPrevious?: boolean;
   onComplete?: (lessonId: string) => void;
   isCompleted?: boolean;
 }
@@ -64,10 +60,6 @@ function getYouTubeVideoId(url: string): string | null {
 
 export default function LessonView({ 
   lesson, 
-  onNext, 
-  onPrevious, 
-  hasNext, 
-  hasPrevious,
   onComplete,
   isCompleted 
 }: LessonViewProps) {
@@ -122,38 +114,14 @@ export default function LessonView({
             </Tooltip>
           )}
         </Stack>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
-          <Typography color="text.secondary">
-            Lesson {lesson.orderIndex}
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <Button
-              onClick={onPrevious}
-              disabled={!hasPrevious}
-              variant="outlined"
-              startIcon={<span>←</span>}
-            >
-              Previous
-            </Button>
-            <Button
-              onClick={onNext}
-              disabled={!hasNext}
-              variant="outlined"
-              endIcon={<span>→</span>}
-            >
-              Next
-            </Button>
-          </Stack>
-        </Stack>
       </Box>
 
       {/* Video Section */}
       {lesson['video-url'] && videoId && (
         <>
           <Typography variant="h6" gutterBottom>
-            經文梳理
+          {lesson['video-title']}
           </Typography>
-          <Card sx={{ mb: 4 }}>
             <Box
               sx={{
                 position: 'relative',
@@ -178,12 +146,6 @@ export default function LessonView({
                 }}
               />
             </Box>
-            <CardContent>
-              <Typography variant="h6" component="div">
-                {lesson['video-title']}
-              </Typography>
-            </CardContent>
-          </Card>
         </>
       )}
       

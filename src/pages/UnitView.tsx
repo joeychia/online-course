@@ -108,30 +108,11 @@ export default function UnitView() {
 
   const units = getMockUnitsForCourse(course.id);
   const unitLessons = unit ? getMockLessonsForUnit(unit.id) : [];
-  const currentIndex = selectedLesson ? unitLessons.findIndex(l => l.id === selectedLesson.id) : -1;
-  const hasNext = currentIndex < unitLessons.length - 1;
-  const hasPrevious = currentIndex > 0;
-
+  
   const isLessonAccessible = (lesson: Lesson) => {
     if (lesson.orderIndex === 1) return true;
     const previousLesson = unitLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
     return previousLesson ? userProgress[previousLesson.id]?.completed : false;
-  };
-
-  const handleNext = () => {
-    if (hasNext && currentIndex >= 0) {
-      const nextLesson = unitLessons[currentIndex + 1];
-      setSelectedLesson(nextLesson);
-      navigate(`/${courseId}/${nextLesson.id}`);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (hasPrevious && currentIndex >= 0) {
-      const prevLesson = unitLessons[currentIndex - 1];
-      setSelectedLesson(prevLesson);
-      navigate(`/${courseId}/${prevLesson.id}`);
-    }
   };
 
   const handleComplete = (lessonId: string) => {
@@ -159,10 +140,6 @@ export default function UnitView() {
   const mainContent = selectedLesson ? (
     <LessonView
       lesson={selectedLesson}
-      onNext={handleNext}
-      onPrevious={handlePrevious}
-      hasNext={hasNext}
-      hasPrevious={hasPrevious}
       onComplete={handleComplete}
       isCompleted={selectedLesson ? userProgress[selectedLesson.id]?.completed : false}
     />

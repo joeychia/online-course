@@ -80,6 +80,7 @@ export default function NavPanel({
   };
 
   const isLessonAccessible = (unit: Unit, lesson: Lesson, allLessons: Lesson[]) => {
+    return true; // for debuggging
     // If course has unlockLessonIndex, only that lesson is accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
       return lesson.orderIndex === course.settings.unlockLessonIndex;
