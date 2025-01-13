@@ -21,7 +21,7 @@ export default function CourseView() {
   const units = getMockUnitsForCourse(course.id);
 
   const handleSelectLesson = (unitId: string, lessonId: string) => {
-    navigate(`/courses/${courseId}/units/${unitId}/lessons/${lessonId}`);
+    navigate(`/${courseId}/${lessonId}`);
     setIsDrawerOpen(false);
   };
 

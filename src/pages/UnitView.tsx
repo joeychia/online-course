@@ -61,9 +61,8 @@ const LessonCard = ({ lesson, isAccessible, isCompleted, onClick }: LessonCardPr
 const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
 
 export default function UnitView() {
-  const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
+  const { courseId = '', lessonId = '' } = useParams<{ 
     courseId: string; 
-    unitId: string;
     lessonId: string;
   }>();
   const navigate = useNavigate();
@@ -72,26 +71,43 @@ export default function UnitView() {
   const [isNavCollapsed, setIsNavCollapsed] = useState(false);
 
   const course = getMockCourse(courseId);
-  const unit = getMockUnit(unitId);
   const currentUser = getMockUser('system');
   const userProgress = currentUser?.progress[courseId] || {};
 
-  useEffect(() => {
-    if (lessonId) {
-      const lessons = getMockLessonsForUnit(unitId);
-      const lesson = lessons.find(l => l.id === lessonId);
-      if (lesson) {
-        setSelectedLesson(lesson);
+  // Find the unit based on the lesson ID
+  const findUnitForLesson = (lessonId: string) => {
+    const units = getMockUnitsForCourse(courseId);
+    for (const unit of units) {
+      const lessons = getMockLessonsForUnit(unit.id);
+      if (lessons.some(l => l.id === lessonId)) {
+        return unit;
       }
     }
-  }, [lessonId, unitId]);
+    return null;
+  };
 
-  if (!course || !unit) {
-    return <Typography>Course or unit not found</Typography>;
+  const unit = lessonId ? findUnitForLesson(lessonId) : null;
+
+  useEffect(() => {
+    if (lessonId) {
+      const units = getMockUnitsForCourse(courseId);
+      for (const unit of units) {
+        const lessons = getMockLessonsForUnit(unit.id);
+        const lesson = lessons.find(l => l.id === lessonId);
+        if (lesson) {
+          setSelectedLesson(lesson);
+          break;
+        }
+      }
+    }
+  }, [lessonId, courseId]);
+
+  if (!course || (lessonId && !unit)) {
+    return <Typography>Course or lesson not found</Typography>;
   }
 
   const units = getMockUnitsForCourse(course.id);
-  const unitLessons = getMockLessonsForUnit(unit.id);
+  const unitLessons = unit ? getMockLessonsForUnit(unit.id) : [];
   const currentIndex = selectedLesson ? unitLessons.findIndex(l => l.id === selectedLesson.id) : -1;
   const hasNext = currentIndex < unitLessons.length - 1;
   const hasPrevious = currentIndex > 0;
@@ -106,7 +122,7 @@ export default function UnitView() {
     if (hasNext && currentIndex >= 0) {
       const nextLesson = unitLessons[currentIndex + 1];
       setSelectedLesson(nextLesson);
-      navigate(`/courses/${courseId}/units/${unitId}/lessons/${nextLesson.id}`);
+      navigate(`/${courseId}/${nextLesson.id}`);
     }
   };
 
@@ -114,7 +130,7 @@ export default function UnitView() {
     if (hasPrevious && currentIndex >= 0) {
       const prevLesson = unitLessons[currentIndex - 1];
       setSelectedLesson(prevLesson);
-      navigate(`/courses/${courseId}/units/${unitId}/lessons/${prevLesson.id}`);
+      navigate(`/${courseId}/${prevLesson.id}`);
     }
   };
 
@@ -124,7 +140,7 @@ export default function UnitView() {
   };
 
   const handleSelectLesson = (unitId: string, lessonId: string) => {
-    navigate(`/courses/${courseId}/units/${unitId}/lessons/${lessonId}`);
+    navigate(`/${courseId}/${lessonId}`);
     setIsDrawerOpen(false);
   };
 
@@ -154,10 +170,10 @@ export default function UnitView() {
     <>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          {unit.name}
+          {unit?.name}
         </Typography>
         <Typography variant="body1" paragraph>
-          {unit.description}
+          {unit?.description}
         </Typography>
         <Box sx={{ mt: 2, mb: 3 }}>
           <LinearProgress variant="determinate" value={progressPercentage} />
@@ -178,7 +194,7 @@ export default function UnitView() {
                 lesson={lesson}
                 isAccessible={isAccessible}
                 isCompleted={isCompleted}
-                onClick={() => handleSelectLesson(unitId, lesson.id)}
+                onClick={() => handleSelectLesson(unit?.id, lesson.id)}
               />
             </Grid>
           );
@@ -193,7 +209,7 @@ export default function UnitView() {
         course={course}
         units={units}
         progress={userProgress}
-        selectedUnitId={unitId}
+        selectedUnitId={unit?.id}
         selectedLessonId={lessonId}
         onSelectLesson={handleSelectLesson}
         isOpen={isDrawerOpen}

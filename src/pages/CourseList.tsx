@@ -21,7 +21,7 @@ const CourseCard = ({ course }: CourseCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/courses/${course.id}`);
+    navigate(`/${course.id}`);
   };
 
   return (

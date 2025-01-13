@@ -93,7 +93,7 @@ export default function NavPanel({
 
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, overflow: 'hidden' }}>
           <IconButton onClick={onToggle} sx={{ display: { sm: 'none' } }}>
             <MenuIcon />
@@ -107,9 +107,6 @@ export default function NavPanel({
             </Box>
           )}
         </Stack>
-        <IconButton onClick={handleToggleCollapse} sx={{ display: { xs: 'none', sm: 'flex' } }}>
-          {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-        </IconButton>
       </Box>
       <List sx={{ flex: 1, overflow: 'auto' }}>
         {units.map((unit) => {
@@ -256,27 +253,6 @@ export default function NavPanel({
         }}
       >
         {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-      </IconButton>
-      {/* Mobile toggle button */}
-      <IconButton
-        color="inherit"
-        aria-label="open drawer"
-        edge="start"
-        onClick={onToggle}
-        sx={{ 
-          position: 'fixed',
-          top: TOOLBAR_HEIGHT + 16,
-          left: 16,
-          display: { sm: 'none' },
-          zIndex: theme => theme.zIndex.drawer + 2,
-          bgcolor: 'background.paper',
-          boxShadow: 1,
-          '&:hover': {
-            bgcolor: 'background.paper',
-          }
-        }}
-      >
-        <MenuIcon />
       </IconButton>
     </>
   );

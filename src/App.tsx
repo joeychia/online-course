@@ -13,10 +13,8 @@ export default function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<CourseList courses={mockData.courses} />} />
-          <Route path="/courses/:courseId" element={<CourseView />} />
-          <Route path="/courses/:courseId/units/:unitId" element={<UnitView />} />
-          <Route path="/courses/:courseId/units/:unitId/lessons/:lessonId" element={<UnitView />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/:courseId" element={<CourseView />} />
+          <Route path="/:courseId/:lessonId" element={<UnitView />} />
         </Routes>
       </Layout>
     </Router>

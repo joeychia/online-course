@@ -5,10 +5,7 @@ import {
   Typography,
   Container,
   Box,
-  Link,
-  Grid,
   Stack,
-  IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -22,13 +19,6 @@ const StyledLink = styled(RouterLink)(({ theme }) => ({
   '&:hover': {
     color: theme.palette.primary.light,
   },
-}));
-
-const Footer = styled('footer')(({ theme }) => ({
-  backgroundColor: theme.palette.grey[900],
-  color: theme.palette.grey[400],
-  padding: theme.spacing(8, 0),
-  marginTop: 'auto',
 }));
 
 const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
@@ -63,58 +53,6 @@ export default function Layout({ children }: LayoutProps) {
       <Box component="main" sx={{ flex: 1, width: '100%' }}>
         {children}
       </Box>
-
-      <Footer>
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" color="white" gutterBottom>
-                About Us
-              </Typography>
-              <Typography variant="body2">
-                Dedicated to providing high-quality online learning experiences.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" color="white" gutterBottom>
-                Quick Links
-              </Typography>
-              <Stack spacing={1}>
-                <Link component={RouterLink} to="/about" color="inherit" sx={{ '&:hover': { color: 'white' } }}>
-                  About
-                </Link>
-                <Link component={RouterLink} to="/contact" color="inherit" sx={{ '&:hover': { color: 'white' } }}>
-                  Contact
-                </Link>
-                <Link component={RouterLink} to="/faq" color="inherit" sx={{ '&:hover': { color: 'white' } }}>
-                  FAQ
-                </Link>
-              </Stack>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" color="white" gutterBottom>
-                Connect
-              </Typography>
-              <Stack direction="row" spacing={2}>
-                <Link href="#" color="inherit" sx={{ '&:hover': { color: 'white' } }}>
-                  Twitter
-                </Link>
-                <Link href="#" color="inherit" sx={{ '&:hover': { color: 'white' } }}>
-                  LinkedIn
-                </Link>
-                <Link href="#" color="inherit" sx={{ '&:hover': { color: 'white' } }}>
-                  GitHub
-                </Link>
-              </Stack>
-            </Grid>
-          </Grid>
-          <Box sx={{ mt: 8, pt: 3, borderTop: 1, borderColor: 'grey.800', textAlign: 'center' }}>
-            <Typography variant="body2">
-              © 2024 Online Course. All rights reserved.
-            </Typography>
-          </Box>
-        </Container>
-      </Footer>
     </Box>
   );
 } 
