@@ -1,0 +1,61 @@
+{
+  "title": "1/1 第1週 第1天 開天闢地",
+  "description": "帮助屬靈生命成长的兩年讀經計劃。所有材料均由【西雅圖證道堂】東區國語堂提供。",
+  "date": "January 01, 2024",
+  "question": "世界從何而來?",
+  "readings": {
+    "main": {
+      "text": "創世記 1.1-2.3【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Genesis.1.1-2.3&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Genesis.1.1-2.3&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Genesis 1.1-2.3&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/GEN.1"
+      }
+    },
+    "psalm": {
+      "text": "詩篇 1【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Psalms.1&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Psalms.1&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Psalms 1&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/PSA.1"
+      }
+    }
+  },
+  "meditation": {
+    "gods_story": {
+      "title": "默想：神的故事",
+      "content": "創 1:1–2:3 是創世記的開篇，是本書其他部分的序曲。\n\n神在六天中以話語創造世界；神看一切為好；神按自己的形象造男造女；神在第七天安息，並將這一天定為聖日。"
+    },
+    "my_story": {
+      "title": "默想：我的故事",
+      "content": "【與神同行】知道這個世界的一切都是神的話語所創造，可以如何幫助我認識神的話語的力量？我對神的話語能夠改變自己的生命是否還有疑惑？\n\n【價值定位】知道每一個人都是按神的形象所造，可以如何幫助我正確認識自己？"
+    }
+  },
+  "sharing_links": [
+    {
+      "title": "親子導讀：創世記1:1-2:3",
+      "url": "/sharing/zhuolin/2024/wk1-day1-sharing3.html"
+    },
+    {
+      "title": "新增靈修：創世記1:1-2:3",
+      "url": "/sharing/zhuolin/2024/wk1-day1-sharing2.html"
+    },
+    {
+      "title": "每日靈修：從創世到啓示",
+      "url": "/sharing/zhuolin/2024/wk1-day1-sharing.html"
+    },
+    {
+      "title": "謙理之行：第1天/共730天",
+      "url": "/sharing/2024/wk1-day1-qianli.html"
+    }
+  ],
+  "qianli": {
+    "url": "/sharing/2024/wk1-day1-qianli.html",
+    "youtube": {
+      "text": "誰是真正的創造者？",
+      "url": "https://youtu.be/9PZB5l6QlHk"
+    }
+  }
+}

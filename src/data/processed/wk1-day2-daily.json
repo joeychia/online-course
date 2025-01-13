@@ -1,0 +1,61 @@
+{
+  "title": "1/2 第1週 第2天 人類始祖",
+  "description": "帮助屬靈生命成长的兩年讀經計劃。所有材料均由【西雅圖證道堂】東區國語堂提供。",
+  "date": "January 02, 2024",
+  "question": "神創世之初,人類的狀況如何?",
+  "readings": {
+    "main": {
+      "text": "創世記 2.4-4.26【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Genesis.2.4-4.26&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Genesis.2.4-4.26&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Genesis 2.4-4.26&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/GEN.2"
+      }
+    },
+    "psalm": {
+      "text": "詩篇 2【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Psalms.2&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Psalms.2&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Psalms 2&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/PSA.2"
+      }
+    }
+  },
+  "meditation": {
+    "gods_story": {
+      "title": "默想：神的故事",
+      "content": "創 2:4-4:26 是創世記十段家族史的第一段，是人類始祖亞當夏娃的家族史。\n\n神創造人並安置在伊甸園，夏娃是從亞當的肋骨所造，為要成為一體彼此幫助(2:4–25)；蛇引誘人犯罪遠離神，失去與神的同在(3:1–24)；人類進一步墮落，亞當夏娃的兒子該隱殺了弟弟亞伯，該隱的後裔拉麥的傲慢，以及罪惡中的希望：「那時候，人才求告耶和華的名。」 (4:1–26)。"
+    },
+    "my_story": {
+      "title": "默想：我的故事",
+      "content": "【生命品格】亞當夏娃的墮落犯罪對我有什麼警醒?我是否常常因為驕傲、不滿而做不討神喜悅的事情？\n\n【價值定位】我是否願意在罪中求告神的名？是否可以面對自己真實的內心？"
+    }
+  },
+  "sharing_links": [
+    {
+      "title": "親子導讀：創世紀2:4-4:26",
+      "url": "/sharing/zhuolin/2024/wk1-day2-sharing3.html"
+    },
+    {
+      "title": "新增靈修：創世紀2:4-4:26",
+      "url": "/sharing/zhuolin/2024/wk1-day2-sharing2.html"
+    },
+    {
+      "title": "每日靈修：人的被造與墮落",
+      "url": "/sharing/zhuolin/2024/wk1-day2-sharing.html"
+    },
+    {
+      "title": "謙理之行：第2天/共730天",
+      "url": "/sharing/2024/wk1-day2-qianli.html"
+    }
+  ],
+  "qianli": {
+    "url": "/sharing/2024/wk1-day2-qianli.html",
+    "youtube": {
+      "text": "原罪與墮落：是誰的過錯？",
+      "url": "https://youtu.be/v92F9uI3Ptg"
+    }
+  }
+}

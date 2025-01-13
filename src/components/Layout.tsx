@@ -31,6 +31,8 @@ const Footer = styled('footer')(({ theme }) => ({
   marginTop: 'auto',
 }));
 
+const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
+
 export default function Layout({ children }: LayoutProps) {
   return (
     <Box sx={{ 
@@ -38,21 +40,26 @@ export default function Layout({ children }: LayoutProps) {
       flexDirection: 'column',
       minHeight: '100vh',
     }}>
-      <AppBar position="static">
+      <AppBar 
+        position="fixed" 
+        sx={{ 
+          zIndex: theme => theme.zIndex.drawer + 1 
+        }}
+      >
         <Toolbar>
           <Container maxWidth="lg" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
               Online Course
             </Typography>
             <Stack direction="row" spacing={4}>
-              <StyledLink to="/">Home</StyledLink>
-              <StyledLink to="/courses">Courses</StyledLink>
+              <StyledLink to="/">Courses</StyledLink>
               <StyledLink to="/progress">My Progress</StyledLink>
             </Stack>
           </Container>
         </Toolbar>
       </AppBar>
-
+      <Toolbar /> {/* This creates space for the fixed AppBar */}
+      
       <Box component="main" sx={{ flex: 1, width: '100%' }}>
         {children}
       </Box>

@@ -1,0 +1,61 @@
+{
+  "title": "第2週 第3天 應許後裔",
+  "description": "帮助屬靈生命成长的兩年讀經計劃。所有材料均由【西雅圖證道堂】東區國語堂提供。",
+  "date": "January 10, 2024",
+  "question": "讀經：",
+  "readings": {
+    "main": {
+      "text": "創世記 15-16【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Genesis.15-16&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Genesis.15-16&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Genesis 15-16&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/GEN.15"
+      }
+    },
+    "psalm": {
+      "text": "詩篇 10【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Psalms.10&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Psalms.10&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Psalms 10&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/PSA.10"
+      }
+    }
+  },
+  "meditation": {
+    "gods_story": {
+      "title": "默想：神的故事",
+      "content": "創世紀 15-16 繼續應許的主題，神與亞伯蘭立約賜給他後裔。\n\n神與亞伯蘭立約，應許他的後裔數不勝數，將來必回到應許之地。但亞伯蘭和撒萊還是靠著人的方法嘗試得到後裔。雖然有人的軟弱，神仍然信實地守約施慈愛，並且看顧苦難中的夏甲。"
+    },
+    "my_story": {
+      "title": "默想：我的故事",
+      "content": "【生命品格】雖然有神的約定、預言和應許，亞伯蘭和撒萊還是在長長的等候中軟弱，試圖用人的方法得到神的應許。我是否也曾在/正在等待中軟弱？亞伯蘭\n和撒萊的故事給我怎樣的提醒？\n\n【價值定位】夏甲雖然身爲奴僕,却仍然被神看顧。她的故事在今天給我怎樣的鼓勵和安慰？"
+    }
+  },
+  "sharing_links": [
+    {
+      "title": "親子導讀：創世紀15-16",
+      "url": "/sharing/zhuolin/2024/wk2-day3-sharing3.html"
+    },
+    {
+      "title": "新增靈修：創世紀15-16",
+      "url": "/sharing/zhuolin/2024/wk2-day3-sharing2.html"
+    },
+    {
+      "title": "每日靈修： 不要懼怕",
+      "url": "/sharing/zhuolin/2024/wk2-day3-sharing.html"
+    },
+    {
+      "title": "謙理之行：第10天/共730天",
+      "url": "/sharing/2024/wk2-day3-qianli.html"
+    }
+  ],
+  "qianli": {
+    "url": "/sharing/2024/wk2-day3-qianli.html",
+    "youtube": {
+      "text": "因信稱義: 舊約中的一個案例",
+      "url": "https://youtu.be/N1-ylVLcTYA"
+    }
+  }
+}

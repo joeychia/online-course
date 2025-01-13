@@ -1,0 +1,61 @@
+{
+  "title": "第2週 第2天 祝福地土",
+  "description": "帮助屬靈生命成长的兩年讀經計劃。所有材料均由【西雅圖證道堂】東區國語堂提供。",
+  "date": "January 09, 2024",
+  "question": "讀經：",
+  "readings": {
+    "main": {
+      "text": "創世記 13-14【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Genesis.13-14&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Genesis.13-14&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Genesis 13-14&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/GEN.13"
+      }
+    },
+    "psalm": {
+      "text": "詩篇 9【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Psalms.9&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Psalms.9&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Psalms 9&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/PSA.9"
+      }
+    }
+  },
+  "meditation": {
+    "gods_story": {
+      "title": "默想：神的故事",
+      "content": "創 13-14 繼續前面的記載，說明神如何按著應許保守亞伯蘭的地土。\n\n亞伯蘭的牧人與羅得的牧人之間出現紛爭，導致他們分離;羅得選擇看似豐盛繁華却充滿罪惡之地。羅得被擄，亞伯蘭將他和所多瑪全城的人救回，成爲他人的祝福。亞伯蘭拒絕所多瑪王的報酬，却將所得的十分之一獻給耶和華的祭司麥基洗德，成爲聖經記錄裏的第一個十一奉獻。"
+    },
+    "my_story": {
+      "title": "默想：我的故事",
+      "content": "【價值定位】亞伯蘭不願接受所多瑪王的感謝和禮物，却接受麥基洗德的祝福並將自己所得的十分之一獻給神。我今天如何看待和回應神的祝福?\n\n【肢體關係】亞伯蘭妥善處理與羅得的紛爭，並勇敢地拯救羅得。我今天是否與弟兄姐妹有紛爭？我該如何處理這樣的紛爭？"
+    }
+  },
+  "sharing_links": [
+    {
+      "title": "親子導讀：創世紀13-14",
+      "url": "/sharing/zhuolin/2024/wk2-day2-sharing3.html"
+    },
+    {
+      "title": "新增靈修：創世紀13-14",
+      "url": "/sharing/zhuolin/2024/wk2-day2-sharing2.html"
+    },
+    {
+      "title": "每日靈修：亞伯蘭的迴轉和羅得的遠離",
+      "url": "/sharing/zhuolin/2024/wk2-day2-sharing.html"
+    },
+    {
+      "title": "謙理之行：第9天/共730天",
+      "url": "/sharing/2024/wk2-day2-qianli.html"
+    }
+  ],
+  "qianli": {
+    "url": "/sharing/2024/wk2-day2-qianli.html",
+    "youtube": {
+      "text": "選擇的後果：亞伯蘭與羅得的教訓",
+      "url": "https://youtu.be/CmGlVpZEnyc"
+    }
+  }
+}

@@ -21,7 +21,7 @@ export interface Lesson {
   unitId: string;
   name: string;
   content: string;
-  quizId?: string;
+  quizId: string | null;
   orderIndex: number;
 }
 

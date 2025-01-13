@@ -1,0 +1,61 @@
+{
+  "title": "第3週 第4天 以實瑪利",
+  "description": "帮助屬靈生命成长的兩年讀經計劃。所有材料均由【西雅圖證道堂】東區國語堂提供。",
+  "date": "January 18, 2024",
+  "question": "讀經：",
+  "readings": {
+    "main": {
+      "text": "創世記 25.12-18【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Genesis.25.12-18&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Genesis.25.12-18&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Genesis 25.12-18&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/GEN.25"
+      }
+    },
+    "psalm": {
+      "text": "詩篇 18【繁體】【简体】【NIV】【YouVersion】",
+      "links": {
+        "traditional": "https://www.biblegateway.com/passage/?search=Psalms.18&version=CUVMPT",
+        "simplified": "https://www.biblegateway.com/passage/?search=Psalms.18&version=CUVMPS",
+        "niv": "https://www.biblegateway.com/passage/?search=Psalms 18&version=NIV",
+        "youversion": "https://www.bible.com/zh-TW/bible/46/PSA.18"
+      }
+    }
+  },
+  "meditation": {
+    "gods_story": {
+      "title": "默想：神的故事",
+      "content": "創世紀 25:12-18 是創世記十段家族史的第七段。記錄了以實瑪利的後裔。神的應許從不落空。\n\n正如神所應許的，以實瑪利成為十二個族長的父親，住在眾弟兄的東邊。"
+    },
+    "my_story": {
+      "title": "默想：我的故事",
+      "content": "【服事忠誠】以實瑪利是按照血氣所生的。他雖然不是應許的後裔，神還是眷顧他，祝福祂。以實瑪利是今天的阿拉伯人的先祖。我如何看待今天的以實瑪利後裔?"
+    }
+  },
+  "sharing_links": [
+    {
+      "title": "親子導讀：創世紀25:12-18",
+      "url": "/sharing/zhuolin/2024/wk3-day4-sharing3.html"
+    },
+    {
+      "title": "新增靈修：創世紀25:12-18",
+      "url": "/sharing/zhuolin/2024/wk3-day4-sharing2.html"
+    },
+    {
+      "title": "每日靈修：以實瑪利",
+      "url": "/sharing/zhuolin/2024/wk3-day4-sharing.html"
+    },
+    {
+      "title": "謙理之行：第18天/共730天",
+      "url": "/sharing/2024/wk3-day4-qianli.html"
+    }
+  ],
+  "qianli": {
+    "url": "/sharing/2024/wk3-day4-qianli.html",
+    "youtube": {
+      "text": "以實瑪利的後代：如何聚焦在神的國度？",
+      "url": "https://youtu.be/2jsLKJOq2_U"
+    }
+  }
+}
