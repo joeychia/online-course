@@ -17,6 +17,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { getMockCourse, getMockUnitsForCourse, getMockLessonsForUnit, getMockUser } from '../data/mockDataLoader';
 import NavPanel from '../components/NavPanel';
+import { useState } from 'react';
 
 export default function CourseView() {
   const { courseId = '' } = useParams<{ courseId: string }>();
@@ -41,11 +42,11 @@ export default function CourseView() {
 
   const handleSelectLesson = (lessonId: string) => {
     console.log('Navigating to lesson:', lessonId);
-    navigate(`/${courseId}/lesson/${lessonId}`);
+    navigate(`/${courseId}/${lessonId}`);
   };
 
   const toggleUnit = (unitId: string) => {
-    setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
+    setExpandedUnits((prev: { [key: string]: boolean }) => ({ ...prev, [unitId]: !prev[unitId] }));
   };
 
   const isLessonAccessible = (orderIndex: number) => {
