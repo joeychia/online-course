@@ -21,8 +21,6 @@ const StyledLink = styled(RouterLink)(({ theme }) => ({
   },
 }));
 
-const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
-
 export default function Layout({ children }: LayoutProps) {
   return (
     <Box sx={{ 

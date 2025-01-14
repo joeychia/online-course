@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -21,11 +20,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled } from '@mui/material/styles';
 import { Course, Unit, Lesson } from '../types';
-import { 
-  getMockCourse, 
-  getMockUnitsForCourse,
-  getMockLessonsForUnit,
-} from '../data/mockDataLoader';
+import { getMockLessonsForUnit } from '../data/mockDataLoader';
 
 const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-selected': {
@@ -50,7 +45,6 @@ const StyledUnitListItem = styled(ListItemButton)(({ theme }) => ({
 }));
 
 const DRAWER_WIDTH = 350;
-const COLLAPSED_WIDTH = 0;
 const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
 
 interface NavPanelProps {
@@ -59,7 +53,7 @@ interface NavPanelProps {
   progress: { [key: string]: { completed: boolean } };
   selectedUnitId?: string;
   selectedLessonId?: string;
-  onSelectLesson: (unitId: string, lessonId: string) => void;
+  onSelectLesson: (lessonId: string) => void;
   isOpen: boolean;
   onToggle: () => void;
   onCollapse?: (collapsed: boolean) => void;
@@ -89,13 +83,10 @@ export default function NavPanel({
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
   };
 
-  const isLessonAccessible = (unit: Unit, lesson: Lesson, allLessons: Lesson[]) => {
-    // return true; // for debuggging
+  const isLessonAccessible = (lesson: Lesson, allLessons: Lesson[]) => {
     // If course has unlockLessonIndex, only that lesson is accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
-      if(lesson.orderIndex === course.settings.unlockLessonIndex) {
-        return true;
-      }
+      return lesson.orderIndex === course.settings.unlockLessonIndex;
     }
 
     // Otherwise use the default progression logic:
@@ -104,9 +95,7 @@ export default function NavPanel({
 
     // Other lessons require previous lesson to be completed
     const previousLesson = allLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
-    console.log(`Previous lesson ${previousLesson?.name} is completed: ${progress[previousLesson?.id||'']?.completed}`);
-    const isAccessible = previousLesson ? progress[previousLesson.id]?.completed : false;
-    return isAccessible;
+    return previousLesson ? progress[previousLesson.id]?.completed : false;
   };
 
   const handleToggleCollapse = () => {
@@ -162,14 +151,14 @@ export default function NavPanel({
                 <Collapse in={expandedUnits[unit.id]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     {lessons.map((lesson) => {
-                      const isAccessible = isLessonAccessible(unit, lesson, lessons);
+                      const isAccessible = isLessonAccessible(lesson, lessons);
                       const isCompleted = progress[lesson.id]?.completed;
 
                       return (
                         <StyledListItem
                           key={lesson.id}
                           sx={{ pl: 4 }}
-                          onClick={() => isAccessible && onSelectLesson(unit.id, lesson.id)}
+                          onClick={() => isAccessible && onSelectLesson(lesson.id)}
                           selected={selectedLessonId === lesson.id}
                           disabled={!isAccessible}
                         >

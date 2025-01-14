@@ -78,7 +78,6 @@ export default function UnitView() {
   const [userProgress, setUserProgress] = useState<UserProgress>({});
 
   const course = getMockCourse(courseId);
-  const currentUser = getMockUser('system');
 
   // Find the unit based on the lesson ID
   const findUnitForLesson = (lessonId: string) => {
@@ -141,7 +140,7 @@ export default function UnitView() {
     console.log('Updated user progress:', updatedUser.progress);
   };
 
-  const handleSelectLesson = (unitId: string, lessonId?: string) => {
+  const handleSelectLesson = (lessonId?: string) => {
     if (lessonId) {
       navigate(`/${courseId}/${lessonId}`);
       setIsDrawerOpen(false);
@@ -195,7 +194,7 @@ export default function UnitView() {
                   lesson={lesson}
                   isAccessible={isAccessible}
                   isCompleted={isCompleted}
-                  onClick={() => handleSelectLesson(unit.id, lesson.id)}
+                  onClick={() => handleSelectLesson(lesson.id)}
                 />
               </Grid>
             )

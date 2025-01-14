@@ -16,7 +16,6 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Course } from '../types';
 import { getMockCourse, getMockUnitsForCourse, getMockLessonsForUnit, getMockUser } from '../data/mockDataLoader';
 import NavPanel from '../components/NavPanel';
 
@@ -41,7 +40,7 @@ export default function CourseView() {
     setExpandedUnits({ [units[0].id]: true });
   }
 
-  const handleSelectLesson = (unitId: string, lessonId: string) => {
+  const handleSelectLesson = (lessonId: string) => {
     navigate(`/${courseId}/${lessonId}`);
   };
 
@@ -114,7 +113,7 @@ export default function CourseView() {
                         return (
                           <ListItemButton
                             key={lesson.id}
-                            onClick={() => isAccessible && handleSelectLesson(unit.id, lesson.id)}
+                            onClick={() => isAccessible && handleSelectLesson(lesson.id)}
                             disabled={!isAccessible}
                             sx={{ pl: 4 }}
                           >

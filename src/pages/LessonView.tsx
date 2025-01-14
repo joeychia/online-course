@@ -37,7 +37,7 @@ function encodeMarkdownUrls(content: string): string {
   // Transform markdown tables to have empty headers
   processedContent = processedContent.replace(
     /(\|[^\n]+\|)\n\|[\s\-\|]+\|(\n\|[^\n]+\|)\n\|[\s\-\|]+\|/g,
-    (match, firstRow, secondRow) => {
+    (_, firstRow, secondRow) => {
       return '| | | | |\n|---|---|---|---|\n' + firstRow + secondRow;
     }
   );
