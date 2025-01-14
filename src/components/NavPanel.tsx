@@ -84,9 +84,12 @@ export default function NavPanel({
   };
 
   const isLessonAccessible = (lesson: Lesson, allLessons: Lesson[]) => {
+    // return true; // for debuggging
     // If course has unlockLessonIndex, only that lesson is accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
-      return lesson.orderIndex === course.settings.unlockLessonIndex;
+      if(lesson.orderIndex === course.settings.unlockLessonIndex) {
+        return true;
+      }
     }
 
     // Otherwise use the default progression logic:
@@ -95,7 +98,9 @@ export default function NavPanel({
 
     // Other lessons require previous lesson to be completed
     const previousLesson = allLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
-    return previousLesson ? progress[previousLesson.id]?.completed : false;
+    console.log(`Previous lesson ${previousLesson?.name} is completed: ${progress[previousLesson?.id||'']?.completed}`);
+    const isAccessible = previousLesson ? progress[previousLesson.id]?.completed : false;
+    return isAccessible;
   };
 
   const handleToggleCollapse = () => {

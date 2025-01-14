@@ -71,6 +71,8 @@ export default function UnitView() {
     courseId: string; 
     lessonId: string;
   }>();
+  console.log('URL params:', { courseId, lessonId });
+
   const navigate = useNavigate();
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -78,13 +80,19 @@ export default function UnitView() {
   const [userProgress, setUserProgress] = useState<UserProgress>({});
 
   const course = getMockCourse(courseId);
+  console.log('Found course:', course);
 
   // Find the unit based on the lesson ID
   const findUnitForLesson = (lessonId: string) => {
     const units = getMockUnitsForCourse(courseId);
+    console.log('Available units:', units);
     for (const unit of units) {
       const lessons = getMockLessonsForUnit(unit.id);
-      if (lessons.some(l => l.id === lessonId)) {
+      console.log(`Checking unit ${unit.id}, lessons:`, lessons);
+      console.log('Looking for lessonId:', lessonId);
+      const found = lessons.some(l => l.id === lessonId);
+      console.log('Lesson found in unit:', found);
+      if (found) {
         return unit;
       }
     }
@@ -92,6 +100,7 @@ export default function UnitView() {
   };
 
   const unit = lessonId ? findUnitForLesson(lessonId) : null;
+  console.log('Found unit:', unit);
 
   useEffect(() => {
     if (lessonId && (!selectedLesson || selectedLesson.id !== lessonId)) {

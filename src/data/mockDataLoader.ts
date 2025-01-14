@@ -11,6 +11,7 @@ interface MockData {
 }
 
 const mockData = mockDataJson as unknown as MockData;
+console.log('Loaded mock data:', mockData);
 
 export const getMockData = () => mockData;
 

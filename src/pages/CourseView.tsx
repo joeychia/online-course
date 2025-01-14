@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Box, 
@@ -41,7 +40,8 @@ export default function CourseView() {
   }
 
   const handleSelectLesson = (lessonId: string) => {
-    navigate(`/${courseId}/${lessonId}`);
+    console.log('Navigating to lesson:', lessonId);
+    navigate(`/${courseId}/lesson/${lessonId}`);
   };
 
   const toggleUnit = (unitId: string) => {
