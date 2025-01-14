@@ -16,6 +16,7 @@
 - User can view a course - done
 - User can view a unit - done
 - User can view a lesson - done
+- User can view their quiz history for a lesson (complete questions and answers are recorded)
 - User can do a quiz for a lesson if any - done
 - User can register/drop a course
 - User can join/quit a group

@@ -15,10 +15,10 @@ import LockIcon from '@mui/icons-material/Lock';
 import { Lesson } from '../types';
 import { 
   getMockCourse, 
-  getMockUnit, 
   getMockLessonsForUnit,
   getMockUser,
-  getMockUnitsForCourse
+  getMockUnitsForCourse,
+  updateUserProgress,
 } from '../data/mockDataLoader';
 import LessonView from './LessonView';
 import NavPanel from '../components/NavPanel';
@@ -60,6 +60,12 @@ const LessonCard = ({ lesson, isAccessible, isCompleted, onClick }: LessonCardPr
 
 const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
 
+interface UserProgress {
+  [lessonId: string]: {
+    completed: boolean;
+  };
+}
+
 export default function UnitView() {
   const { courseId = '', lessonId = '' } = useParams<{ 
     courseId: string; 
@@ -69,10 +75,10 @@ export default function UnitView() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isNavCollapsed, setIsNavCollapsed] = useState(false);
+  const [userProgress, setUserProgress] = useState<UserProgress>({});
 
   const course = getMockCourse(courseId);
   const currentUser = getMockUser('system');
-  const userProgress = currentUser?.progress[courseId] || {};
 
   // Find the unit based on the lesson ID
   const findUnitForLesson = (lessonId: string) => {
@@ -89,7 +95,7 @@ export default function UnitView() {
   const unit = lessonId ? findUnitForLesson(lessonId) : null;
 
   useEffect(() => {
-    if (lessonId) {
+    if (lessonId && (!selectedLesson || selectedLesson.id !== lessonId)) {
       const units = getMockUnitsForCourse(courseId);
       for (const unit of units) {
         const lessons = getMockLessonsForUnit(unit.id);
@@ -100,7 +106,13 @@ export default function UnitView() {
         }
       }
     }
-  }, [lessonId, courseId]);
+  }, [lessonId, courseId, selectedLesson, userProgress]);
+
+  useEffect(() => {
+    const initialUser = getMockUser('system');
+    setUserProgress(initialUser.progress[courseId] || {});
+    console.log('Initial user progress loaded:', initialUser.progress);
+  }, [courseId]);
 
   if (!course || (lessonId && !unit)) {
     return <Typography>Course or lesson not found</Typography>;
@@ -112,17 +124,28 @@ export default function UnitView() {
   const isLessonAccessible = (lesson: Lesson) => {
     if (lesson.orderIndex === 1) return true;
     const previousLesson = unitLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
-    return previousLesson ? userProgress[previousLesson.id]?.completed : false;
+    const isAccessible = previousLesson ? userProgress[previousLesson.id]?.completed : false;
+    console.log(`Lesson ${lesson.orderIndex} is accessible: ${isAccessible}`);
+    return isAccessible;
   };
 
   const handleComplete = (lessonId: string) => {
-    // In a real app, this would update the backend
+    // Reload user progress from localStorage
+    const updatedUser = getMockUser('system');
+    // Mark lesson as completed
+    updatedUser.progress[courseId][lessonId].completed = true;
+    // Save updated user progress to localStorage
+    updateUserProgress('system', courseId, lessonId);
+    setUserProgress(updatedUser.progress[courseId] || {});
     console.log('Completing lesson:', lessonId);
+    console.log('Updated user progress:', updatedUser.progress);
   };
 
-  const handleSelectLesson = (unitId: string, lessonId: string) => {
-    navigate(`/${courseId}/${lessonId}`);
-    setIsDrawerOpen(false);
+  const handleSelectLesson = (unitId: string, lessonId?: string) => {
+    if (lessonId) {
+      navigate(`/${courseId}/${lessonId}`);
+      setIsDrawerOpen(false);
+    }
   };
 
   const toggleDrawer = () => {
@@ -166,14 +189,16 @@ export default function UnitView() {
           const isCompleted = userProgress[lesson.id]?.completed;
 
           return (
-            <Grid item key={lesson.id} xs={12} sm={6} md={4}>
-              <LessonCard
-                lesson={lesson}
-                isAccessible={isAccessible}
-                isCompleted={isCompleted}
-                onClick={() => handleSelectLesson(unit?.id, lesson.id)}
-              />
-            </Grid>
+            unit && (
+              <Grid item key={lesson.id} xs={12} sm={6} md={4}>
+                <LessonCard
+                  lesson={lesson}
+                  isAccessible={isAccessible}
+                  isCompleted={isCompleted}
+                  onClick={() => handleSelectLesson(unit.id, lesson.id)}
+                />
+              </Grid>
+            )
           );
         })}
       </Grid>

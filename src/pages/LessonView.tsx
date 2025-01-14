@@ -7,8 +7,6 @@ import {
   Paper, 
   Stack,
   Tooltip,
-  Card,
-  CardContent,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -85,7 +83,6 @@ export default function LessonView({
     if (lesson && note.trim()) {
       // Here you would typically save the note to your backend
       console.log('Saving note:', { lessonId: lesson.id, note });
-      // Mark lesson as completed when note is saved
       onComplete?.(lesson.id);
       // Clear the note after saving
       setNote("");

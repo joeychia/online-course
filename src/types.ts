@@ -77,5 +77,6 @@ export interface UserProfile {
       };
     };
   };
+  notes: { [noteId: string]: Note };
   groupIds: { [key: string]: boolean };
 } 

@@ -23,8 +23,30 @@ export const getMockLesson = (lessonId: string): Lesson => {
     quizId: lesson.quizId === undefined ? null : lesson.quizId
   };
 };
-export const getMockUser = (userId: string) => mockData.users[userId];
-export const getMockNote = (noteId: string) => mockData.notes[noteId];
+
+// Function to load user data from localStorage
+function loadUserData(userId: string): UserProfile {
+  const data = localStorage.getItem(`user_${userId}`);
+  return data ? JSON.parse(data) : mockData.users[userId];
+}
+
+// Function to save user data to localStorage
+export function saveUserData(userId: string, userData: UserProfile) {
+  localStorage.setItem(`user_${userId}`, JSON.stringify(userData));
+}
+
+// Update getMockUser to use localStorage
+export const getMockUser = (userId: string) => {
+  return loadUserData(userId);
+};
+
+// Update getMockNote to use localStorage
+export const getMockNote = (noteId: string) => {
+  const note = mockData.notes[noteId];
+  const user = loadUserData(note.userId);
+  return user.notes[noteId] || note;
+};
+
 export const getMockQuiz = (quizId: string) => mockData.quizzes[quizId];
 
 export const getMockLessonsForUnit = (unitId: string): Lesson[] => {
@@ -42,4 +64,14 @@ export const getMockUnitsForCourse = (courseId: string): Unit[] => {
   
   return Object.keys(course.unitIds)
     .map(unitId => mockData.units[unitId]);
+};
+
+// Add a function to update user progress
+export const updateUserProgress = (userId: string, courseId: string, lessonId: string) => {
+  const user = loadUserData(userId);
+  user.progress[courseId] = user.progress[courseId] || {};
+  user.progress[courseId][lessonId] = user.progress[courseId][lessonId] || { completed: false };
+  user.progress[courseId][lessonId].completed = true;
+  saveUserData(userId, user);
+  console.log(`User progress updated for course ${courseId} and lesson ${lessonId}`);
 }; 
