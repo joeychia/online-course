@@ -25,7 +25,7 @@ export interface Lesson {
     "video-title"?: string;
     "video-url"?: string;
     meditation?: string;
-    quizId?: string;
+    quizId: string | null;
     orderIndex: number;
 }
 
@@ -35,13 +35,14 @@ export interface QuizOption {
 }
 
 export interface QuizQuestion {
-    type: 'single_choice' | 'free_form';
+    questionType: 'single_choice' | 'free_form';
     text: string;
     options: Record<string, QuizOption>;
 }
 
 export interface Quiz {
     id: string;
+    type: "multiple choice" | "true/false" | "short answer";
     questions: Record<string, QuizQuestion>;
 }
 
@@ -78,4 +79,5 @@ export interface User {
     registeredCourses: Record<string, boolean>;
     progress: Record<string, Record<string, UserProgress>>;
     groupIds: Record<string, boolean>;
+    notes: Record<string, Note>;
 } 

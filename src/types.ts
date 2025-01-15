@@ -2,11 +2,11 @@ export interface Course {
   id: string;
   name: string;
   description: string;
-  settings?: {
-    unlockLessonIndex?: number;
+  settings: {
+    unlockLessonIndex: number;
   };
-  unitIds: { [key: string]: boolean };
-  groupIds: { [key: string]: boolean };
+  unitIds: Record<string, boolean>;
+  groupIds: Record<string, boolean>;
   isPublic?: boolean;
 }
 
@@ -15,9 +15,7 @@ export interface Unit {
   courseId: string;
   name: string;
   description: string;
-  lessonIds: { [key: string]: boolean };
-  isPublic?: boolean;
-  orderIndex?: number;
+  lessonIds: Record<string, boolean>;
 }
 
 export interface Lesson {
@@ -25,24 +23,42 @@ export interface Lesson {
   unitId: string;
   name: string;
   content: string;
+  "video-title"?: string;
+  "video-url"?: string;
+  meditation?: string;
   quizId: string | null;
   orderIndex: number;
 }
 
 export interface Quiz {
   id: string;
-  type: 'multiple choice' | 'true/false' | 'short answer';
-  questions: {
-    [key: string]: {
-      text: string;
-      options: {
-        [key: string]: {
-          text: string;
-          isCorrect: boolean;
-        };
-      };
-    };
-  };
+  type: "multiple choice" | "true/false" | "short answer";
+  questions: Record<string, QuizQuestion>;
+}
+
+export interface QuizQuestion {
+  questionType: 'single_choice' | 'free_form';
+  text: string;
+  options: Record<string, QuizOption>;
+}
+
+export interface QuizOption {
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface UserProgress {
+  completed: boolean;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  registeredCourses: Record<string, boolean>;
+  progress: Record<string, Record<string, UserProgress>>;
+  groupIds: Record<string, boolean>;
+  notes: Record<string, Note>;
 }
 
 export interface Group {
@@ -60,23 +76,8 @@ export interface Grade {
 }
 
 export interface Note {
+  id: string;
   lessonId: string;
   userId: string;
   text: string;
-}
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  registeredCourses: { [key: string]: boolean };
-  progress: {
-    [courseId: string]: {
-      [lessonId: string]: {
-        completed: boolean;
-      };
-    };
-  };
-  notes: { [noteId: string]: Note };
-  groupIds: { [key: string]: boolean };
 } 

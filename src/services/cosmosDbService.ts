@@ -7,25 +7,37 @@ class CosmosDbService {
     private client: CosmosClient;
     private database: Database;
     private containers: Map<string, Container>;
+    private initialized: boolean = false;
+    private initializationPromise: Promise<void> | null = null;
 
     constructor() {
-        const connectionString = process.env.VITE_COSMOS_DB_CONNECTION_STRING;
+        const connectionString = import.meta.env.VITE_COSMOS_DB_CONNECTION_STRING;
         if (!connectionString) {
             throw new Error("Cosmos DB connection string not found in environment variables");
         }
 
         this.client = new CosmosClient(connectionString);
-        this.database = this.client.database(process.env.VITE_COSMOS_DB_NAME || "online-course-db");
+        this.database = this.client.database(import.meta.env.VITE_COSMOS_DB_NAME || "online-course-db");
         this.containers = new Map();
 
         // Initialize containers
-        this.initializeContainers();
+        this.initializationPromise = this.initializeContainers();
     }
 
     private async initializeContainers() {
+        if (this.initialized) return;
+
         const containerNames = ['courses', 'units', 'lessons', 'quizzes', 'groups', 'grades', 'notes', 'users'];
         for (const name of containerNames) {
             this.containers.set(name, this.database.container(name));
+        }
+        
+        this.initialized = true;
+    }
+
+    private async ensureInitialized() {
+        if (!this.initialized && this.initializationPromise) {
+            await this.initializationPromise;
         }
     }
 
@@ -39,6 +51,7 @@ class CosmosDbService {
 
     // Course operations
     async getAllCourses(): Promise<Course[]> {
+        await this.ensureInitialized();
         const container = this.getContainer('courses');
         const { resources } = await container.items.query("SELECT * FROM c").fetchAll();
         return resources as Course[];
@@ -62,6 +75,7 @@ class CosmosDbService {
 
     // Unit operations
     async getUnitsForCourse(courseId: string): Promise<Unit[]> {
+        await this.ensureInitialized();
         const container = this.getContainer('units');
         const querySpec = {
             query: "SELECT * FROM c WHERE c.courseId = @courseId",
@@ -85,6 +99,7 @@ class CosmosDbService {
 
     // Lesson operations
     async getLessonsForUnit(unitId: string): Promise<Lesson[]> {
+        await this.ensureInitialized();
         const container = this.getContainer('lessons');
         const querySpec = {
             query: "SELECT * FROM c WHERE c.unitId = @unitId ORDER BY c.orderIndex",
@@ -181,6 +196,7 @@ class CosmosDbService {
 
     // Note operations
     async getNoteForLesson(lessonId: string, userId: string): Promise<Note | null> {
+        await this.ensureInitialized();
         const container = this.getContainer('notes');
         const querySpec = {
             query: "SELECT * FROM c WHERE c.lessonId = @lessonId AND c.userId = @userId",
@@ -203,6 +219,7 @@ class CosmosDbService {
 
     // Grade operations
     async getGradesForCourse(courseId: string): Promise<Grade[]> {
+        await this.ensureInitialized();
         const container = this.getContainer('grades');
         const querySpec = {
             query: "SELECT * FROM c WHERE c.courseId = @courseId",
@@ -213,6 +230,7 @@ class CosmosDbService {
     }
 
     async getUserGrade(userId: string, courseId: string): Promise<Grade | null> {
+        await this.ensureInitialized();
         const container = this.getContainer('grades');
         const querySpec = {
             query: "SELECT * FROM c WHERE c.courseId = @courseId AND c.userId = @userId",
@@ -226,7 +244,8 @@ class CosmosDbService {
     }
 
     // Generic operations
-    private async getItemById<T extends ItemDefinition>(containerName: string, id: string): Promise<T | null> {
+    async getItemById<T extends ItemDefinition>(containerName: string, id: string): Promise<T | null> {
+        await this.ensureInitialized();
         try {
             const container = this.getContainer(containerName);
             const { resource } = await container.item(id).read();
@@ -240,20 +259,32 @@ class CosmosDbService {
     }
 
     private async createItem<T extends ItemDefinition>(containerName: string, item: Omit<T, 'id'>): Promise<T> {
+        await this.ensureInitialized();
         const container = this.getContainer(containerName);
         const { resource } = await container.items.create(item);
         return resource as unknown as T;
     }
 
     private async updateItem<T extends ItemDefinition>(containerName: string, id: string, item: T): Promise<T> {
+        await this.ensureInitialized();
         const container = this.getContainer(containerName);
         const { resource } = await container.item(id).replace(item);
         return resource as unknown as T;
     }
 
     private async deleteItem(containerName: string, id: string): Promise<void> {
+        await this.ensureInitialized();
         const container = this.getContainer(containerName);
         await container.item(id).delete();
+    }
+
+    // Add specific methods for each entity type
+    async getUnitById(id: string): Promise<Unit | null> {
+        return this.getItemById<Unit>('units', id);
+    }
+
+    async getLessonById(id: string): Promise<Lesson | null> {
+        return this.getItemById<Lesson>('lessons', id);
     }
 }
 
