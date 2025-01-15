@@ -30,7 +30,7 @@ const CourseCard = ({ course, isAuthenticated, onSignInClick }: CourseCardProps)
 
   const handleClick = () => {
     if (isAuthenticated) {
-      navigate(`/courses/${course.id}`);
+      navigate(`/${course.id}`);
     } else {
       onSignInClick();
     }

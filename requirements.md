@@ -5,7 +5,7 @@
 - User can create/edit/delete a course
 - User can create/edit/delete a unit
 - User can create/edit/delete a lesson, which can include video, text, image, quiz
-- User can create/edit/delete a quiz, which can include multiple choice, true/false, short answer
+- User can create/edit/delete a quiz, where each question can include single_choice, free_form
 - User can create/edit/delete a group
 - User can manage members in a group
 - User can view everyone's grade in a course

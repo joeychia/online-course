@@ -32,12 +32,11 @@ export interface Lesson {
 
 export interface Quiz {
   id: string;
-  type: "multiple choice" | "true/false" | "short answer";
   questions: Record<string, QuizQuestion>;
 }
 
 export interface QuizQuestion {
-  questionType: 'single_choice' | 'free_form';
+  type: 'single_choice' | 'free_form';
   text: string;
   options: Record<string, QuizOption>;
 }

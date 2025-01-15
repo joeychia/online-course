@@ -84,7 +84,23 @@ export default function LessonView({
       if (lesson?.quizId) {
         try {
           const quizData = await getQuiz(lesson.quizId);
-          setQuiz(quizData);
+          if (quizData) {
+            const sortedQuiz = {
+              id: quizData.id,
+              questions: Object.fromEntries(
+                Object.entries(quizData.questions)
+                  .sort(([keyA], [keyB]) => {
+                    const numA = parseInt(keyA.replace(/\D/g, ''), 10);
+                    const numB = parseInt(keyB.replace(/\D/g, ''), 10);
+                    return numA - numB; // Sort numerically
+                  })
+                  .map(([key, value]) => [key, value])
+              ),
+            };
+            setQuiz(sortedQuiz);
+          } else {
+            setQuiz(null);
+          }
         } catch (err) {
           console.error('Error loading quiz:', err);
         }

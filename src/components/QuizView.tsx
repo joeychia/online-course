@@ -28,7 +28,6 @@ interface Question {
 
 interface Quiz {
   id: string;
-  type: string;
   questions: {
     [key: string]: Question;
   };

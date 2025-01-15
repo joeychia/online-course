@@ -27,9 +27,9 @@ export interface Lesson {
 
 export interface Quiz {
   id: string;
-  type: 'multiple choice' | 'true/false' | 'short answer';
   questions: {
     [key: string]: {
+      type: 'single_choice' | 'free_form';
       text: string;
       options: {
         [key: string]: {
