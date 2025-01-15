@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -53,7 +54,7 @@ interface NavPanelProps {
   progress: { [key: string]: { completed: boolean } };
   selectedUnitId?: string;
   selectedLessonId?: string;
-  onSelectLesson: (lessonId: string) => void;
+  onSelectLesson?: (unitId: string, lessonId: string) => void;
   isOpen: boolean;
   onToggle: () => void;
   onCollapse?: (collapsed: boolean) => void;
@@ -70,6 +71,7 @@ export default function NavPanel({
   onToggle,
   onCollapse
 }: NavPanelProps) {
+  const navigate = useNavigate();
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>(
     units.reduce((acc, unit) => ({ 
       ...acc, 
@@ -133,6 +135,15 @@ export default function NavPanel({
     onCollapse?.(newCollapsed);
   };
 
+  const handleLessonSelect = (unitId: string, lessonId: string) => {
+    if (onSelectLesson) {
+      onSelectLesson(unitId, lessonId);
+    } else {
+      console.log('navigating to unit', unitId, 'lesson', lessonId);
+      navigate(`/${course.id}/${unitId}/${lessonId}`);
+    }
+  };
+
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
@@ -187,7 +198,7 @@ export default function NavPanel({
                         <StyledListItem
                           key={lesson.id}
                           sx={{ pl: 4 }}
-                          onClick={() => isAccessible && onSelectLesson(lesson.id)}
+                          onClick={() => isAccessible && handleLessonSelect(unit.id, lesson.id)}
                           selected={selectedLessonId === lesson.id}
                           disabled={!isAccessible}
                         >

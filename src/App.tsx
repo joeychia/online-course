@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
 import UnitView from './pages/UnitView';
+import LessonView from './pages/LessonView';
 import Login from './pages/Login';
 import { useAuth } from './contexts/AuthContext';
 
@@ -52,10 +53,18 @@ export default function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/:courseId/:lessonId" element={
+        <Route path="/:courseId/:unitId" element={
           <ProtectedRoute>
             <Layout>
               <UnitView />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/:courseId/:unitId/:lessonId" element={
+          <ProtectedRoute>
+            <Layout>
+              <LessonView />
             </Layout>
           </ProtectedRoute>
         } />

@@ -40,9 +40,9 @@ export default function CourseView() {
     setExpandedUnits({ [units[0].id]: true });
   }
 
-  const handleSelectLesson = (lessonId: string) => {
-    console.log('Navigating to lesson:', lessonId);
-    navigate(`/${courseId}/${lessonId}`);
+  const handleSelectLesson = (unitId: string, lessonId: string) => {
+    console.log('Navigating to unit:', unitId, 'lesson:', lessonId);
+    navigate(`/${courseId}/${unitId}/${lessonId}`);
   };
 
   const toggleUnit = (unitId: string) => {
@@ -114,7 +114,7 @@ export default function CourseView() {
                         return (
                           <ListItemButton
                             key={lesson.id}
-                            onClick={() => isAccessible && handleSelectLesson(lesson.id)}
+                            onClick={() => isAccessible && handleSelectLesson(unit.id, lesson.id)}
                             disabled={!isAccessible}
                             sx={{ pl: 4 }}
                           >

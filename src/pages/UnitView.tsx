@@ -149,9 +149,9 @@ export default function UnitView() {
     console.log('Updated user progress:', updatedUser.progress);
   };
 
-  const handleSelectLesson = (lessonId?: string) => {
+  const handleSelectLesson = (unitId: string, lessonId: string) => {
     if (lessonId) {
-      navigate(`/${courseId}/${lessonId}`);
+      navigate(`/${courseId}/${unitId}/${lessonId}`);
       setIsDrawerOpen(false);
     }
   };
@@ -203,7 +203,7 @@ export default function UnitView() {
                   lesson={lesson}
                   isAccessible={isAccessible}
                   isCompleted={isCompleted}
-                  onClick={() => handleSelectLesson(lesson.id)}
+                  onClick={() => handleSelectLesson(unit.id, lesson.id)}
                 />
               </Grid>
             )
