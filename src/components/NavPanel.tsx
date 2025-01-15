@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -20,7 +20,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled } from '@mui/material/styles';
 import { Course, Unit, Lesson } from '../types';
-import { getMockLessonsForUnit } from '../data/mockDataLoader';
+import { getLessonsForUnit } from '../services/dataService';
 
 const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-selected': {
@@ -70,7 +70,6 @@ export default function NavPanel({
   onToggle,
   onCollapse
 }: NavPanelProps) {
-
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>(
     units.reduce((acc, unit) => ({ 
       ...acc, 
@@ -78,6 +77,31 @@ export default function NavPanel({
     }), {})
   );
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+
+  // Load lessons for each unit
+  useEffect(() => {
+    async function loadLessons(unit: Unit) {
+      if (!unitLessons[unit.id] && !loading[unit.id]) {
+        try {
+          setLoading(prev => ({ ...prev, [unit.id]: true }));
+          const lessons = await getLessonsForUnit(unit.id);
+          setUnitLessons(prev => ({ ...prev, [unit.id]: lessons }));
+        } catch (err) {
+          console.error(`Error loading lessons for unit ${unit.id}:`, err);
+        } finally {
+          setLoading(prev => ({ ...prev, [unit.id]: false }));
+        }
+      }
+    }
+
+    units.forEach(unit => {
+      if (expandedUnits[unit.id]) {
+        loadLessons(unit);
+      }
+    });
+  }, [units, expandedUnits, loading]); // Removed unitLessons from dependencies
 
   const toggleUnit = (unitId: string) => {
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
@@ -128,7 +152,7 @@ export default function NavPanel({
       </Box>
       <List sx={{ flex: 1, overflow: 'auto' }}>
         {units.map((unit) => {
-          const lessons = getMockLessonsForUnit(unit.id);
+          const lessons = unitLessons[unit.id] || [];
           const completedCount = lessons.filter(l => progress[l.id]?.completed).length;
           const progressPercentage = (completedCount / lessons.length) * 100;
 

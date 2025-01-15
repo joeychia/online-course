@@ -16,6 +16,7 @@ export interface Unit {
   name: string;
   description: string;
   lessonIds: Record<string, boolean>;
+  orderIndex?: number;
 }
 
 export interface Lesson {
