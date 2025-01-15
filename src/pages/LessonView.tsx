@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import { Viewer } from '@toast-ui/react-editor';
 import { 
   Box, 
@@ -19,14 +18,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Course, Unit, Lesson, Quiz } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
 import QuizView from '../components/QuizView';
-import NavPanel from '../components/NavPanel';
 import { 
-  getLesson, 
   getQuiz, 
   getUser, 
   updateUserProgress,
-  getCourse,
-  getUnitsForCourse 
 } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -64,7 +59,8 @@ interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title' | 'med
 }
 
 interface LessonViewProps {
-  lesson: ExtendedLesson | null;
+  courseId: string;
+  lesson: ExtendedLesson;
   onComplete?: (lessonId: string) => void;
   isCompleted?: boolean;
 }
@@ -74,74 +70,14 @@ function getYouTubeVideoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-export default function LessonView() {
-  const { courseId, unitId, lessonId } = useParams();
+export default function LessonView({ courseId, lesson, onComplete, isCompleted: initialIsCompleted = false }: LessonViewProps) {
   const { currentUser } = useAuth();
-  const [course, setCourse] = useState<Course | null>(null);
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [lesson, setLesson] = useState<ExtendedLesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState<string>("");
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string } | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [progress, setProgress] = useState<{ [key: string]: { completed: boolean } }>({});
-  const [navOpen, setNavOpen] = useState(false);
-
-  // Load course and units data
-  useEffect(() => {
-    async function loadCourseData() {
-      if (!courseId || !currentUser) return;
-
-      try {
-        const [courseData, unitsData] = await Promise.all([
-          getCourse(courseId),
-          getUnitsForCourse(courseId)
-        ]);
-
-        if (courseData) {
-          setCourse(courseData);
-          setUnits(unitsData);
-        }
-      } catch (err) {
-        console.error('Error loading course data:', err);
-      }
-    }
-
-    loadCourseData();
-  }, [courseId, currentUser]);
-
-  // Load lesson data and user progress
-  useEffect(() => {
-    async function loadData() {
-      if (!lessonId || !currentUser || !courseId) return;
-
-      try {
-        setLoading(true);
-        const [lessonData, userData] = await Promise.all([
-          getLesson(lessonId),
-          getUser(currentUser.uid)
-        ]);
-
-        if (lessonData) {
-          setLesson(lessonData);
-          // Set progress for all lessons in the course
-          if (userData?.progress?.[courseId]) {
-            setProgress(userData.progress[courseId]);
-            // Check if current lesson is completed
-            setIsCompleted(!!userData.progress[courseId][lessonId]?.completed);
-          }
-        }
-      } catch (err) {
-        console.error('Error loading lesson:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, [lessonId, courseId, currentUser]);
+  const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
 
   // Load quiz if lesson has quizId
   useEffect(() => {
@@ -171,6 +107,7 @@ export default function LessonView() {
       } else {
         setQuiz(null);
       }
+      setLoading(false);
     }
     
     loadQuiz();
@@ -181,6 +118,7 @@ export default function LessonView() {
       try {
         await updateUserProgress(currentUser.uid, courseId, lesson.id);
         setIsCompleted(true);
+        onComplete?.(lesson.id);
         // Clear the note after saving
         setNote("");
       } catch (err) {
@@ -194,6 +132,7 @@ export default function LessonView() {
       try {
         await updateUserProgress(currentUser.uid, courseId, lesson.id);
         setIsCompleted(true);
+        onComplete?.(lesson.id);
         setQuizAnswers(answers);
         setQuizOpen(false);
       } catch (err) {
@@ -202,7 +141,7 @@ export default function LessonView() {
     }
   };
 
-  if (loading || !course) {
+  if (loading) {
     return (
       <Box sx={{ 
         height: '100%', 
@@ -215,207 +154,178 @@ export default function LessonView() {
     );
   }
 
-  if (!lesson) {
-    return (
-      <Box sx={{ 
-        height: '100%', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
-      }}>
-        <Typography color="text.secondary">
-          Lesson not found
-        </Typography>
-      </Box>
-    );
-  }
-
   const videoId = lesson['video-url'] ? getYouTubeVideoId(lesson['video-url']) : null;
   const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';
   const encodedMeditation = lesson.meditation ? encodeMarkdownUrls(lesson.meditation) : '';
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <NavPanel
-        course={course}
-        units={units}
-        progress={progress}
-        selectedUnitId={unitId}
-        selectedLessonId={lessonId}
-        isOpen={navOpen}
-        onToggle={() => setNavOpen(!navOpen)}
-      />
-      
-      <Box sx={{ flex: 1, height: '100%', p: 3 }}>
-        <Box sx={{ mb: 3 }}>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Typography variant="h4" component="h1">
-              {lesson.name}
-            </Typography>
-            {isCompleted && (
-              <Tooltip title="Lesson completed">
-                <CheckCircleIcon color="success" />
-              </Tooltip>
-            )}
-          </Stack>
-        </Box>
+    <Box sx={{ flex: 1, height: '100%', p: 3 }}>
+      <Box sx={{ mb: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="h4" component="h1">
+            {lesson.name}
+          </Typography>
+          {isCompleted && (
+            <Tooltip title="Lesson completed">
+              <CheckCircleIcon color="success" />
+            </Tooltip>
+          )}
+        </Stack>
+      </Box>
 
-        {/* Video Section */}
-        {lesson['video-url'] && videoId && (
-          <>
-            <Typography variant="h6" gutterBottom>
-            {lesson['video-title']}
-            </Typography>
-              <Box 
-                sx={{
-                  position: 'relative',
-                  width: '100%',
-                  paddingTop: '56.25%', // 16:9 aspect ratio
-                  mb: 4,
-                }}
-              >
-                <Box
-                  component="iframe"
-                  src={`https://www.youtube.com/embed/${videoId}`}
-                  title={lesson['video-title']}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    border: 0,
-                  }}
-                />
-              </Box>
-          </>
-        )}
-              {/* Quiz Section */}
-              {quiz && !quizAnswers && (
-          <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="h5">
-                本週測驗
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="primary"
-                onClick={() => setQuizOpen(true)}
-              >
-                開始測驗
-              </Button>
-            </Stack>
-          </Paper>
-        )}
-        {/* Bible Reading Content */}
-        <Box sx={{ mb: 4 }}>
-          <Viewer 
-            key={lesson.id}
-            initialValue={encodedContent}
-            customHTMLRenderer={{
-              link: (node: any, { entering }: any) => {
-                if (entering) {
-                  const { destination, title } = node;
-                  return {
-                    type: 'openTag',
-                    tagName: 'a',
-                    attributes: {
-                      href: destination,
-                      title: title || '',
-                      target: '_blank',
-                      rel: 'noopener noreferrer',
-                    },
-                  };
-                } else {
-                  return { type: 'closeTag', tagName: 'a' };
-                }
-              },
-            }}
-          />
-        </Box>
-
-        {/* Meditation Section */}
-        {lesson.meditation && (
-          <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
-            <Viewer initialValue={encodedMeditation} customHTMLRenderer={{
-              link: (node: any, { entering }: any) => {
-                if (entering) {
-                  const { destination, title } = node;
-                  return {
-                    type: 'openTag',
-                    tagName: 'a',
-                    attributes: {
-                      href: destination,
-                      title: title || '',
-                      target: '_blank',
-                      rel: 'noopener noreferrer',
-                    },
-                  };
-                } else {
-                  return { type: 'closeTag', tagName: 'a' };
-                }
-              },
-            }}/>
-          </Paper>
-        )}
-
-
-
-        {/* Quiz Modal */}
-        <Dialog 
-          open={quizOpen} 
-          onClose={() => setQuizOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle sx={{ m: 0, p: 2, pr: 6, position: 'relative' }}>
-            本週測驗
-            <IconButton
-              onClick={() => setQuizOpen(false)}
+      {/* Video Section */}
+      {lesson['video-url'] && videoId && (
+        <>
+          <Typography variant="h6" gutterBottom>
+          {lesson['video-title']}
+          </Typography>
+            <Box 
               sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
+                position: 'relative',
+                width: '100%',
+                paddingTop: '56.25%', // 16:9 aspect ratio
+                mb: 4,
               }}
             >
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            {quiz && <QuizView quiz={quiz} onSubmit={handleQuizSubmit} />}
-          </DialogContent>
-        </Dialog>
-        
-        {/* Notes Section */}
-        {!quizAnswers && (
-          <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-              <Typography variant="h6">
-                Personal Notes
-                <Typography variant="body2" color="text.secondary">
-                  You must write a note to complete this lesson
-                </Typography>
-              </Typography>
-              <Button 
-                onClick={handleSaveNote}
-                variant="contained"
-                color="primary"
-                disabled={!note.trim()}
-              >
-                Save Notes & Complete Lesson
-              </Button>
-            </Stack>
-            <RichTextEditor
-              value={note}
-              onChange={setNote}
-              placeholder="Write your notes here..."
-            />
-          </Paper>
-        )}
+              <Box
+                component="iframe"
+                src={`https://www.youtube.com/embed/${videoId}`}
+                title={lesson['video-title']}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 0,
+                }}
+              />
+            </Box>
+        </>
+      )}
+            {/* Quiz Section */}
+            {quiz && !quizAnswers && (
+        <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h5">
+              本週測驗
+            </Typography>
+            <Button 
+              variant="contained" 
+              color="primary"
+              onClick={() => setQuizOpen(true)}
+            >
+              開始測驗
+            </Button>
+          </Stack>
+        </Paper>
+      )}
+      {/* Bible Reading Content */}
+      <Box sx={{ mb: 4 }}>
+        <Viewer 
+          key={lesson.id}
+          initialValue={encodedContent}
+          customHTMLRenderer={{
+            link: (node: any, { entering }: any) => {
+              if (entering) {
+                const { destination, title } = node;
+                return {
+                  type: 'openTag',
+                  tagName: 'a',
+                  attributes: {
+                    href: destination,
+                    title: title || '',
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  },
+                };
+              } else {
+                return { type: 'closeTag', tagName: 'a' };
+              }
+            },
+          }}
+        />
       </Box>
+
+      {/* Meditation Section */}
+      {lesson.meditation && (
+        <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
+          <Viewer initialValue={encodedMeditation} customHTMLRenderer={{
+            link: (node: any, { entering }: any) => {
+              if (entering) {
+                const { destination, title } = node;
+                return {
+                  type: 'openTag',
+                  tagName: 'a',
+                  attributes: {
+                    href: destination,
+                    title: title || '',
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  },
+                };
+              } else {
+                return { type: 'closeTag', tagName: 'a' };
+              }
+            },
+          }}/>
+        </Paper>
+      )}
+
+      {/* Quiz Modal */}
+      <Dialog 
+        open={quizOpen} 
+        onClose={() => setQuizOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ m: 0, p: 2, pr: 6, position: 'relative' }}>
+          本週測驗
+          <IconButton
+            onClick={() => setQuizOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {quiz && <QuizView quiz={quiz} onSubmit={handleQuizSubmit} />}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Notes Section */}
+      {!quizAnswers && (
+        <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6">
+              Personal Notes
+              <Typography variant="body2" color="text.secondary">
+                You must write a note to complete this lesson
+              </Typography>
+            </Typography>
+            <Button 
+              onClick={handleSaveNote}
+              variant="contained"
+              color="primary"
+              disabled={!note.trim()}
+            >
+              Save Notes & Complete Lesson
+            </Button>
+          </Stack>
+          <RichTextEditor
+            value={note}
+            onChange={setNote}
+            placeholder="Write your notes here..."
+          />
+        </Paper>
+      )}
     </Box>
   );
 } 

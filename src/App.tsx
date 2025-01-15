@@ -56,7 +56,7 @@ export default function App() {
         <Route path="/:courseId/:unitId" element={
           <ProtectedRoute>
             <Layout>
-              <UnitView />
+              <CourseView />
             </Layout>
           </ProtectedRoute>
         } />
@@ -64,7 +64,7 @@ export default function App() {
         <Route path="/:courseId/:unitId/:lessonId" element={
           <ProtectedRoute>
             <Layout>
-              <LessonView />
+              <CourseView />
             </Layout>
           </ProtectedRoute>
         } />
