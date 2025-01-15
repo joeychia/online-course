@@ -14,10 +14,10 @@ import {
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { Lesson } from '../types';
+import { Lesson, Quiz } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
 import QuizView from '../components/QuizView';
-import { getMockQuiz } from '../data/mockDataLoader';
+import { getQuiz } from '../services/dataService';
 
 // Function to encode URLs in markdown content
 function encodeMarkdownUrls(content: string): string {
@@ -71,13 +71,30 @@ export default function LessonView({
   const [note, setNote] = useState<string>("");
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string } | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
 
   // Reset note and quiz answers when lesson changes
   useEffect(() => {
     setNote("");
     setQuizAnswers(null);
     setQuizOpen(false);
-  }, [lesson?.id]);
+    
+    // Load quiz if lesson has a quizId
+    async function loadQuiz() {
+      if (lesson?.quizId) {
+        try {
+          const quizData = await getQuiz(lesson.quizId);
+          setQuiz(quizData);
+        } catch (err) {
+          console.error('Error loading quiz:', err);
+        }
+      } else {
+        setQuiz(null);
+      }
+    }
+    
+    loadQuiz();
+  }, [lesson?.id, lesson?.quizId]);
 
   const handleSaveNote = () => {
     if (lesson && note.trim()) {
@@ -114,7 +131,6 @@ export default function LessonView({
   }
 
   const videoId = lesson['video-url'] ? getYouTubeVideoId(lesson['video-url']) : null;
-  const quiz = lesson.quizId ? getMockQuiz(lesson.quizId) : null;
 
   // Encode URLs in content and meditation before rendering
   const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';

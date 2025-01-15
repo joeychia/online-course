@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import { Course } from '../types';
-import { firestoreService } from '../services/firestoreService';
+import { getAllCourses } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 
 interface CourseCardProps {
@@ -75,7 +75,7 @@ export default function CourseList() {
       try {
         setLoading(true);
         setError(null);
-        const data = await firestoreService.getAllCourses();
+        const data = await getAllCourses();
         setCourses(data);
       } catch (err) {
         console.error('Error loading courses:', err);
