@@ -30,12 +30,12 @@ frontend:
   - React
   - TypeScript
   - Material UI
-  - Azure Auth
+  - Firebase Auth
   - Responsive design
   - PWA support
 
 backend:
-  - Azure Cosmos DB
+  - Firestore
 
 test:
   - vitest

@@ -7,13 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "setup-db": "node src/scripts/setupCosmosDb.js",
-    "load-mock-data": "node src/scripts/loadMockData.js",
-    "test-db": "node src/scripts/testCosmosDb.js"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.2.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.0",
@@ -22,6 +18,7 @@
     "axios": "^1.7.9",
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.7",
+    "firebase": "^10.8.0",
     "gray-matter": "^4.0.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -31,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/firebase": "^2.4.32",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
