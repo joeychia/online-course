@@ -1,22 +1,65 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
 import UnitView from './pages/UnitView';
-import { getMockData } from './data/mockDataLoader';
+import Login from './pages/Login';
+import { useAuth } from './contexts/AuthContext';
 
-const mockData = getMockData();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/login" />;
+  }
+
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<CourseList courses={mockData.courses} />} />
-          <Route path="/:courseId" element={<CourseView />} />
-          <Route path="/:courseId/:lessonId" element={<UnitView />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        {/* Public routes */}
+        <Route path="/" element={
+          <Layout>
+            <CourseList />
+          </Layout>
+        } />
+        
+        <Route path="/courses" element={
+          <Layout>
+            <CourseList />
+          </Layout>
+        } />
+        
+        {/* Protected routes */}
+        <Route path="/courses/:courseId" element={
+          <ProtectedRoute>
+            <Layout>
+              <CourseView />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/courses/:courseId/:lessonId" element={
+          <ProtectedRoute>
+            <Layout>
+              <UnitView />
+            </Layout>
+          </ProtectedRoute>
+        } />
+      </Routes>
     </Router>
   );
 }

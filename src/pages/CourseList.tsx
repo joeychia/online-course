@@ -11,20 +11,29 @@ import {
   Chip,
   Stack,
   CircularProgress,
-  Alert
+  Alert,
+  Button,
 } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
 import { Course } from '../types';
-import { getAllCourses } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CourseCardProps {
   course: Course;
+  isAuthenticated: boolean;
+  onSignInClick: () => void;
 }
 
-const CourseCard = ({ course }: CourseCardProps) => {
+const CourseCard = ({ course, isAuthenticated, onSignInClick }: CourseCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/${course.id}`);
+    if (isAuthenticated) {
+      navigate(`/courses/${course.id}`);
+    } else {
+      onSignInClick();
+    }
   };
 
   return (
@@ -37,13 +46,14 @@ const CourseCard = ({ course }: CourseCardProps) => {
           <Typography color="text.secondary" paragraph>
             {course.description}
           </Typography>
-          <Stack direction="row" spacing={1}>
-            {course.isPublic && (
-              <Chip 
-                label="Public" 
-                color="primary" 
-                size="small" 
-                variant="outlined" 
+          <Stack direction="row" spacing={1} alignItems="center">
+            {!isAuthenticated && (
+              <Chip
+                icon={<LockIcon />}
+                label="Sign in to access"
+                color="primary"
+                variant="outlined"
+                size="small"
               />
             )}
           </Stack>
@@ -57,13 +67,15 @@ export default function CourseList() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadCourses() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getAllCourses();
+        const data = await firestoreService.getAllCourses();
         setCourses(data);
       } catch (err) {
         console.error('Error loading courses:', err);
@@ -76,11 +88,29 @@ export default function CourseList() {
     loadCourses();
   }, []);
 
+  const handleSignInClick = () => {
+    navigate('/login');
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Available Courses
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Available Courses
+        </Typography>
+        {!currentUser && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Sign in to access full course content and track your progress.
+            <Button
+              color="primary"
+              onClick={handleSignInClick}
+              sx={{ ml: 2 }}
+            >
+              Sign In
+            </Button>
+          </Alert>
+        )}
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -102,7 +132,11 @@ export default function CourseList() {
         <Grid container spacing={3}>
           {courses.map((course) => (
             <Grid item key={course.id} xs={12} sm={6} md={4}>
-              <CourseCard course={course} />
+              <CourseCard 
+                course={course} 
+                isAuthenticated={!!currentUser}
+                onSignInClick={handleSignInClick}
+              />
             </Grid>
           ))}
         </Grid>

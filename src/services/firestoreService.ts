@@ -1,4 +1,3 @@
-import { initializeApp } from 'firebase/app';
 import { 
     getFirestore, 
     collection, 
@@ -15,19 +14,8 @@ import {
     QueryDocumentSnapshot
 } from 'firebase/firestore';
 import type { Course, Unit, Lesson, Quiz, Group, Grade, Note, UserProfile as User } from '../types';
+import { app } from './firebaseConfig';
 
-// Initialize Firebase
-const firebaseConfig = {
-    // TODO: Add your Firebase config here
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
-
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 class FirestoreService {
@@ -88,6 +76,11 @@ class FirestoreService {
         const docRef = doc(db, 'users', id);
         const docSnap = await getDoc(docRef);
         return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as User : null;
+    }
+
+    async createUser(user: User): Promise<void> {
+        const userRef = doc(db, 'users', user.id);
+        await setDoc(userRef, user);
     }
 
     async updateUserProgress(userId: string, courseId: string, lessonId: string, completed: boolean): Promise<void> {

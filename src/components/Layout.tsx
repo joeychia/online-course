@@ -1,4 +1,5 @@
-import { Link as RouterLink } from 'react-router-dom';
+import { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -6,8 +7,14 @@ import {
   Container,
   Box,
   Stack,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Button,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,6 +29,31 @@ const StyledLink = styled(RouterLink)(({ theme }) => ({
 }));
 
 export default function Layout({ children }: LayoutProps) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { currentUser, userProfile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+    }
+  };
+
+  const handleSignIn = () => {
+    navigate('/login');
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -39,9 +71,47 @@ export default function Layout({ children }: LayoutProps) {
             <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
               ECC Online Classes
             </Typography>
-            <Stack direction="row" spacing={4}>
-              <StyledLink to="/">Courses</StyledLink>
-              <StyledLink to="/progress">My Progress</StyledLink>
+            <Stack direction="row" spacing={4} alignItems="center">
+              <StyledLink to="/courses">Courses</StyledLink>
+              {currentUser ? (
+                <>
+                  <StyledLink to="/progress">My Progress</StyledLink>
+                  <div>
+                    <IconButton
+                      onClick={handleMenu}
+                      sx={{ p: 0 }}
+                    >
+                      <Avatar 
+                        alt={userProfile?.name || currentUser?.email || ''} 
+                        src={currentUser?.photoURL?.toString()}
+                      />
+                    </IconButton>
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleClose}
+                      onClick={handleClose}
+                    >
+                      <MenuItem disabled>
+                        {userProfile?.name || currentUser.email}
+                      </MenuItem>
+                      <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+                    </Menu>
+                  </div>
+                </>
+              ) : (
+                <Button 
+                  color="inherit" 
+                  onClick={handleSignIn}
+                  sx={{ 
+                    '&:hover': {
+                      color: 'primary.light',
+                    }
+                  }}
+                >
+                  Sign In
+                </Button>
+              )}
             </Stack>
           </Container>
         </Toolbar>
