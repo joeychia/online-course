@@ -16,12 +16,12 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { getMockCourse, getMockUnitsForCourse, getMockLessonsForUnit, getMockUser } from '../data/mockDataLoader';
-import { getLesson } from '../services/dataService';
+import { getMockUser } from '../data/mockDataLoader';
+import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
 import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
-import { Lesson } from '../types';
+import { Lesson, Course, Unit } from '../types';
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -33,12 +33,57 @@ export default function CourseView() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>({});
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
   
-  const course = getMockCourse(courseId);
   const currentUser = getMockUser('system');
   const userProgress = currentUser?.progress[courseId] || {};
 
+  // Load course and units data
+  useEffect(() => {
+    async function loadCourseData() {
+      if (!courseId) return;
+      
+      setLoading(true);
+      try {
+        const [courseData, unitsData] = await Promise.all([
+          getCourse(courseId),
+          getUnitsForCourse(courseId)
+        ]);
+        setCourse(courseData);
+        setUnits(unitsData);
+      } catch (err) {
+        console.error('Error loading course data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCourseData();
+  }, [courseId]);
+
+  // Load lessons for expanded units
+  useEffect(() => {
+    async function loadUnitLessons(unitId: string) {
+      if (!unitLessons[unitId]) {
+        try {
+          const lessons = await getLessonsForUnit(unitId);
+          setUnitLessons(prev => ({ ...prev, [unitId]: lessons }));
+        } catch (err) {
+          console.error(`Error loading lessons for unit ${unitId}:`, err);
+        }
+      }
+    }
+
+    units.forEach(unit => {
+      if (expandedUnits[unit.id]) {
+        loadUnitLessons(unit.id);
+      }
+    });
+  }, [units, expandedUnits]);
+
+  // Load selected lesson
   useEffect(() => {
     async function loadLesson() {
       if (lessonId) {
@@ -61,8 +106,6 @@ export default function CourseView() {
   if (!course) {
     return <Typography>Course not found</Typography>;
   }
-
-  const units = getMockUnitsForCourse(course.id);
 
   // Initialize first unit as expanded if expandedUnits is empty
   if (Object.keys(expandedUnits).length === 0 && units.length > 0) {
@@ -117,7 +160,7 @@ export default function CourseView() {
 
       <List>
         {units.map((unit) => {
-          const lessons = getMockLessonsForUnit(unit.id);
+          const lessons = unitLessons[unit.id] || [];
           const completedCount = lessons.filter(l => userProgress[l.id]?.completed).length;
           const progressPercentage = (completedCount / lessons.length) * 100;
 
