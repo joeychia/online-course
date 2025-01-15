@@ -1,0 +1,15 @@
+{
+  "rules": [
+    {
+      "pattern": "**/*",
+      "context": [
+        "requirements.md"
+      ]
+    }
+  ],
+  "settings": {
+    "contextWeight": {
+      "requirements.md": "high"
+    }
+  }
+}
