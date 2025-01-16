@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { Lesson, Quiz } from '../types';
+import { Lesson, Quiz, QuizHistory } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
 import QuizView from '../components/QuizView';
 import { 
@@ -23,6 +23,7 @@ import {
   updateUserProgress,
   saveNote,
   getNotesForLesson,
+  getQuizHistoryForUserLesson,
 } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import SaveIcon from '@mui/icons-material/Save';
@@ -79,16 +80,21 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string } | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(null);
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
   const [isSaving, setIsSaving] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
 
-  // Load quiz if lesson has quizId
+  // Load quiz and quiz history if lesson has quizId
   useEffect(() => {
-    async function loadQuiz() {
-      if (lesson?.quizId) {
+    async function loadQuizData() {
+      if (lesson?.quizId && currentUser) {
         try {
-          const quizData = await getQuiz(lesson.quizId);
+          const [quizData, historyData] = await Promise.all([
+            getQuiz(lesson.quizId),
+            getQuizHistoryForUserLesson(currentUser.uid, lesson.id)
+          ]);
+
           if (quizData) {
             const sortedQuiz = {
               id: quizData.id,
@@ -105,17 +111,23 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
           } else {
             setQuiz(null);
           }
+
+          setQuizHistory(historyData);
+          if (historyData) {
+            setQuizAnswers(historyData.answers);
+          }
         } catch (err) {
-          console.error('Error loading quiz:', err);
+          console.error('Error loading quiz data:', err);
         }
       } else {
         setQuiz(null);
+        setQuizHistory(null);
       }
       setLoading(false);
     }
     
-    loadQuiz();
-  }, [lesson?.quizId]);
+    loadQuizData();
+  }, [lesson?.quizId, currentUser, lesson?.id]);
 
   // Load existing note when component mounts
   useEffect(() => {
@@ -156,7 +168,9 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         setIsCompleted(true);
         onComplete?.(lesson.id);
         setQuizAnswers(answers);
-        setQuizOpen(false);
+        // Update quiz history state after submission
+        const newHistory = await getQuizHistoryForUserLesson(currentUser.uid, lesson.id);
+        setQuizHistory(newHistory);
       } catch (err) {
         console.error('Error submitting quiz:', err);
       }
@@ -229,18 +243,25 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         </>
       )}
             {/* Quiz Section */}
-            {quiz && !quizAnswers && (
+            {quiz && (
         <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h5">
-              本週測驗
-            </Typography>
+            <Box>
+              <Typography variant="h5">
+                本週測驗
+              </Typography>
+              {quizHistory && (
+                <Typography variant="body2" color="text.secondary">
+                  Previous Score: {quizHistory.correct}/{quizHistory.total} on {new Date(quizHistory.completedAt).toLocaleDateString()}
+                </Typography>
+              )}
+            </Box>
             <Button 
               variant="contained" 
               color="primary"
               onClick={() => setQuizOpen(true)}
             >
-              開始測驗
+              {quizHistory || quizAnswers ? '重新测验' : '開始測驗'}
             </Button>
           </Stack>
         </Paper>
@@ -318,7 +339,13 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          {quiz && <QuizView quiz={quiz} onSubmit={handleQuizSubmit} />}
+          {quiz && <QuizView 
+            quiz={quiz} 
+            onSubmit={handleQuizSubmit}
+            courseId={courseId}
+            lessonId={lesson.id}
+            onClose={() => setQuizOpen(false)}
+          />}
         </DialogContent>
       </Dialog>
       

@@ -11,8 +11,10 @@ import {
     updateDoc,
     DocumentData,
     QueryDocumentSnapshot,
+    addDoc,
+    limit
 } from 'firebase/firestore';
-import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile as User } from '../types';
+import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile as User, QuizHistory } from '../types';
 import { app } from './firebaseConfig';
 
 const db = getFirestore(app);
@@ -68,6 +70,57 @@ class FirestoreService {
         const docRef = doc(db, 'quizzes', id);
         const docSnap = await getDoc(docRef);
         return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Quiz : null;
+    }
+
+    // Quiz History operations
+    async getQuizHistoryForUserCourse(userId: string, courseId: string): Promise<QuizHistory[]> {
+        const quizHistoryRef = collection(db, 'quizHistory');
+        const q = query(
+            quizHistoryRef,
+            where('userId', '==', userId),
+            where('courseId', '==', courseId),
+            orderBy('completedAt', 'desc'),
+            limit(5)
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as QuizHistory));
+    }
+
+    async getQuizHistoryForUserLesson(userId: string, lessonId: string): Promise<QuizHistory | null> {
+        const quizHistoryRef = collection(db, 'quizHistory');
+        const q = query(
+            quizHistoryRef,
+            where('userId', '==', userId),
+            where('lessonId', '==', lessonId),
+            orderBy('completedAt', 'desc'),
+            limit(1)
+        );
+        const snapshot = await getDocs(q);
+        const doc = snapshot.docs[0];
+        return doc ? { id: doc.id, ...doc.data() } as QuizHistory : null;
+    }
+
+    async saveQuizHistory(
+        userId: string, 
+        courseId: string, 
+        lessonId: string, 
+        answers: Record<string, string>,
+        correct: number,
+        total: number
+    ): Promise<QuizHistory> {
+        const quizHistoryRef = collection(db, 'quizHistory');
+        const quizHistory: Omit<QuizHistory, 'id'> = {
+            userId,
+            courseId,
+            lessonId,
+            answers,
+            correct,
+            total,
+            completedAt: new Date().toISOString()
+        };
+
+        const docRef = await addDoc(quizHistoryRef, quizHistory);
+        return { id: docRef.id, ...quizHistory };
     }
 
     // User operations

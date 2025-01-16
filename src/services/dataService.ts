@@ -1,5 +1,5 @@
 import { firestoreService } from './firestoreService';
-import type { Course, Unit, Lesson, Quiz, Note, UserProfile } from '../types';
+import type { Course, Unit, Lesson, Quiz, Note, UserProfile, QuizHistory } from '../types';
 
 export const getAllCourses = async (): Promise<Course[]> => {
   return await firestoreService.getAllCourses();
@@ -50,4 +50,24 @@ export const saveNote = async (userId: string, lessonId: string, text: string): 
 
 export const getNotesForLesson = async (userId: string, lessonId: string): Promise<Note | null> => {
   return await firestoreService.getNoteForLesson(userId, lessonId);
+};
+
+// Quiz History operations
+export const getQuizHistoryForUserCourse = async (userId: string, courseId: string): Promise<QuizHistory[]> => {
+  return await firestoreService.getQuizHistoryForUserCourse(userId, courseId);
+};
+
+export const getQuizHistoryForUserLesson = async (userId: string, lessonId: string): Promise<QuizHistory | null> => {
+  return await firestoreService.getQuizHistoryForUserLesson(userId, lessonId);
+};
+
+export const saveQuizHistory = async (
+  userId: string,
+  courseId: string,
+  lessonId: string,
+  answers: Record<string, string>,
+  correct: number,
+  total: number
+): Promise<QuizHistory> => {
+  return await firestoreService.saveQuizHistory(userId, courseId, lessonId, answers, correct, total);
 };

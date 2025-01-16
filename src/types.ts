@@ -47,6 +47,16 @@ export interface QuizOption {
   isCorrect: boolean;
 }
 
+export interface QuizHistory {
+  userId: string;
+  courseId: string;
+  lessonId: string;
+  answers: Record<string, string>;
+  completedAt: string;
+  correct: number;
+  total: number;
+}
+
 export interface UserProgress {
   completed: boolean;
   completedAt: string;

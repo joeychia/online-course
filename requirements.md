@@ -111,6 +111,23 @@ Quizzes
 }
 ```
 
+Quiz History
+```json
+"quizHistory": {
+  "$quizId": {
+    "userId": "userId",
+    "courseId": "courseId",
+    "lessonId": "lessonId",
+    "answers": {
+      "$questionId": "answer"
+    },
+    "completedAt": "timestamp",
+    "correct": 10,
+    "total": 10
+  }
+}
+```
+
 Groups
 ```json
 "groups": {
