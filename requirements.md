@@ -156,7 +156,9 @@ User Profiles & Progress
     "progress": {
       "$courseId": {
         "$lessonId": {
-          "completed": false
+          "completed": false,
+          "completedAt": "timestamp",
+          "lessonName": "lessonName"
         }
       }
     },

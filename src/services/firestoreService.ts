@@ -82,7 +82,7 @@ class FirestoreService {
         await setDoc(userRef, user);
     }
 
-    async updateUserProgress(userId: string, courseId: string, lessonId: string, completed: boolean): Promise<void> {
+    async updateUserProgress(userId: string, courseId: string, lessonId: string, completed: boolean, completedAt: string, lessonName: string): Promise<void> {
         const userRef = doc(db, 'users', userId);
         const user = await this.getUserById(userId);
         if (!user) throw new Error('User not found');
@@ -91,7 +91,7 @@ class FirestoreService {
         if (!progress[courseId]) {
             progress[courseId] = {};
         }
-        progress[courseId][lessonId] = { completed };
+        progress[courseId][lessonId] = { completed, completedAt, lessonName };
 
         await updateDoc(userRef, { progress });
     }

@@ -37,9 +37,11 @@ export const updateUserProgress = async (
   userId: string,
   courseId: string,
   lessonId: string,
-  completed: boolean = true
+  completed: boolean = true,
+  completedAt: string = new Date().toISOString(),
+  lessonName: string = ''
 ): Promise<void> => {
-  await firestoreService.updateUserProgress(userId, courseId, lessonId, completed);
+  await firestoreService.updateUserProgress(userId, courseId, lessonId, completed, completedAt, lessonName);
 };
 
 export const saveNote = async (userId: string, lessonId: string, text: string): Promise<Note> => {

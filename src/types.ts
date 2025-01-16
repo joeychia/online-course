@@ -49,6 +49,8 @@ export interface QuizOption {
 
 export interface UserProgress {
   completed: boolean;
+  completedAt: string;
+  lessonName: string;
 }
 
 export interface UserProfile {

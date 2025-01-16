@@ -16,7 +16,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser } from '../services/dataService';
+import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser, updateUserProgress } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
 import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
@@ -120,13 +120,16 @@ export default function CourseView() {
 
   const handleLessonComplete = async (completedLessonId: string) => {
     if (!currentUser) return;
-    
+    // save progress to firestore
+    await updateUserProgress(currentUser.uid, courseId, completedLessonId, true, new Date().toISOString(), selectedLesson?.name || '');
+
     // Update local progress state
     const updatedProgress = {
       ...userProgress,
-      
-      [completedLessonId]: { completed: true }
+
+      [completedLessonId]: { completed: true, completedAt: new Date().toISOString(), lessonName: selectedLesson?.name || '' }
     };
+       
     setUserProgress(updatedProgress);
   };
 

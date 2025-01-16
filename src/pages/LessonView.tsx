@@ -25,6 +25,7 @@ import {
   getNotesForLesson,
 } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
+import SaveIcon from '@mui/icons-material/Save';
 
 // Function to encode URLs in markdown content
 function encodeMarkdownUrls(content: string): string {
@@ -79,6 +80,8 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
   const [quizOpen, setQuizOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
+  const [isSaving, setIsSaving] = useState(false);
+  const [noteSaved, setNoteSaved] = useState(false);
 
   // Load quiz if lesson has quizId
   useEffect(() => {
@@ -131,18 +134,18 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
   }, [lesson?.id, currentUser]);
 
   const handleSaveNote = async () => {
-    if (lesson && note.trim() && courseId && currentUser) {
-      try {
-        // Save the note first with the correct key format
-        await saveNote(currentUser.uid, lesson.id, note);
-        console.log('Note saved:', note);
-        // Then update progress
-        await updateUserProgress(currentUser.uid, courseId, lesson.id);
-        setIsCompleted(true);
-        onComplete?.(lesson.id);
-      } catch (err) {
-        console.error('Error saving note:', err);
-      }
+    if (!currentUser) return;
+    
+    try {
+      setIsSaving(true);
+      await saveNote(currentUser.uid, lesson.id, note);
+      setIsCompleted(true);
+      onComplete?.(lesson.id);
+      setNoteSaved(true);
+    } catch (err) {
+      console.error('Error saving note:', err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -328,14 +331,24 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
                 You must write a note to complete this lesson
               </Typography>
             </Typography>
-            <Button 
-              onClick={handleSaveNote}
-              variant="contained"
-              color="primary"
-              disabled={!note.trim()}
-            >
-              Save Notes & Complete Lesson
-            </Button>
+            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+              <Button
+                variant="contained"
+                onClick={handleSaveNote}
+                disabled={isSaving}
+                startIcon={
+                  isSaving ? (
+                    <CircularProgress size={20} sx={{ color: 'white' }} />
+                  ) : noteSaved ? (
+                    <CheckCircleIcon sx={{ color: 'white' }} />
+                  ) : (
+                    <SaveIcon sx={{ color: 'white' }} />
+                  )
+                }
+              >
+                {isSaving ? 'Saving...' : 'Save Note & Complete Lesson'}
+              </Button>
+            </Stack>
           </Stack>
           <RichTextEditor
             value={note}
