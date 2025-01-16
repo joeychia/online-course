@@ -11,7 +11,7 @@
 - User can view everyone's grade in a course
 
 ### For User
-- User can sign up/sign in/sign out
+- User can sign up/sign in/sign out - done
 - User can preview a course without sign in - done
 - User can view a course - done
 - User can view a unit - done

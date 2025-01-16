@@ -9,11 +9,10 @@ import {
     orderBy,
     setDoc,
     updateDoc,
-    deleteDoc,
     DocumentData,
-    QueryDocumentSnapshot
+    QueryDocumentSnapshot,
 } from 'firebase/firestore';
-import type { Course, Unit, Lesson, Quiz, Group, Grade, Note, UserProfile as User } from '../types';
+import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile as User } from '../types';
 import { app } from './firebaseConfig';
 
 const db = getFirestore(app);

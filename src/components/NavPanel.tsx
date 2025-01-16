@@ -7,14 +7,15 @@ import {
   ListItemButton,
   ListItemText,
   Collapse,
-  LinearProgress,
   Stack,
   IconButton,
   Drawer,
+  CircularProgress,
 } from '@mui/material';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -124,7 +125,6 @@ export default function NavPanel({
 
     // Other lessons require previous lesson to be completed
     const previousLesson = allLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
-    console.log(`Previous lesson ${previousLesson?.name} is completed: ${progress[previousLesson?.id||'']?.completed}`);
     const isAccessible = previousLesson ? progress[previousLesson.id]?.completed : false;
     return isAccessible;
   };
@@ -164,8 +164,6 @@ export default function NavPanel({
       <List sx={{ flex: 1, overflow: 'auto' }}>
         {units.map((unit) => {
           const lessons = unitLessons[unit.id] || [];
-          const completedCount = lessons.filter(l => progress[l.id]?.completed).length;
-          const progressPercentage = (completedCount / lessons.length) * 100;
 
           return (
             <Box key={unit.id}>
@@ -175,14 +173,7 @@ export default function NavPanel({
               >
                 <ListItemText
                   primary={isCollapsed ? `U${unit.orderIndex || ''}` : unit.name}
-                  secondary={!isCollapsed && (
-                    <Box sx={{ mt: 1 }}>
-                      <LinearProgress variant="determinate" value={progressPercentage} />
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {completedCount} of {lessons.length} completed
-                      </Typography>
-                    </Box>
-                  )}
+
                   sx={{ m: isCollapsed ? 0 : undefined }}
                 />
                 {!isCollapsed && (expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />)}
@@ -190,31 +181,39 @@ export default function NavPanel({
               {!isCollapsed && (
                 <Collapse in={expandedUnits[unit.id]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
-                    {lessons.map((lesson) => {
-                      const isAccessible = isLessonAccessible(lesson, lessons);
-                      const isCompleted = progress[lesson.id]?.completed;
+                    {loading[unit.id] ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                        <CircularProgress size={24} />
+                      </Box>
+                    ) : (
+                      lessons.map((lesson) => {
+                        const isAccessible = isLessonAccessible(lesson, lessons);
+                        const isCompleted = progress[lesson.id]?.completed;
 
-                      return (
-                        <StyledListItem
-                          key={lesson.id}
-                          sx={{ pl: 4 }}
-                          onClick={() => isAccessible && handleLessonSelect(unit.id, lesson.id)}
-                          selected={selectedLessonId === lesson.id}
-                          disabled={!isAccessible}
-                        >
-                          <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
-                            <Typography sx={{ flex: 1 }}>
-                              {lesson.orderIndex}. {lesson.name}
-                            </Typography>
-                            {!isAccessible ? (
-                              <LockIcon color="disabled" fontSize="small" />
-                            ) : isCompleted ? (
-                              <CheckCircleIcon color="success" fontSize="small" />
-                            ) : null}
-                          </Stack>
-                        </StyledListItem>
-                      );
-                    })}
+                        return (
+                          <StyledListItem
+                            key={lesson.id}
+                            sx={{ pl: 4 }}
+                            onClick={() => isAccessible && handleLessonSelect(unit.id, lesson.id)}
+                            selected={selectedLessonId === lesson.id}
+                            disabled={!isAccessible}
+                          >
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                              <Typography sx={{ flex: 1 }}>
+                                {lesson.orderIndex}. {lesson.name}
+                              </Typography>
+                              {!isAccessible ? (
+                                <LockIcon color="disabled" fontSize="small" />
+                              ) : isCompleted ? (
+                                <CheckCircleIcon color="success" fontSize="small" />
+                              ) : (
+                                <LockOpenIcon color="primary" fontSize="small" />
+                              )}
+                            </Stack>
+                          </StyledListItem>
+                        );
+                      })
+                    )}
                   </List>
                 </Collapse>
               )}
