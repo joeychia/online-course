@@ -16,12 +16,13 @@
 - User can view a course - done
 - User can view a unit - done
 - User can view a lesson - done
-- User can view their quiz history for a lesson (complete questions and answers are recorded)
+- User can view their quiz history for a lesson (complete questions and answers are recorded) - done
 - User can do a quiz for a lesson if any - done
 - User can register/drop a course - done
 - User can join/quit a group
 - User must put down a note for a lesson in order to complete the lesson - done
 - User can open the first lesson of each unit, but locked out from other lessons until the previous lesson is completed - done
+- User can switch language between English, Simplified Chinese, and Traditional Chinese. Default is Traditional Chinese.
 
 ## Technical Stack
 

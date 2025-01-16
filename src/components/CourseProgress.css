@@ -10,13 +10,32 @@
   fill: #1976d2;
 }
 
+/* Color scales for multiple lessons per day */
+.react-calendar-heatmap .color-scale-1 {
+  fill: #90caf9;
+}
+
+.react-calendar-heatmap .color-scale-2 {
+  fill: #42a5f5;
+}
+
+.react-calendar-heatmap .color-scale-3 {
+  fill: #1976d2;
+}
+
+.react-calendar-heatmap .color-scale-4 {
+  fill: #1565c0;
+}
+
 /* Hover effect */
 .react-calendar-heatmap .color-filled:hover {
   fill: #1565c0;
   cursor: pointer;
 }
 
-/* Make sure tooltips are visible */
+/* Make sure tooltips are visible and handle multiple lines */
 .__react_component_tooltip {
   z-index: 9999;
+  white-space: pre-line !important;
+  max-width: 300px;
 } 

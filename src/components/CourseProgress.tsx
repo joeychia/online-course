@@ -59,18 +59,36 @@ export default function CourseProgress({ progress, courseId }: CourseProgressPro
   // Prepare calendar data
   const calendarData = Object.entries(progress)
     .filter(([_, data]) => data.completed && data.completedAt)
-    .reduce<CalendarValue[]>((acc, [lessonId, data]) => {
-      const date = new Date(data.completedAt);
-      if (!isNaN(date.getTime())) {
-        acc.push({
-          date: data.completedAt.split('T')[0], // Get just the date part
-          count: 1,
-          lessonId,
-          lessonName: data.lessonName
-        });
+    .reduce<{ [key: string]: { count: number; lessons: { name: string; id: string }[] } }>((acc, [lessonId, data]) => {
+      try {
+        // Convert ISO string to local date
+        const date = new Date(data.completedAt);
+        if (!isNaN(date.getTime())) {
+          // Format date to YYYY-MM-DD in local timezone
+          const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+          const dateKey = localDate.toISOString().split('T')[0];
+          if (!acc[dateKey]) {
+            acc[dateKey] = { count: 0, lessons: [] };
+          }
+          acc[dateKey].count++;
+          acc[dateKey].lessons.push({
+            name: data.lessonName,
+            id: lessonId
+          });
+        }
+      } catch (error) {
+        console.warn('Invalid date format:', data.completedAt);
       }
       return acc;
-    }, []);
+    }, {});
+
+  // Convert to calendar heatmap format
+  const calendarValues = Object.entries(calendarData).map(([date, data]) => ({
+    date,
+    count: data.count,
+    lessons: data.lessons,
+    lessonId: data.lessons[data.lessons.length - 1].id // Use the latest lesson's ID for navigation
+  }));
 
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - 5); // Show last 6 months
@@ -120,26 +138,27 @@ export default function CourseProgress({ progress, courseId }: CourseProgressPro
         <CalendarHeatmap
           startDate={startDate}
           endDate={new Date()}
-          values={calendarData}
+          values={calendarValues}
           showWeekdayLabels={true}
-          horizontal={true}
           classForValue={(value) => {
             if (!value) {
               return 'color-empty';
             }
-            return 'color-filled';
+            return `color-filled color-scale-${Math.min(value.count, 4)}`;
           }}
-          tooltipDataAttrs={(value: CalendarValue) => {
+          tooltipDataAttrs={(value: any) => {
             if (!value || !value.date) {
               return { 'data-tip': 'No lessons completed' };
             }
+            const lessons = value.lessons.map((l: { name: string }) => l.name).join('\n');
             return {
-              'data-tip': `${value.lessonName} (${new Date(value.date).toLocaleDateString()})`,
+              'data-tip': `${new Date(value.date).toLocaleDateString()}\n${lessons}`,
+              'data-multiline': true
             };
           }}
           onClick={handleLessonClick}
         />
-        <ReactTooltip />
+        <ReactTooltip multiline={true} />
       </Box>
 
       {/* Latest Lesson Section */}
