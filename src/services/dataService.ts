@@ -61,13 +61,24 @@ export const getQuizHistoryForUserLesson = async (userId: string, lessonId: stri
   return await firestoreService.getQuizHistoryForUserLesson(userId, lessonId);
 };
 
-export const saveQuizHistory = async (
+export async function saveQuizHistory(
   userId: string,
   courseId: string,
   lessonId: string,
   answers: Record<string, string>,
   correct: number,
   total: number
-): Promise<QuizHistory> => {
-  return await firestoreService.saveQuizHistory(userId, courseId, lessonId, answers, correct, total);
-};
+): Promise<QuizHistory> {
+  const quizHistory: Omit<QuizHistory, 'id'> = {
+    userId,
+    courseId,
+    lessonId,
+    answers,
+    correct,
+    total,
+    completedAt: new Date().toISOString(),
+    timeSpent: 0, // Add default value
+    score: (correct / total) * 100 // Calculate score
+  };
+  return await firestoreService.createQuizHistory(quizHistory);
+}

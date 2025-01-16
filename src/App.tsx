@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/Layout';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
-import UnitView from './pages/UnitView';
-import LessonView from './pages/LessonView';
+// import UnitView from './pages/UnitView';
+// import LessonView from './pages/LessonView';
 import Login from './pages/Login';
 import { useAuth } from './contexts/AuthContext';
 

@@ -2,7 +2,7 @@ import { Box, Typography, Paper, Link } from '@mui/material';
 import { UserProgress } from '../types';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNavigate } from 'react-router-dom';
-import CalendarHeatmap from 'react-calendar-heatmap';
+import CalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import ReactTooltip from 'react-tooltip';
 import './CourseProgress.css';
@@ -12,11 +12,15 @@ interface CourseProgressProps {
   courseId: string;
 }
 
-interface CalendarValue {
+interface CalendarValue extends ReactCalendarHeatmapValue<string> {
   date: string;
   count: number;
+  lessons: { name: string; id: string }[];
   lessonId: string;
-  lessonName: string;
+}
+
+interface TooltipDataAttrs {
+  [key: string]: string | boolean;
 }
 
 function formatDate(dateString: string): string {
@@ -93,7 +97,7 @@ export default function CourseProgress({ progress, courseId }: CourseProgressPro
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - 5); // Show last 6 months
 
-  const handleLessonClick = (value: CalendarValue | null) => {
+  const handleLessonClick = (value: CalendarValue | undefined) => {
     if (value) {
       navigate(`/${courseId}/${value.lessonId}`);
     }
@@ -146,17 +150,22 @@ export default function CourseProgress({ progress, courseId }: CourseProgressPro
             }
             return `color-filled color-scale-${Math.min(value.count, 4)}`;
           }}
-          tooltipDataAttrs={(value: any) => {
+          tooltipDataAttrs={(value: ReactCalendarHeatmapValue<string> | undefined): TooltipDataAttrs => {
             if (!value || !value.date) {
               return { 'data-tip': 'No lessons completed' };
             }
-            const lessons = value.lessons.map((l: { name: string }) => l.name).join('\n');
+            const calendarValue = value as CalendarValue;
+            const lessons = calendarValue.lessons.map(l => l.name).join('\n');
             return {
-              'data-tip': `${new Date(value.date).toLocaleDateString()}\n${lessons}`,
+              'data-tip': `${new Date(calendarValue.date).toLocaleDateString()}\n${lessons}`,
               'data-multiline': true
             };
           }}
-          onClick={handleLessonClick}
+          onClick={(value: ReactCalendarHeatmapValue<string> | undefined) => {
+            if (value) {
+              handleLessonClick(value as CalendarValue);
+            }
+          }}
         />
         <ReactTooltip multiline={true} />
       </Box>

@@ -48,13 +48,16 @@ export interface QuizOption {
 }
 
 export interface QuizHistory {
+  id: string;
   userId: string;
   courseId: string;
   lessonId: string;
   answers: Record<string, string>;
+  score: number;
   completedAt: string;
   correct: number;
   total: number;
+  timeSpent: number;
 }
 
 export interface UserProgress {

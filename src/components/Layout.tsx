@@ -13,20 +13,11 @@ import {
   Avatar,
   Button,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
-
-const StyledLink = styled(RouterLink)(({ theme }) => ({
-  color: theme.palette.primary.contrastText,
-  textDecoration: 'none',
-  '&:hover': {
-    color: theme.palette.primary.light,
-  },
-}));
 
 export default function Layout({ children }: LayoutProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
