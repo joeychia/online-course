@@ -1,0 +1,22 @@
+.react-calendar-heatmap {
+  width: 100%;
+}
+
+.react-calendar-heatmap .color-empty {
+  fill: #ebedf0;
+}
+
+.react-calendar-heatmap .color-filled {
+  fill: #1976d2;
+}
+
+/* Hover effect */
+.react-calendar-heatmap .color-filled:hover {
+  fill: #1565c0;
+  cursor: pointer;
+}
+
+/* Make sure tooltips are visible */
+.__react_component_tooltip {
+  z-index: 9999;
+} 

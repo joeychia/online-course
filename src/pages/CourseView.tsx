@@ -5,23 +5,16 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  Collapse,
-  LinearProgress,
-  Stack,
   Card,
-  CardContent,
   CircularProgress,
 } from '@mui/material';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import LockIcon from '@mui/icons-material/Lock';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser, updateUserProgress } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
 import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
-import { Lesson, Course, Unit } from '../types';
+import { Lesson, Course, Unit, UserProgress } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import CourseProgress from '../components/CourseProgress';
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -38,7 +31,7 @@ export default function CourseView() {
   const [course, setCourse] = useState<Course | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
-  const [userProgress, setUserProgress] = useState<{ [key: string]: { completed: boolean } }>({});
+  const [userProgress, setUserProgress] = useState<Record<string, UserProgress>>({});
 
   // Load course and units data
   useEffect(() => {
@@ -120,17 +113,21 @@ export default function CourseView() {
 
   const handleLessonComplete = async (completedLessonId: string) => {
     if (!currentUser) return;
+    const completedAt = new Date().toISOString();
+    const lessonName = selectedLesson?.name || '';
+
     // save progress to firestore
-    await updateUserProgress(currentUser.uid, courseId, completedLessonId, true, new Date().toISOString(), selectedLesson?.name || '');
+    await updateUserProgress(currentUser.uid, courseId, completedLessonId, true, completedAt, lessonName);
 
     // Update local progress state
-    const updatedProgress = {
-      ...userProgress,
-
-      [completedLessonId]: { completed: true, completedAt: new Date().toISOString(), lessonName: selectedLesson?.name || '' }
-    };
-       
-    setUserProgress(updatedProgress);
+    setUserProgress(prev => ({
+      ...prev,
+      [completedLessonId]: {
+        completed: true,
+        completedAt,
+        lessonName
+      }
+    }));
   };
 
   const toggleUnit = (unitId: string) => {
@@ -163,6 +160,7 @@ export default function CourseView() {
       <Typography variant="body1" paragraph>
         {course.description}
       </Typography>
+      <CourseProgress progress={userProgress} courseId={courseId} />
 
       <List>
         {units.map((unit) => {
