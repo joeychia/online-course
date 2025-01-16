@@ -120,31 +120,30 @@ class FirestoreService {
     }
 
     // Note operations
-    async getNoteForLesson(lessonId: string, userId: string): Promise<Note | null> {
-        const notesRef = collection(db, 'notes');
-        const q = query(
-            notesRef,
-            where('lessonId', '==', lessonId),
-            where('userId', '==', userId)
-        );
-        const snapshot = await getDocs(q);
-        const doc = snapshot.docs[0];
-        return doc ? { id: doc.id, ...doc.data() } as Note : null;
+    async getNoteForLesson(userId: string, lessonId: string): Promise<Note | null> {
+        const noteId = `${lessonId}_${userId}`;
+        const userRef = doc(db, 'users', userId);
+
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) return null;
+
+        const note = userSnap.data()?.notes?.[noteId] || null;
+        
+        return note ? { ...note, id: noteId } : null;
     }
 
-    async saveNote(note: Omit<Note, 'id'>): Promise<Note> {
-        const notesRef = collection(db, 'notes');
-        const newNoteRef = doc(notesRef);
-        await setDoc(newNoteRef, note);
-        return { id: newNoteRef.id, ...note };
-    }
+    async saveNote(userId: string, lessonId: string, text: string): Promise<Note> {
+        const userRef = doc(db, 'users', userId);
+        const noteId = `${lessonId}_${userId}`;
+        const note: Note = { id: noteId, lessonId, text };
+        // Update or set the note directly
+        await updateDoc(userRef, {
+            [`notes.${noteId}`]:note
+        });
 
-    async updateNote(id: string, note: Note): Promise<Note> {
-        const noteRef = doc(db, 'notes', id);
-        const { id: noteId, ...noteData } = note;
-        await updateDoc(noteRef, noteData);
         return note;
     }
+
 
     // Grade operations
     async getGradesForCourse(courseId: string): Promise<Grade[]> {

@@ -141,13 +141,7 @@ Grades
 
 Notes
 ```json
-"notes": {
-  "$lessonId_$userId": {
-    "lessonId": "lessonId",
-    "userId": "userId",
-    "text": "User's note here"
-  }
-}
+
 ```
 
 User Profiles & Progress
@@ -170,6 +164,12 @@ User Profiles & Progress
       "$groupId1": true,
       "$groupId2": true,
       // Add more groupIds as needed
+    },
+    "notes": {
+      "$lessonId_$userId": {
+        "lessonId": "lessonId",
+        "text": "User's note here"
+      }
     }
   }
 }

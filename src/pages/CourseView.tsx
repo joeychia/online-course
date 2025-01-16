@@ -16,12 +16,12 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { getMockUser } from '../data/mockDataLoader';
-import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit } from '../services/dataService';
+import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
 import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
 import { Lesson, Course, Unit } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -30,6 +30,7 @@ export default function CourseView() {
     lessonId: string;
   }>();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>({});
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
@@ -37,23 +38,23 @@ export default function CourseView() {
   const [course, setCourse] = useState<Course | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
-  
-  const currentUser = getMockUser('system');
-  const userProgress = currentUser?.progress[courseId] || {};
+  const [userProgress, setUserProgress] = useState<{ [key: string]: { completed: boolean } }>({});
 
   // Load course and units data
   useEffect(() => {
     async function loadCourseData() {
-      if (!courseId) return;
+      if (!courseId || !currentUser) return;
       
       setLoading(true);
       try {
-        const [courseData, unitsData] = await Promise.all([
+        const [courseData, unitsData, userData] = await Promise.all([
           getCourse(courseId),
-          getUnitsForCourse(courseId)
+          getUnitsForCourse(courseId),
+          getUser(currentUser.uid)
         ]);
         setCourse(courseData);
         setUnits(unitsData);
+        setUserProgress(userData?.progress?.[courseId] || {});
       } catch (err) {
         console.error('Error loading course data:', err);
       } finally {
@@ -61,7 +62,7 @@ export default function CourseView() {
       }
     }
     loadCourseData();
-  }, [courseId]);
+  }, [courseId, currentUser]);
 
   // Load lessons for expanded units
   useEffect(() => {
@@ -117,14 +118,15 @@ export default function CourseView() {
     navigate(`/${courseId}/${unitId}/${lessonId}`);
   };
 
-  const handleLessonComplete = (completedLessonId: string) => {
+  const handleLessonComplete = async (completedLessonId: string) => {
+    if (!currentUser) return;
+    
     // Update local progress state
     const updatedProgress = {
       ...userProgress,
       [completedLessonId]: { completed: true }
     };
-    // This will cause a re-render and update the NavPanel
-    currentUser.progress[courseId] = updatedProgress;
+    setUserProgress(updatedProgress);
   };
 
   const toggleUnit = (unitId: string) => {

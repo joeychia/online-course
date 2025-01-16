@@ -47,7 +47,7 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
         ]}
         theme="light"
         autofocus={false}
-        hideModeSwitch={false}
+        hideModeSwitch={true}
       />
     </div>
   );

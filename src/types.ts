@@ -78,6 +78,5 @@ export interface Grade {
 export interface Note {
   id: string;
   lessonId: string;
-  userId: string;
   text: string;
 } 

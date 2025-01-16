@@ -15,13 +15,14 @@ import {
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { Course, Unit, Lesson, Quiz } from '../types';
+import { Lesson, Quiz } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
 import QuizView from '../components/QuizView';
 import { 
   getQuiz, 
-  getUser, 
   updateUserProgress,
+  saveNote,
+  getNotesForLesson,
 } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -113,14 +114,32 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
     loadQuiz();
   }, [lesson?.quizId]);
 
+  // Load existing note when component mounts
+  useEffect(() => {
+    async function loadNote() {
+      if (!currentUser || !lesson) return;
+      try {
+        const existingNote = await getNotesForLesson(currentUser.uid, lesson.id);
+        if (existingNote) {
+          setNote(existingNote.text);
+        }
+      } catch (err) {
+        console.error('Error loading note:', err);
+      }
+    }
+    loadNote();
+  }, [lesson?.id, currentUser]);
+
   const handleSaveNote = async () => {
     if (lesson && note.trim() && courseId && currentUser) {
       try {
+        // Save the note first with the correct key format
+        await saveNote(currentUser.uid, lesson.id, note);
+        console.log('Note saved:', note);
+        // Then update progress
         await updateUserProgress(currentUser.uid, courseId, lesson.id);
         setIsCompleted(true);
         onComplete?.(lesson.id);
-        // Clear the note after saving
-        setNote("");
       } catch (err) {
         console.error('Error saving note:', err);
       }
@@ -301,7 +320,6 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
       </Dialog>
       
       {/* Notes Section */}
-      {!quizAnswers && (
         <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">
@@ -325,7 +343,6 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
             placeholder="Write your notes here..."
           />
         </Paper>
-      )}
     </Box>
   );
 } 

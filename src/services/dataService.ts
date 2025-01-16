@@ -172,10 +172,10 @@ export const updateUserProgress = async (
   await firestoreService.updateUserProgress(userId, courseId, lessonId, completed);
 };
 
-export const saveNote = async (note: Omit<Note, 'id'>): Promise<Note> => {
-  return await firestoreService.saveNote(note);
+export const saveNote = async (userId: string, lessonId: string, text: string): Promise<Note> => {
+  return await firestoreService.saveNote(userId, lessonId, text);
 };
 
-export const updateNote = async (id: string, note: Note): Promise<Note> => {
-  return await firestoreService.updateNote(id, note);
-}; 
+export const getNotesForLesson = async (userId: string, lessonId: string): Promise<Note | null> => {
+  return await firestoreService.getNoteForLesson(userId, lessonId);
+};
