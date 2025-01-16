@@ -72,10 +72,8 @@ export default function Layout({ children }: LayoutProps) {
               ECC Online Classes
             </Typography>
             <Stack direction="row" spacing={4} alignItems="center">
-              <StyledLink to="/courses">Courses</StyledLink>
               {currentUser ? (
                 <>
-                  <StyledLink to="/progress">My Progress</StyledLink>
                   <div>
                     <IconButton
                       onClick={handleMenu}

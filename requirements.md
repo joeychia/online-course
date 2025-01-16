@@ -22,7 +22,6 @@
 - User can join/quit a group
 - User must put down a note for a lesson in order to complete the lesson - done
 - User can open the first lesson of each unit, but locked out from other lessons until the previous lesson is completed - done
-- User can view a dashboard of all courses, units, lessons, quizzes, groups, and grades
 
 ## Technical Stack
 

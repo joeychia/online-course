@@ -152,8 +152,22 @@ export default function NavPanel({
             <MenuIcon />
           </IconButton>
           {!isCollapsed && (
-            <Box sx={{ flex: 1, overflow: 'hidden' }}>
-              <Typography variant="h6" component="h1" noWrap>{course.name}</Typography>
+            <Box 
+              sx={{ 
+                flex: 1, 
+                overflow: 'hidden',
+                '&:hover': {
+                  cursor: 'pointer',
+                  '& h1': {
+                    color: 'primary.main',
+                  }
+                }
+              }}
+              onClick={() => navigate(`/${course.id}`)}
+            >
+              <Typography variant="h6" component="h1" noWrap sx={{ transition: 'color 0.2s' }}>
+                {course.name}
+              </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} noWrap>
                 {course.description}
               </Typography>
