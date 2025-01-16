@@ -124,6 +124,7 @@ export default function CourseView() {
     // Update local progress state
     const updatedProgress = {
       ...userProgress,
+      
       [completedLessonId]: { completed: true }
     };
     setUserProgress(updatedProgress);
@@ -163,55 +164,19 @@ export default function CourseView() {
       <List>
         {units.map((unit) => {
           const lessons = unitLessons[unit.id] || [];
-          const completedCount = lessons.filter(l => userProgress[l.id]?.completed).length;
-          const progressPercentage = (completedCount / lessons.length) * 100;
-
+          
           return (
             <Card key={unit.id} sx={{ mb: 2 }}>
-              <ListItemButton onClick={() => toggleUnit(unit.id)}>
+              <ListItemButton onClick={() => {
+                const firstLesson = lessons[0];
+                if (firstLesson) {
+                  handleSelectLesson(unit.id, firstLesson.id);
+                }
+              }}>
                 <ListItemText
                   primary={unit.name}
-                  secondary={
-                    <Box sx={{ mt: 1 }}>
-                      <LinearProgress variant="determinate" value={progressPercentage} />
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {completedCount} of {lessons.length} completed
-                      </Typography>
-                    </Box>
-                  }
                 />
-                {expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
-              <Collapse in={expandedUnits[unit.id]} timeout="auto">
-                <CardContent>
-                  <List component="div" disablePadding>
-                    {lessons.map((lesson) => {
-                      const isAccessible = isLessonAccessible(lesson.orderIndex);
-                      const isCompleted = userProgress[lesson.id]?.completed;
-
-                      return (
-                        <ListItemButton
-                          key={lesson.id}
-                          onClick={() => isAccessible && handleSelectLesson(unit.id, lesson.id)}
-                          disabled={!isAccessible}
-                          sx={{ pl: 4 }}
-                        >
-                          <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
-                            <Typography sx={{ flex: 1 }}>
-                              {lesson.orderIndex}. {lesson.name}
-                            </Typography>
-                            {!isAccessible ? (
-                              <LockIcon color="disabled" fontSize="small" />
-                            ) : isCompleted ? (
-                              <CheckCircleIcon color="success" fontSize="small" />
-                            ) : null}
-                          </Stack>
-                        </ListItemButton>
-                      );
-                    })}
-                  </List>
-                </CardContent>
-              </Collapse>
             </Card>
           );
         })}
