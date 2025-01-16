@@ -18,7 +18,7 @@
 - User can view a lesson - done
 - User can view their quiz history for a lesson (complete questions and answers are recorded)
 - User can do a quiz for a lesson if any - done
-- User can register/drop a course
+- User can register/drop a course - done
 - User can join/quit a group
 - User must put down a note for a lesson in order to complete the lesson - done
 - User can open the first lesson of each unit, but locked out from other lessons until the previous lesson is completed - done

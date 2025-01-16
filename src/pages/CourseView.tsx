@@ -7,6 +7,8 @@ import {
   ListItemText,
   Card,
   CircularProgress,
+  Button,
+  Paper,
 } from '@mui/material';
 import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser, updateUserProgress } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
@@ -15,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { Lesson, Course, Unit, UserProgress } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import CourseProgress from '../components/CourseProgress';
+import { firestoreService } from '../services/firestoreService';
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -32,6 +35,7 @@ export default function CourseView() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
   const [userProgress, setUserProgress] = useState<Record<string, UserProgress>>({});
+  const [isRegistered, setIsRegistered] = useState(false);
 
   // Load course and units data
   useEffect(() => {
@@ -48,6 +52,7 @@ export default function CourseView() {
         setCourse(courseData);
         setUnits(unitsData);
         setUserProgress(userData?.progress?.[courseId] || {});
+        setIsRegistered(!!userData?.registeredCourses?.[courseId]);
       } catch (err) {
         console.error('Error loading course data:', err);
       } finally {
@@ -130,15 +135,29 @@ export default function CourseView() {
     }));
   };
 
-  const toggleUnit = (unitId: string) => {
-    setExpandedUnits((prev: { [key: string]: boolean }) => ({ ...prev, [unitId]: !prev[unitId] }));
+
+  const handleRegisterCourse = async () => {
+    if (!currentUser || !courseId) return;
+    
+    try {
+      await firestoreService.registerCourse(currentUser.uid, courseId);
+      setIsRegistered(true);
+    } catch (err) {
+      console.error('Error registering for course:', err);
+    }
   };
 
-  const isLessonAccessible = (orderIndex: number) => {
-    if (course.settings?.unlockLessonIndex !== undefined) {
-      return orderIndex === course.settings.unlockLessonIndex;
+  const handleDropCourse = async () => {
+    if (!currentUser || !courseId) return;
+    
+    if (window.confirm('Are you sure you want to drop this course? Your progress will be saved but you will need to register again to continue.')) {
+      try {
+        await firestoreService.dropCourse(currentUser.uid, courseId);
+        setIsRegistered(false);
+      } catch (err) {
+        console.error('Error dropping course:', err);
+      }
     }
-    return orderIndex === 1;
   };
 
   const mainContent = loading ? (
@@ -153,36 +172,78 @@ export default function CourseView() {
       isCompleted={userProgress[selectedLesson.id]?.completed}
     />
   ) : (
-    <>
-      <Typography variant="h4" component="h1" gutterBottom>
-        {course.name}
-      </Typography>
-      <Typography variant="body1" paragraph>
-        {course.description}
-      </Typography>
-      <CourseProgress progress={userProgress} courseId={courseId} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+      <Box sx={{ flex: 1 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          {course.name}
+        </Typography>
+        <Typography variant="body1" paragraph>
+          {course.description}
+        </Typography>
 
-      <List>
-        {units.map((unit) => {
-          const lessons = unitLessons[unit.id] || [];
-          
-          return (
-            <Card key={unit.id} sx={{ mb: 2 }}>
-              <ListItemButton onClick={() => {
-                const firstLesson = lessons[0];
-                if (firstLesson) {
-                  handleSelectLesson(unit.id, firstLesson.id);
-                }
-              }}>
-                <ListItemText
-                  primary={unit.name}
-                />
-              </ListItemButton>
-            </Card>
-          );
-        })}
-      </List>
-    </>
+        {isRegistered ? (
+          <CourseProgress progress={userProgress} courseId={courseId} />
+        ) : (
+          <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h6" gutterBottom>
+                Register for This Course
+              </Typography>
+              <Typography color="text.secondary" paragraph>
+                Register to track your progress and access all course materials.
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleRegisterCourse}
+                sx={{ mt: 2 }}
+              >
+                Register Now
+              </Button>
+            </Box>
+          </Paper>
+        )}
+
+        <List>
+          {units.map((unit) => {
+            const lessons = unitLessons[unit.id] || [];
+            
+            return (
+              <Card key={unit.id} sx={{ mb: 2 }}>
+                <ListItemButton onClick={() => {
+                  const firstLesson = lessons[0];
+                  if (firstLesson) {
+                    handleSelectLesson(unit.id, firstLesson.id);
+                  }
+                }}>
+                  <ListItemText
+                    primary={unit.name}
+                  />
+                </ListItemButton>
+              </Card>
+            );
+          })}
+        </List>
+      </Box>
+
+      {isRegistered && (
+        <Box sx={{ mt: 4, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Button
+            variant="text"
+            color="inherit"
+            onClick={handleDropCourse}
+            sx={{ 
+              color: 'text.secondary',
+              '&:hover': {
+                color: 'error.main',
+              }
+            }}
+          >
+            Drop Course
+          </Button>
+        </Box>
+      )}
+    </Box>
   );
 
   return (
