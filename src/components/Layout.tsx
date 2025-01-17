@@ -72,65 +72,83 @@ export default function Layout({ children }: LayoutProps) {
           zIndex: theme => theme.zIndex.drawer + 1 
         }}
       >
-        <Toolbar>
-          <Container maxWidth="lg" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Stack direction="row" spacing={1} alignItems="center">
-              {showMenuButton && (
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="start"
-                  onClick={handleDrawerToggle}
-                  sx={{ mr: 2 }}
-                >
-                  <MenuIcon />
-                </IconButton>
-              )}
-              <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
-                ECC Online Classes
-              </Typography>
-            </Stack>
-            <Stack direction="row" spacing={4} alignItems="center">
-              {currentUser ? (
-                <>
-                  <div>
-                    <IconButton
-                      onClick={handleMenu}
-                      sx={{ p: 0 }}
+        <Toolbar 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            px: 2,
+            height: 56,
+            minHeight: 56
+          }}
+        >
+          <Stack direction="row" spacing={1} alignItems="center">
+            {showMenuButton && (
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
+              ECC Online Classes
+            </Typography>
+          </Stack>
+          <Stack direction="row" spacing={4} alignItems="center">
+            {currentUser ? (
+              <>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      display: { xs: 'none', sm: 'block' },
+                      color: 'white'
+                    }}
+                  >
+                    {userProfile?.name || currentUser.email?.split('@')[0]}
+                  </Typography>
+                  <IconButton
+                    onClick={handleMenu}
+                    sx={{ p: 0 }}
+                  >
+                    <Avatar 
+                      alt={userProfile?.name || currentUser?.email || ''}
+                      src={currentUser?.photoURL?.toString()}
+                      sx={{ width: 32, height: 32 }}
                     >
-                      <Avatar 
-                        alt={userProfile?.name || currentUser?.email || ''} 
-                        src={currentUser?.photoURL?.toString()}
-                      />
-                    </IconButton>
-                    <Menu
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl)}
-                      onClose={handleClose}
-                      onClick={handleClose}
-                    >
-                      <MenuItem disabled>
-                        {userProfile?.name || currentUser.email}
-                      </MenuItem>
-                      <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
-                    </Menu>
-                  </div>
-                </>
-              ) : (
-                <Button 
-                  color="inherit" 
-                  onClick={handleSignIn}
-                  sx={{ 
-                    '&:hover': {
-                      color: 'primary.light',
-                    }
-                  }}
-                >
-                  Sign In
-                </Button>
-              )}
-            </Stack>
-          </Container>
+                      {(userProfile?.name || currentUser?.email || '').charAt(0).toUpperCase()}
+                    </Avatar>
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                    onClick={handleClose}
+                  >
+                    <MenuItem disabled>
+                      {userProfile?.name || currentUser.email}
+                    </MenuItem>
+                    <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+                  </Menu>
+                </Stack>
+              </>
+            ) : (
+              <Button 
+                color="inherit" 
+                onClick={handleSignIn}
+                sx={{ 
+                  '&:hover': {
+                    color: 'primary.light',
+                  }
+                }}
+              >
+                Sign In
+              </Button>
+            )}
+          </Stack>
         </Toolbar>
       </AppBar>
       <Toolbar /> {/* This creates space for the fixed AppBar */}

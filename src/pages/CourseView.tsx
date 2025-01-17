@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { DRAWER_WIDTH, TOOLBAR_HEIGHT } from '../components/NavPanel';
+import { TOOLBAR_HEIGHT } from '../components/NavPanel';
 import { 
   Box, 
   Typography,
@@ -10,7 +10,6 @@ import {
   CircularProgress,
   Button,
   Paper,
-  IconButton,
 } from '@mui/material';
 import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser, updateUserProgress } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
@@ -20,7 +19,6 @@ import { Lesson, Course, Unit, UserProgress } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
-import MenuIcon from '@mui/icons-material/Menu';
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -287,11 +285,15 @@ export default function CourseView() {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          m: { xs: 2, sm: 3 },
           width: '100%',
           height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
-          overflow: 'auto', // Enable scrolling for main content
+          overflow: 'auto',
           ml: { xs: 0 },
+          '& > *': {
+            maxWidth: 'lg',
+            mx: 'auto'
+          },
           transition: theme => theme.transitions.create('margin', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,

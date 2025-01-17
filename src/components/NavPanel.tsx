@@ -8,17 +8,14 @@ import {
   ListItemText,
   Collapse,
   Stack,
-  IconButton,
   Drawer,
   CircularProgress,
 } from '@mui/material';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
-import CloseIcon from '@mui/icons-material/Close';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import MenuIcon from '@mui/icons-material/Menu';
 import { styled } from '@mui/material/styles';
 import { Course, Unit, Lesson } from '../types';
 import { getLessonsForUnit } from '../services/dataService';
@@ -47,7 +44,7 @@ const StyledUnitListItem = styled(ListItemButton)(({ theme }) => ({
 
 // Export the constants
 export const DRAWER_WIDTH = 350;
-export const TOOLBAR_HEIGHT = 64;
+export const TOOLBAR_HEIGHT = 56;
 
 interface NavPanelProps {
   course: Course;
@@ -145,9 +142,7 @@ export default function NavPanel({
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, overflow: 'hidden' }}>
-          <IconButton onClick={onToggle} >
-            <CloseIcon />
-          </IconButton>
+
           <Box 
             sx={{ 
               flex: 1, 
