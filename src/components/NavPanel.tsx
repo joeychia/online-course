@@ -15,11 +15,10 @@ import {
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
+import CloseIcon from '@mui/icons-material/Close';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled } from '@mui/material/styles';
 import { Course, Unit, Lesson } from '../types';
 import { getLessonsForUnit } from '../services/dataService';
@@ -46,8 +45,9 @@ const StyledUnitListItem = styled(ListItemButton)(({ theme }) => ({
   }
 }));
 
-const DRAWER_WIDTH = 350;
-const TOOLBAR_HEIGHT = 64; // Standard MUI toolbar height
+// Export the constants
+export const DRAWER_WIDTH = 350;
+export const TOOLBAR_HEIGHT = 64;
 
 interface NavPanelProps {
   course: Course;
@@ -58,7 +58,6 @@ interface NavPanelProps {
   onSelectLesson?: (unitId: string, lessonId: string) => void;
   isOpen: boolean;
   onToggle: () => void;
-  onCollapse?: (collapsed: boolean) => void;
 }
 
 export default function NavPanel({ 
@@ -70,7 +69,6 @@ export default function NavPanel({
   onSelectLesson,
   isOpen,
   onToggle,
-  onCollapse
 }: NavPanelProps) {
   const navigate = useNavigate();
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>(
@@ -79,7 +77,6 @@ export default function NavPanel({
       [unit.id]: unit.id === selectedUnitId || !selectedUnitId
     }), {})
   );
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
@@ -129,12 +126,6 @@ export default function NavPanel({
     return isAccessible;
   };
 
-  const handleToggleCollapse = () => {
-    const newCollapsed = !isCollapsed;
-    setIsCollapsed(newCollapsed);
-    onCollapse?.(newCollapsed);
-  };
-
   const handleLessonSelect = (unitId: string, lessonId: string) => {
     if (onSelectLesson) {
       onSelectLesson(unitId, lessonId);
@@ -142,37 +133,41 @@ export default function NavPanel({
       console.log('navigating to unit', unitId, 'lesson', lessonId);
       navigate(`/${course.id}/${unitId}/${lessonId}`);
     }
+    
+    // Close drawer on mobile after selecting a lesson
+    const isMobile = window.innerWidth < 600; // sm breakpoint is 600px
+    if (isMobile) {
+      onToggle();
+    }
   };
 
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, overflow: 'hidden' }}>
-          <IconButton onClick={onToggle} sx={{ display: { sm: 'none' } }}>
-            <MenuIcon />
+          <IconButton onClick={onToggle} >
+            <CloseIcon />
           </IconButton>
-          {!isCollapsed && (
-            <Box 
-              sx={{ 
-                flex: 1, 
-                overflow: 'hidden',
-                '&:hover': {
-                  cursor: 'pointer',
-                  '& h1': {
-                    color: 'primary.main',
-                  }
+          <Box 
+            sx={{ 
+              flex: 1, 
+              overflow: 'hidden',
+              '&:hover': {
+                cursor: 'pointer',
+                '& h1': {
+                  color: 'primary.main',
                 }
-              }}
-              onClick={() => navigate(`/${course.id}`)}
-            >
-              <Typography variant="h6" component="h1" noWrap sx={{ transition: 'color 0.2s' }}>
-                {course.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} noWrap>
-                {course.description}
-              </Typography>
-            </Box>
-          )}
+              }
+            }}
+            onClick={() => navigate(`/${course.id}`)}
+          >
+            <Typography variant="h6" component="h1" noWrap sx={{ transition: 'color 0.2s' }}>
+              {course.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} noWrap>
+              {course.description}
+            </Typography>
+          </Box>
         </Stack>
       </Box>
       <List sx={{ flex: 1, overflow: 'auto' }}>
@@ -186,51 +181,48 @@ export default function NavPanel({
                 selected={unit.id === selectedUnitId}
               >
                 <ListItemText
-                  primary={isCollapsed ? `U${unit.orderIndex || ''}` : unit.name}
-
-                  sx={{ m: isCollapsed ? 0 : undefined }}
+                  primary={unit.name}
+                  sx={{ m: 0 }}
                 />
-                {!isCollapsed && (expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />)}
+                {expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />}
               </StyledUnitListItem>
-              {!isCollapsed && (
-                <Collapse in={expandedUnits[unit.id]} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {loading[unit.id] ? (
-                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                        <CircularProgress size={24} />
-                      </Box>
-                    ) : (
-                      lessons.map((lesson) => {
-                        const isAccessible = isLessonAccessible(lesson, lessons);
-                        const isCompleted = progress[lesson.id]?.completed;
+              <Collapse in={expandedUnits[unit.id]} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {loading[unit.id] ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : (
+                    lessons.map((lesson) => {
+                      const isAccessible = isLessonAccessible(lesson, lessons);
+                      const isCompleted = progress[lesson.id]?.completed;
 
-                        return (
-                          <StyledListItem
-                            key={lesson.id}
-                            sx={{ pl: 4 }}
-                            onClick={() => isAccessible && handleLessonSelect(unit.id, lesson.id)}
-                            selected={selectedLessonId === lesson.id}
-                            disabled={!isAccessible}
-                          >
-                            <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
-                              <Typography sx={{ flex: 1 }}>
-                                {lesson.orderIndex}. {lesson.name}
-                              </Typography>
-                              {!isAccessible ? (
-                                <LockIcon color="disabled" fontSize="small" />
-                              ) : isCompleted ? (
-                                <CheckCircleIcon color="success" fontSize="small" />
-                              ) : (
-                                <LockOpenIcon color="primary" fontSize="small" />
-                              )}
-                            </Stack>
-                          </StyledListItem>
-                        );
-                      })
-                    )}
-                  </List>
-                </Collapse>
-              )}
+                      return (
+                        <StyledListItem
+                          key={lesson.id}
+                          sx={{ pl: 4 }}
+                          onClick={() => isAccessible && handleLessonSelect(unit.id, lesson.id)}
+                          selected={selectedLessonId === lesson.id}
+                          disabled={!isAccessible}
+                        >
+                          <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                            <Typography sx={{ flex: 1 }}>
+                              {lesson.orderIndex}. {lesson.name}
+                            </Typography>
+                            {!isAccessible ? (
+                              <LockIcon color="disabled" fontSize="small" />
+                            ) : isCompleted ? (
+                              <CheckCircleIcon color="success" fontSize="small" />
+                            ) : (
+                              <LockOpenIcon color="primary" fontSize="small" />
+                            )}
+                          </Stack>
+                        </StyledListItem>
+                      );
+                    })
+                  )}
+                </List>
+              </Collapse>
             </Box>
           );
         })}
@@ -239,87 +231,63 @@ export default function NavPanel({
   );
 
   return (
-    <>
-      <Box
-        component="nav"
+    <Box
+      component="nav"
+      sx={{
+        width: { sm: isOpen ? DRAWER_WIDTH : 0 },
+        flexShrink: { sm: 0 },
+        transition: theme => theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
+      }}
+    >
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={isOpen}
+        onClose={onToggle}
+        ModalProps={{ keepMounted: true }}
         sx={{
-          width: { 
-            sm: isCollapsed ? 0 : DRAWER_WIDTH 
+          display: { xs: 'block', sm: 'none' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: DRAWER_WIDTH,
+            borderRight: 1,
+            borderColor: 'divider',
+            mt: `${TOOLBAR_HEIGHT}px`,
+            height: '100%',
+            overflowX: 'hidden',
           },
-          flexShrink: { sm: 0 },
-          transition: theme => theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
         }}
       >
-        {/* Mobile drawer */}
-        <Drawer
-          variant="temporary"
-          open={isOpen}
-          onClose={onToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
-              width: DRAWER_WIDTH,
-              borderRight: 1,
-              borderColor: 'divider',
-              mt: `${TOOLBAR_HEIGHT}px`
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-        {/* Desktop drawer */}
-        <Drawer
-          variant={isCollapsed ? 'temporary' : 'permanent'}
-          open={!isCollapsed}
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
-              width: DRAWER_WIDTH,
-              borderRight: 1,
-              borderColor: 'divider',
-              mt: `${TOOLBAR_HEIGHT}px`,
-              height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
-              transition: theme => theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
-              overflowX: 'hidden',
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-      </Box>
-      {/* Floating toggle button for desktop */}
-      <IconButton
-        color="inherit"
-        aria-label={isCollapsed ? "expand navigation" : "collapse navigation"}
-        onClick={handleToggleCollapse}
-        sx={{ 
-          position: 'fixed',
-          top: TOOLBAR_HEIGHT + 16,
-          left: isCollapsed ? 16 : DRAWER_WIDTH - 40,
-          display: { xs: 'none', sm: 'flex' },
-          zIndex: theme => theme.zIndex.drawer + 2,
-          bgcolor: 'background.paper',
-          boxShadow: 2,
-          '&:hover': {
-            bgcolor: 'background.paper',
+        {drawerContent}
+      </Drawer>
+
+      {/* Desktop Drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', sm: 'block' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: DRAWER_WIDTH,
+            borderRight: 1,
+            borderColor: 'divider',
+            mt: `${TOOLBAR_HEIGHT}px`,
+            height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
+            overflowX: 'hidden',
+            transform: isOpen ? 'none' : `translateX(-${DRAWER_WIDTH}px)`,
+            visibility: isOpen ? 'visible' : 'hidden',
+            transition: theme => theme.transitions.create(['transform', 'visibility'], {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
           },
-          transition: theme => theme.transitions.create('left', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
         }}
       >
-        {isCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-      </IconButton>
-    </>
+        {drawerContent}
+      </Drawer>
+    </Box>
   );
 } 

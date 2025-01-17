@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { DRAWER_WIDTH, TOOLBAR_HEIGHT } from '../components/NavPanel';
 import { 
   Box, 
   Typography,
@@ -9,6 +10,7 @@ import {
   CircularProgress,
   Button,
   Paper,
+  IconButton,
 } from '@mui/material';
 import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser, updateUserProgress } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
@@ -18,6 +20,7 @@ import { Lesson, Course, Unit, UserProgress } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
+import MenuIcon from '@mui/icons-material/Menu';
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -36,6 +39,24 @@ export default function CourseView() {
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
   const [userProgress, setUserProgress] = useState<Record<string, UserProgress>>({});
   const [isRegistered, setIsRegistered] = useState(false);
+
+  // Toggle drawer handler
+  const handleDrawerToggle = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
+
+  // Listen for drawer toggle events from Layout
+  useEffect(() => {
+    const handleToggleDrawer = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      setIsDrawerOpen(customEvent.detail);
+    };
+
+    window.addEventListener('toggleDrawer', handleToggleDrawer);
+    return () => {
+      window.removeEventListener('toggleDrawer', handleToggleDrawer);
+    };
+  }, []);
 
   // Load course and units data
   useEffect(() => {
@@ -247,7 +268,11 @@ export default function CourseView() {
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ 
+      display: 'flex',
+      minHeight: '100vh',
+      overflow: 'hidden' // Prevent body scroll
+    }}>
       <NavPanel
         course={course}
         units={units}
@@ -256,15 +281,21 @@ export default function CourseView() {
         selectedLessonId={lessonId}
         onSelectLesson={handleSelectLesson}
         isOpen={isDrawerOpen}
-        onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
+        onToggle={handleDrawerToggle}
       />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - 350px)` },
-          maxWidth: 'lg'
+          width: '100%',
+          height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
+          overflow: 'auto', // Enable scrolling for main content
+          ml: { xs: 0 },
+          transition: theme => theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
         }}
       >
         {mainContent}
