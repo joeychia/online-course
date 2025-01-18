@@ -12,6 +12,7 @@ import {
   Paper,
 } from '@mui/material';
 import { getLesson, getCourse, getUnitsIdNameForCourse, getLessonsIdNameForUnit, getUser, updateUserProgress } from '../services/dataService';
+import { analyticsService } from '../services/analyticsService';
 import NavPanel from '../components/NavPanel';
 import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
@@ -121,6 +122,30 @@ export default function CourseView() {
     loadLesson();
   }, [lessonId]);
 
+  // Track page view
+  useEffect(() => {
+    analyticsService.trackPageView(window.location.pathname);
+  }, [courseId, unitId, lessonId]);
+
+  // Track course view
+  useEffect(() => {
+    if (course) {
+      analyticsService.trackCourseView({
+        courseId: course.id,
+        courseName: course.name
+      });
+    }
+  }, [course]);
+
+  // Track user identity
+  useEffect(() => {
+    if (currentUser) {
+      analyticsService.identifyUser(currentUser.uid, {
+        email: currentUser.email
+      });
+    }
+  }, [currentUser]);
+
   if (!course) {
     return <Typography>Course not found</Typography>;
   }
@@ -131,9 +156,23 @@ export default function CourseView() {
   };
 
   const handleLessonComplete = async (completedLessonId: string) => {
-    if (!currentUser) return;
+    if (!currentUser || !course || !currentLesson) return;
+
     const completedAt = new Date().toISOString();
-    const lessonName = currentLesson?.name || '';
+    const lessonName = currentLesson.name;
+
+    // Track lesson completion
+    const unit = units.find(u => u.id === unitId);
+    if (unit) {
+      analyticsService.trackLessonComplete({
+        courseId: course.id,
+        courseName: course.name,
+        unitId: unit.id,
+        unitName: unit.name,
+        lessonId: completedLessonId,
+        lessonName
+      });
+    }
 
     // save progress to firestore
     await updateUserProgress(currentUser.uid, courseId, completedLessonId, true, completedAt, lessonName);
@@ -149,25 +188,36 @@ export default function CourseView() {
     }));
   };
 
-
   const handleRegisterCourse = async () => {
-    if (!currentUser || !courseId) return;
+    if (!currentUser || !courseId || !course) return;
     
     try {
       await firestoreService.registerCourse(currentUser.uid, courseId);
       setIsRegistered(true);
+
+      // Track course registration
+      analyticsService.trackCourseRegistration({
+        courseId: course.id,
+        courseName: course.name
+      });
     } catch (err) {
       console.error('Error registering for course:', err);
     }
   };
 
   const handleDropCourse = async () => {
-    if (!currentUser || !courseId) return;
+    if (!currentUser || !courseId || !course) return;
     
     if (window.confirm('Are you sure you want to drop this course? Your progress will be saved but you will need to register again to continue.')) {
       try {
         await firestoreService.dropCourse(currentUser.uid, courseId);
         setIsRegistered(false);
+
+        // Track course drop
+        analyticsService.trackCourseDropped({
+          courseId: course.id,
+          courseName: course.name
+        });
       } catch (err) {
         console.error('Error dropping course:', err);
       }

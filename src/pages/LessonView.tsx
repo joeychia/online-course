@@ -16,10 +16,12 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import { Lesson, Quiz, QuizHistory } from '../types';
+import { analyticsService } from '../services/analyticsService';
 import RichTextEditor from '../components/RichTextEditor';
 import QuizView from '../components/QuizView';
 import { 
   getQuiz, 
+  getUnit,
   updateUserProgress,
   saveNote,
   getNotesForLesson,
@@ -84,6 +86,27 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
   const [isSaving, setIsSaving] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
+  const [quizStartTime, setQuizStartTime] = useState<Date | null>(null);
+
+  // Track lesson view
+  useEffect(() => {
+    async function trackView() {
+      if (lesson.unitId) {
+        const unit = await getUnit(lesson.unitId);
+        if (unit) {
+          analyticsService.trackLessonView({
+            courseId,
+            courseName: unit.courseId, // We might want to fetch course name if needed
+            unitId: unit.id,
+            unitName: unit.name,
+            lessonId: lesson.id,
+            lessonName: lesson.name
+          });
+        }
+      }
+    }
+    trackView();
+  }, [lesson.id, courseId]);
 
   // Load quiz and quiz history if lesson has quizId
   useEffect(() => {
@@ -162,6 +185,38 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
   };
 
   const handleQuizSubmit = async (answers: { [key: string]: string }) => {
+    if (!quiz || !currentUser) return;
+
+    const endTime = new Date();
+    const timeSpent = quizStartTime ? (endTime.getTime() - quizStartTime.getTime()) / 1000 : 0;
+
+    // Calculate score
+    let correct = 0;
+    Object.entries(answers).forEach(([questionId, answerId]) => {
+      const question = quiz.questions[questionId];
+      if (question.options[answerId]?.isCorrect) {
+        correct++;
+      }
+    });
+
+    const total = Object.keys(quiz.questions).length;
+    const score = (correct / total) * 100;
+
+    // Track quiz completion
+    const unit = await getUnit(lesson.unitId);
+    if (unit) {
+      analyticsService.trackQuizComplete({
+        courseId,
+        courseName: unit.courseId, // We might want to fetch course name if needed
+        unitId: unit.id,
+        unitName: unit.name,
+        lessonId: lesson.id,
+        lessonName: lesson.name,
+        score,
+        timeSpent
+      });
+    }
+
     if (lesson && courseId && currentUser) {
       try {
         await updateUserProgress(currentUser.uid, courseId, lesson.id);
