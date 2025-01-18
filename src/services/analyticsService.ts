@@ -1,12 +1,21 @@
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
 
+const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
+
+if (!GA_MEASUREMENT_ID) {
+  console.warn('Google Analytics Measurement ID is not set in environment variables');
+}
+
 // Initialize analytics with Google Analytics
 const analytics = Analytics({
   app: 'online-course',
   plugins: [
     googleAnalytics({
-      measurementIds: [import.meta.env.VITE_GA_MEASUREMENT_ID]
+      measurementIds: [GA_MEASUREMENT_ID],
+      gtagConfig: {
+        send_page_view: true
+      }
     })
   ]
 });
