@@ -35,10 +35,27 @@ class FirestoreService {
 
     // Unit operations
     async getUnitsForCourse(courseId: string): Promise<Unit[]> {
+        const course = await this.getCourseById(courseId);
+        if (!course) return [];
+
+        // If we need additional unit details beyond what's in course.units,
+        // fetch only those units that need full details
         const unitsRef = collection(db, 'units');
         const q = query(unitsRef, where('courseId', '==', courseId));
         const snapshot = await getDocs(q);
-        return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() } as Unit));
+        
+        // Create a map of existing unit details from course.units
+        const existingUnits = new Map(course.units.map(u => [u.id, u]));
+        
+        return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+            const unitData = doc.data();
+            const existingUnit = existingUnits.get(doc.id);
+            return {
+                id: doc.id,
+                ...unitData,
+                name: existingUnit?.name || unitData.name // Prefer the name from course.units
+            } as Unit;
+        });
     }
 
     async getUnitById(id: string): Promise<Unit | null> {

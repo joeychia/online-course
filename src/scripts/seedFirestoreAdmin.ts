@@ -43,33 +43,33 @@ export async function seedFirestore() {
             console.log(`Added course: ${course.name}`);
         }
 
-        // Add units
-        for (const [id, unit] of Object.entries(mockData.units)) {
-            await db.doc(`units/${id}`).set(unit);
-            console.log(`Added unit: ${unit.name}`);
-        }
+        // // Add units
+        // for (const [id, unit] of Object.entries(mockData.units)) {
+        //     await db.doc(`units/${id}`).set(unit);
+        //     console.log(`Added unit: ${unit.name}`);
+        // }
 
-        // Add lessons
-        for (const [id, lesson] of Object.entries(mockData.lessons)) {
-            await db.doc(`lessons/${id}`).set(lesson);
-            console.log(`Added lesson: ${lesson.name}`);
-        }
+        // // Add lessons
+        // for (const [id, lesson] of Object.entries(mockData.lessons)) {
+        //     await db.doc(`lessons/${id}`).set(lesson);
+        //     console.log(`Added lesson: ${lesson.name}`);
+        // }
 
-        // Add quizzes
-        if (mockData.quizzes) {
-            for (const [id, quiz] of Object.entries(mockData.quizzes)) {
-                await db.doc(`quizzes/${id}`).set(quiz);
-                console.log(`Added quiz: ${id}`);
-            }
-        }
+        // // Add quizzes
+        // if (mockData.quizzes) {
+        //     for (const [id, quiz] of Object.entries(mockData.quizzes)) {
+        //         await db.doc(`quizzes/${id}`).set(quiz);
+        //         console.log(`Added quiz: ${id}`);
+        //     }
+        // }
 
-        // Add users (optional, you might want to handle this separately)
-        if (mockData.users) {
-            for (const [id, user] of Object.entries(mockData.users)) {
-                await db.doc(`users/${id}`).set(user);
-                console.log(`Added user: ${user.name}`);
-            }
-        }
+        // // Add users (optional, you might want to handle this separately)
+        // if (mockData.users) {
+        //     for (const [id, user] of Object.entries(mockData.users)) {
+        //         await db.doc(`users/${id}`).set(user);
+        //         console.log(`Added user: ${user.name}`);
+        //     }
+        // }
 
         console.log('Firestore seeded successfully!');
         process.exit(0);

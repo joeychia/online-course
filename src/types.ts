@@ -5,7 +5,10 @@ export interface Course {
   settings: {
     unlockLessonIndex: number;
   };
-  unitIds: Record<string, boolean>;
+  units: Array<{
+    id: string;
+    name: string;
+  }>;
   groupIds: Record<string, boolean>;
   isPublic?: boolean;
 }
@@ -16,7 +19,6 @@ export interface Unit {
   name: string;
   description: string;
   lessonIds: Record<string, boolean>;
-  orderIndex?: number;
 }
 
 export interface Lesson {
