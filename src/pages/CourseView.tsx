@@ -11,11 +11,11 @@ import {
   Button,
   Paper,
 } from '@mui/material';
-import { getLesson, getCourse, getUnitsForCourse, getLessonsForUnit, getUser, updateUserProgress } from '../services/dataService';
+import { getLesson, getCourse, getUnitsIdNameForCourse, getLessonsIdNameForUnit, getUser, updateUserProgress } from '../services/dataService';
 import NavPanel from '../components/NavPanel';
 import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
-import { Lesson, Course, Unit, UserProgress } from '../types';
+import { Lesson, Course, UserProgress } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
@@ -28,15 +28,14 @@ export default function CourseView() {
   }>();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>({});
-  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
-  const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState<Course | null>(null);
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
-  const [userProgress, setUserProgress] = useState<Record<string, UserProgress>>({});
+  const [units, setUnits] = useState<Array<{ id: string; name: string }>>([]);
+  const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
+  const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(window.innerWidth >= 600);
+  const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
   const [isRegistered, setIsRegistered] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Toggle drawer handler
   const handleDrawerToggle = () => {
@@ -56,26 +55,29 @@ export default function CourseView() {
     };
   }, []);
 
-  // Load course and units data
+  // Load course data
   useEffect(() => {
     async function loadCourseData() {
-      if (!courseId || !currentUser) return;
-      
-      setLoading(true);
+      if (!courseId) return;
+
       try {
         const [courseData, unitsData, userData] = await Promise.all([
           getCourse(courseId),
-          getUnitsForCourse(courseId),
-          getUser(currentUser.uid)
+          getUnitsIdNameForCourse(courseId),
+          currentUser ? getUser(currentUser.uid) : null
         ]);
-        setCourse(courseData);
-        setUnits(unitsData);
-        setUserProgress(userData?.progress?.[courseId] || {});
-        setIsRegistered(!!userData?.registeredCourses?.[courseId]);
+
+        if (courseData) {
+          setCourse(courseData);
+          setUnits(unitsData);
+          
+          if (userData) {
+            setUserProgress(userData.progress[courseId] || {});
+            setIsRegistered(!!userData.registeredCourses?.[courseId]);
+          }
+        }
       } catch (err) {
         console.error('Error loading course data:', err);
-      } finally {
-        setLoading(false);
       }
     }
     loadCourseData();
@@ -86,7 +88,7 @@ export default function CourseView() {
     async function loadUnitLessons(unitId: string) {
       if (!unitLessons[unitId]) {
         try {
-          const lessons = await getLessonsForUnit(unitId);
+          const lessons = await getLessonsIdNameForUnit(unitId);
           setUnitLessons(prev => ({ ...prev, [unitId]: lessons }));
         } catch (err) {
           console.error(`Error loading lessons for unit ${unitId}:`, err);
@@ -94,12 +96,10 @@ export default function CourseView() {
       }
     }
 
-    units.forEach(unit => {
-      if (expandedUnits[unit.id]) {
-        loadUnitLessons(unit.id);
-      }
-    });
-  }, [units, expandedUnits]);
+    if (unitId) {
+      loadUnitLessons(unitId);
+    }
+  }, [unitId, unitLessons]);
 
   // Load selected lesson
   useEffect(() => {
@@ -108,14 +108,14 @@ export default function CourseView() {
         setLoading(true);
         try {
           const lesson = await getLesson(lessonId);
-          setSelectedLesson(lesson);
+          setCurrentLesson(lesson);
         } catch (err) {
           console.error('Error loading lesson:', err);
         } finally {
           setLoading(false);
         }
       } else {
-        setSelectedLesson(null);
+        setCurrentLesson(null);
       }
     }
     loadLesson();
@@ -123,11 +123,6 @@ export default function CourseView() {
 
   if (!course) {
     return <Typography>Course not found</Typography>;
-  }
-
-  // Initialize first unit as expanded if expandedUnits is empty
-  if (Object.keys(expandedUnits).length === 0 && units.length > 0) {
-    setExpandedUnits({ [units[0].id]: true });
   }
 
   const handleSelectLesson = (unitId: string, lessonId: string) => {
@@ -138,7 +133,7 @@ export default function CourseView() {
   const handleLessonComplete = async (completedLessonId: string) => {
     if (!currentUser) return;
     const completedAt = new Date().toISOString();
-    const lessonName = selectedLesson?.name || '';
+    const lessonName = currentLesson?.name || '';
 
     // save progress to firestore
     await updateUserProgress(currentUser.uid, courseId, completedLessonId, true, completedAt, lessonName);
@@ -183,12 +178,12 @@ export default function CourseView() {
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
       <CircularProgress />
     </Box>
-  ) : selectedLesson ? (
+  ) : currentLesson ? (
     <LessonView
       courseId={courseId}
-      lesson={selectedLesson}
+      lesson={currentLesson}
       onComplete={handleLessonComplete}
-      isCompleted={userProgress[selectedLesson.id]?.completed}
+      isCompleted={userProgress[currentLesson.id]?.completed}
     />
   ) : (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>

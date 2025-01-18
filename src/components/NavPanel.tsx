@@ -17,8 +17,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
-import { Course, Unit, Lesson } from '../types';
-import { getLessonsForUnit } from '../services/dataService';
+import { Course } from '../types';
+import { getLessonsIdNameForUnit } from '../services/dataService';
 
 const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-selected': {
@@ -48,7 +48,7 @@ export const TOOLBAR_HEIGHT = 56;
 
 interface NavPanelProps {
   course: Course;
-  units: Unit[];
+  units: Array<{ id: string; name: string }>;
   progress: { [key: string]: { completed: boolean } };
   selectedUnitId?: string;
   selectedLessonId?: string;
@@ -74,16 +74,16 @@ export default function NavPanel({
       [unit.id]: unit.id === selectedUnitId || !selectedUnitId
     }), {})
   );
-  const [unitLessons, setUnitLessons] = useState<{ [key: string]: Lesson[] }>({});
+  const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
   // Load lessons for each unit
   useEffect(() => {
-    async function loadLessons(unit: Unit) {
+    async function loadLessons(unit: { id: string; name: string }) {
       if (!unitLessons[unit.id] && !loading[unit.id]) {
         try {
           setLoading(prev => ({ ...prev, [unit.id]: true }));
-          const lessons = await getLessonsForUnit(unit.id);
+          const lessons = await getLessonsIdNameForUnit(unit.id);
           setUnitLessons(prev => ({ ...prev, [unit.id]: lessons }));
         } catch (err) {
           console.error(`Error loading lessons for unit ${unit.id}:`, err);
@@ -98,41 +98,39 @@ export default function NavPanel({
         loadLessons(unit);
       }
     });
-  }, [units, expandedUnits, loading]); // Removed unitLessons from dependencies
+  }, [units, expandedUnits, loading]);
 
   const toggleUnit = (unitId: string) => {
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
   };
 
-  const isLessonAccessible = (lesson: Lesson, allLessons: Lesson[]) => {
+  const isLessonAccessible = (lessonIndex: number, unitLessons: Array<{ id: string }>) => {
     // return true; // for debuggging
     // If course has unlockLessonIndex, only that lesson is accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
-      if(lesson.orderIndex === course.settings.unlockLessonIndex) {
+      if(lessonIndex === course.settings.unlockLessonIndex) {
         return true;
       }
     }
 
     // Otherwise use the default progression logic:
     // First lesson of each unit is always accessible
-    if (lesson.orderIndex === 1) return true;
+    if (lessonIndex === 1) return true;
 
     // Other lessons require previous lesson to be completed
-    const previousLesson = allLessons.find(l => l.orderIndex === lesson.orderIndex - 1);
-    const isAccessible = previousLesson ? progress[previousLesson.id]?.completed : false;
-    return isAccessible;
+    const previousLessonId = unitLessons[lessonIndex - 2]?.id;
+    return previousLessonId ? progress[previousLessonId]?.completed : false;
   };
 
   const handleLessonSelect = (unitId: string, lessonId: string) => {
     if (onSelectLesson) {
       onSelectLesson(unitId, lessonId);
     } else {
-      console.log('navigating to unit', unitId, 'lesson', lessonId);
       navigate(`/${course.id}/${unitId}/${lessonId}`);
     }
     
     // Close drawer on mobile after selecting a lesson
-    const isMobile = window.innerWidth < 600; // sm breakpoint is 600px
+    const isMobile = window.innerWidth < 600;
     if (isMobile) {
       onToggle();
     }
@@ -142,7 +140,6 @@ export default function NavPanel({
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, overflow: 'hidden' }}>
-
           <Box 
             sx={{ 
               flex: 1, 
@@ -188,8 +185,8 @@ export default function NavPanel({
                       <CircularProgress size={24} />
                     </Box>
                   ) : (
-                    lessons.map((lesson) => {
-                      const isAccessible = isLessonAccessible(lesson, lessons);
+                    lessons.map((lesson, index) => {
+                      const isAccessible = isLessonAccessible(index + 1, lessons);
                       const isCompleted = progress[lesson.id]?.completed;
 
                       return (
@@ -202,7 +199,7 @@ export default function NavPanel({
                         >
                           <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
                             <Typography sx={{ flex: 1 }}>
-                              {lesson.orderIndex}. {lesson.name}
+                              {lesson.name}
                             </Typography>
                             {!isAccessible ? (
                               <LockIcon color="disabled" fontSize="small" />

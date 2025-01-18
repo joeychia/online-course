@@ -33,54 +33,120 @@
       "courseId": "course_rbh7nhons",
       "name": "公告事項",
       "description": "Announcements",
-      "lessonIds": {
-        "lesson_0": true
-      }
+      "lessons": [
+        {
+          "id": "lesson_0",
+          "name": "如何參加耕心禱讀課程"
+        }
+      ]
     },
     "unit_185zenr2y": {
       "id": "unit_185zenr2y",
       "courseId": "course_rbh7nhons",
       "name": "第一週 創世記1-11章",
       "description": "Bible study materials for week 1",
-      "lessonIds": {
-        "lesson_pbtjxm1sg": true,
-        "lesson_ag8bxvobz": true,
-        "lesson_ybus3bs7d": true,
-        "lesson_nx9ud3h1m": true,
-        "lesson_8hd91ikm9": true,
-        "lesson_myoc7tvty": true,
-        "lesson_4meseasfu": true
-      }
+      "lessons": [
+        {
+          "id": "lesson_pbtjxm1sg",
+          "name": "創世記 1.1-2.3"
+        },
+        {
+          "id": "lesson_ag8bxvobz",
+          "name": "創世記 2.4-4.26"
+        },
+        {
+          "id": "lesson_ybus3bs7d",
+          "name": "創世記 5.1-6.8"
+        },
+        {
+          "id": "lesson_nx9ud3h1m",
+          "name": "創世記 6.9-9.29"
+        },
+        {
+          "id": "lesson_8hd91ikm9",
+          "name": "創世記 10.1-11.9"
+        },
+        {
+          "id": "lesson_myoc7tvty",
+          "name": "創世記 11.10-32"
+        },
+        {
+          "id": "lesson_4meseasfu",
+          "name": "本週經文回顧及本週測試"
+        }
+      ]
     },
     "unit_9orkr92md": {
       "id": "unit_9orkr92md",
       "courseId": "course_rbh7nhons",
       "name": "第二週 創世記12-19章",
       "description": "Bible study materials for week 2",
-      "lessonIds": {
-        "lesson_wr99gp6um": true,
-        "lesson_bb09xjpqs": true,
-        "lesson_3ym4zqzqg": true,
-        "lesson_pv8572nlm": true,
-        "lesson_r4f0513n4": true,
-        "lesson_4ty34o8ox": true,
-        "lesson_25ml20h74": true
-      }
+      "lessons": [
+        {
+          "id": "lesson_wr99gp6um",
+          "name": "第2週第1天 呼召應許"
+        },
+        {
+          "id": "lesson_bb09xjpqs",
+          "name": "第2週 第2天 祝福地土"
+        },
+        {
+          "id": "lesson_3ym4zqzqg",
+          "name": "第2週 第3天 應許後裔"
+        },
+        {
+          "id": "lesson_pv8572nlm",
+          "name": "第2週第4天 割禮之約"
+        },
+        {
+          "id": "lesson_r4f0513n4",
+          "name": "第2週第5天 堅固應許"
+        },
+        {
+          "id": "lesson_4ty34o8ox",
+          "name": "第2週第6天 罪惡之地"
+        },
+        {
+          "id": "lesson_25ml20h74",
+          "name": "第2週 第7天 補漏拾遺"
+        }
+      ]
     },
     "unit_auv6m5lgv": {
       "id": "unit_auv6m5lgv",
       "courseId": "course_rbh7nhons",
       "name": "第三週 創世記20-28章",
       "description": "Bible study materials for week 3",
-      "lessonIds": {
-        "lesson_6a97t7mcw": true,
-        "lesson_tl2l6pk7j": true,
-        "lesson_z98c2ph86": true,
-        "lesson_fkwncjfvs": true,
-        "lesson_gbj1zes2r": true,
-        "lesson_xsioeiqlk": true,
-        "lesson_1kd1p5cas": true
-      }
+      "lessons": [
+        {
+          "id": "lesson_6a97t7mcw",
+          "name": "第3週第1天 應許之子"
+        },
+        {
+          "id": "lesson_tl2l6pk7j",
+          "name": "第3週第2天 信心試驗"
+        },
+        {
+          "id": "lesson_z98c2ph86",
+          "name": "第3週第3天 歸回列祖"
+        },
+        {
+          "id": "lesson_fkwncjfvs",
+          "name": "第3週 第4天 以實瑪利"
+        },
+        {
+          "id": "lesson_gbj1zes2r",
+          "name": "第3週第5天 以撒家族"
+        },
+        {
+          "id": "lesson_xsioeiqlk",
+          "name": "第3週第6天 雅各逃亡"
+        },
+        {
+          "id": "lesson_1kd1p5cas",
+          "name": "第3週 第7天 補漏拾遺"
+        }
+      ]
     }
   },
   "lessons": {

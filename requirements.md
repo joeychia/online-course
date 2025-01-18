@@ -50,10 +50,10 @@ Courses
     "settings": {
       "unlockLessonIndex": 1
     },
-    "unitIds": {
-      "$unitId": true,
-      "$unitId2": true
-    },
+    "units": [
+      {"$unitId": "unit name"},
+      {"$unitId2": "unit name2"}
+    ],
     "groupIds": {
       "$groupId": true,
       "$groupId2": true
@@ -69,10 +69,10 @@ Units
     "courseId": "courseId",
     "name": "Unit Name",
     "description": "Unit Description",
-    "lessonIds": {
-      "$lessonId": true,
-      "$lessonId2": true
-    }
+    "lessons": [
+      {"$lessonId": "lesson name"},
+      {"$lessonId2": "lesson name2"}
+    ]
   }
 }
 ```

@@ -18,7 +18,10 @@ export interface Unit {
   courseId: string;
   name: string;
   description: string;
-  lessonIds: Record<string, boolean>;
+  lessons: Array<{
+    id: string;
+    name: string;
+  }>;
 }
 
 export interface Lesson {

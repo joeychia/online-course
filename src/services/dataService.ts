@@ -21,12 +21,14 @@ export const getQuiz = async (quizId: string): Promise<Quiz | null> => {
   return await firestoreService.getQuizById(quizId);
 };
 
-export const getLessonsForUnit = async (unitId: string): Promise<Lesson[]> => {
-  return await firestoreService.getLessonsForUnit(unitId);
+// Get only lesson IDs and names for navigation
+export const getLessonsIdNameForUnit = async (unitId: string): Promise<Array<{ id: string; name: string }>> => {
+  return await firestoreService.getLessonsIdNameForUnit(unitId);
 };
 
-export const getUnitsForCourse = async (courseId: string): Promise<Unit[]> => {
-  return await firestoreService.getUnitsForCourse(courseId);
+// Get only unit IDs and names for navigation
+export const getUnitsIdNameForCourse = async (courseId: string): Promise<Array<{ id: string; name: string }>> => {
+  return await firestoreService.getUnitsIdNameForCourse(courseId);
 };
 
 export const getUser = async (userId: string): Promise<UserProfile | null> => {
