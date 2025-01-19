@@ -303,7 +303,10 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
             <Button 
               variant="contained" 
               color="primary"
-              onClick={() => setQuizOpen(true)}
+              onClick={() => {
+                setQuizStartTime(new Date());
+                setQuizOpen(true);
+              }}
             >
               {quizHistory || quizAnswers ? '重新测验' : '開始測驗'}
             </Button>

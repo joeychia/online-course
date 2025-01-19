@@ -23,15 +23,5 @@ export default defineConfig({
   },
   preview: {
     port: 3000,
-  },
-  // Handle environment variable replacement in HTML
-  experimental: {
-    renderBuiltUrl(filename: string, { hostType }: { hostType: 'js' | 'css' | 'html' }) {
-      if (hostType === 'html') {
-        return {
-          runtime: `import.meta.env.${filename.toUpperCase()}`
-        };
-      }
-    }
   }
 })

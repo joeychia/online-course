@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "tsc -b && vite build && firebase deploy --only hosting",
-    "seed": "tsx src/scripts/seed.ts"
+    "seed": "tsx src/scripts/seed.ts",
+    "test": "vitest"
   },
   "dependencies": {
     "@analytics/google-analytics": "^1.1.0",
@@ -25,9 +26,7 @@
     "dotenv": "^16.4.7",
     "firebase": "^10.8.0",
     "gray-matter": "^4.0.3",
-    "react": "^17.0.2",
     "react-calendar-heatmap": "^1.9.0",
-    "react-dom": "^17.0.2",
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.22.0",
     "react-tooltip": "^4.5.1",
@@ -35,6 +34,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^14.6.0",
     "@types/firebase": "^2.4.32",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
@@ -45,10 +48,14 @@
     "eslint-plugin-react-refresh": "^0.4.16",
     "firebase-admin": "^13.0.2",
     "globals": "^15.14.0",
+    "jsdom": "^26.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "^3.0.2"
   }
 }
