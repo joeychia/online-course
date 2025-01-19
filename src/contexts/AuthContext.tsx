@@ -3,6 +3,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '../services/authService';
 import { firestoreService } from '../services/firestoreService';
 import type { UserProfile } from '../types/user';
+import { AuthContextType } from '../hooks/useAuth';
 
 export interface AuthContextType {
     currentUser: FirebaseUser | null;

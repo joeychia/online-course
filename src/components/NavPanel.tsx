@@ -171,6 +171,7 @@ export default function NavPanel({
               <StyledUnitListItem 
                 onClick={() => toggleUnit(unit.id)}
                 selected={unit.id === selectedUnitId}
+                data-testid={`unit-button-${unit.id}`}
               >
                 <ListItemText
                   primary={unit.name}
@@ -182,7 +183,7 @@ export default function NavPanel({
                 <List component="div" disablePadding>
                   {loading[unit.id] ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                      <CircularProgress size={24} />
+                      <CircularProgress size={24} data-testid={`unit-loading-${unit.id}`} />
                     </Box>
                   ) : (
                     lessons.map((lesson, index) => {
@@ -196,17 +197,18 @@ export default function NavPanel({
                           onClick={() => isAccessible && handleLessonSelect(unit.id, lesson.id)}
                           selected={selectedLessonId === lesson.id}
                           disabled={!isAccessible}
+                          data-testid={`lesson-item-${lesson.id}`}
                         >
                           <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
                             <Typography sx={{ flex: 1 }}>
                               {lesson.name}
                             </Typography>
                             {!isAccessible ? (
-                              <LockIcon color="disabled" fontSize="small" />
+                              <LockIcon color="disabled" fontSize="small" data-testid={`lesson-lock-${lesson.id}`} />
                             ) : isCompleted ? (
-                              <CheckCircleIcon color="success" fontSize="small" />
+                              <CheckCircleIcon color="success" fontSize="small" data-testid={`lesson-complete-${lesson.id}`} />
                             ) : (
-                              <LockOpenIcon color="primary" fontSize="small" />
+                              <LockOpenIcon color="primary" fontSize="small" data-testid={`lesson-unlocked-${lesson.id}`} />
                             )}
                           </Stack>
                         </StyledListItem>
@@ -225,6 +227,7 @@ export default function NavPanel({
   return (
     <Box
       component="nav"
+      data-testid="nav-drawer"
       sx={{
         width: { sm: isOpen ? DRAWER_WIDTH : 0 },
         flexShrink: { sm: 0 },
