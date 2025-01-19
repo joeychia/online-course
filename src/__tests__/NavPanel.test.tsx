@@ -11,21 +11,21 @@ vi.mock('../services/dataService', () => ({
   getLessonsIdNameForUnit: vi.fn()
 }));
 
+const mockUnits = [
+  { id: '1', name: 'Unit 1' },
+  { id: '2', name: 'Unit 2' }
+];
+
 const mockCourse: Course = {
   id: '1',
   name: 'Test Course',
   description: 'Test Description',
   settings: {
-    requirePreviousLessonCompletion: true
+    unlockLessonIndex: 1
   },
-  units: [],
-  groupIds: []
+  units: mockUnits,
+  groupIds: { default: true }
 };
-
-const mockUnits = [
-  { id: '1', name: 'Unit 1' },
-  { id: '2', name: 'Unit 2' }
-];
 
 const mockLessonsUnit1 = [
   { id: 'u1l1', name: 'Lesson 1' },
@@ -75,7 +75,6 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
-        isMobile={false}
       />
     );
 
@@ -98,7 +97,6 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
-        isMobile={false}
       />
     );
 
@@ -122,7 +120,6 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
-        isMobile={false}
       />
     );
 
@@ -147,7 +144,6 @@ describe('NavPanel', () => {
         onSelectLesson={onSelectLesson}
         isOpen={true}
         onToggle={() => {}}
-        isMobile={false}
       />
     );
 
@@ -172,7 +168,6 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
-        isMobile={false}
       />
     );
 
@@ -229,7 +224,6 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
-        isMobile={true}
       />
     );
 

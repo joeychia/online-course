@@ -5,6 +5,7 @@ import CourseList from '../pages/CourseList';
 import { getAllCourses } from '../services/dataService';
 import type { Course } from '../types';
 import type { User as FirebaseUser } from 'firebase/auth';
+import type { AuthContextType } from '../contexts/AuthContext';
 
 // Mock the dataService
 vi.mock('../services/dataService', () => ({
@@ -12,7 +13,8 @@ vi.mock('../services/dataService', () => ({
 }));
 
 // Create a mock function for useAuth
-const mockUseAuth = vi.fn(() => ({
+const mockUseAuth = vi.fn() as unknown as ReturnType<typeof vi.fn> & { mockReturnValue: (value: AuthContextType) => void };
+mockUseAuth.mockReturnValue({
   currentUser: null,
   userProfile: null,
   loading: false,
@@ -20,7 +22,7 @@ const mockUseAuth = vi.fn(() => ({
   signInWithGoogle: vi.fn(),
   signUp: vi.fn(),
   signOut: vi.fn()
-}));
+});
 
 // Mock useAuth hook
 vi.mock('../contexts/useAuth', () => ({
@@ -57,15 +59,24 @@ interface RenderOptions {
 
 // Test wrapper with router and auth context
 const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOptions = {}) => {
-  mockUseAuth.mockImplementation(() => ({
-    currentUser: user,
-    userProfile: null,
+  const mockUser = user as FirebaseUser | null;
+  const mockAuthValue: AuthContextType = {
+    currentUser: mockUser,
+    userProfile: mockUser ? {
+      id: mockUser.uid,
+      name: mockUser.email?.split('@')[0] || 'Test User',
+      email: mockUser.email || 'test@example.com',
+      role: 'student',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } : null,
     loading: false,
     signIn: vi.fn(),
     signInWithGoogle: vi.fn(),
     signUp: vi.fn(),
     signOut: vi.fn()
-  }));
+  };
+  mockUseAuth.mockReturnValue(mockAuthValue);
 
   return render(
     <BrowserRouter>

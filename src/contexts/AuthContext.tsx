@@ -3,7 +3,6 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '../services/authService';
 import { firestoreService } from '../services/firestoreService';
 import type { UserProfile } from '../types/user';
-import { AuthContextType } from '../hooks/useAuth';
 
 export interface AuthContextType {
     currentUser: FirebaseUser | null;
@@ -26,8 +25,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const unsubscribe = authService.onAuthStateChanged(async (user) => {
             setCurrentUser(user);
             if (user) {
-                const profile = await firestoreService.getUserById(user.uid);
-                setUserProfile(profile);
+                try {
+                    const profile = await firestoreService.getUserById(user.uid);
+                    if (profile && 'id' in profile) {
+                        const now = new Date();
+                        setUserProfile({
+                            id: profile.id,
+                            name: profile.name || user.displayName || 'Anonymous',
+                            email: profile.email || user.email || '',
+                            role: 'student',
+                            createdAt: now,
+                            updatedAt: now
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading user profile:', error);
+                    setUserProfile(null);
+                }
             } else {
                 setUserProfile(null);
             }
@@ -37,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return unsubscribe;
     }, []);
 
-    const value = {
+    const value: AuthContextType = {
         currentUser,
         userProfile,
         loading,
