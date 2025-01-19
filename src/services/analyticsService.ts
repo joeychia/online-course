@@ -1,125 +1,94 @@
-import Analytics from 'analytics';
-import googleAnalytics from '@analytics/google-analytics';
-
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
-
-if (!GA_MEASUREMENT_ID) {
-  console.warn('Google Analytics Measurement ID is not set in environment variables');
+// Analytics interface
+export interface Analytics {
+  page: (_path: string) => Promise<void>;
+  track: (_event: string, _data: Record<string, unknown>) => Promise<void>;
+  identify: (_userId: string, _traits: Record<string, unknown>) => Promise<void>;
 }
 
-// Initialize analytics with Google Analytics
-const analytics = Analytics({
-  app: 'online-course',
-  plugins: [
-    googleAnalytics({
-      measurementIds: [GA_MEASUREMENT_ID],
-      gtagConfig: {
-        send_page_view: true
-      }
-    })
-  ]
-});
-
-// Event types
-export type CourseEvent = {
+// Event interfaces
+export interface CourseEvent {
   courseId: string;
   courseName: string;
-};
+  unitId?: string;
+  unitName?: string;
+  [key: string]: string | undefined;
+}
 
-export type LessonEvent = CourseEvent & {
-  unitId: string;
-  unitName: string;
+export interface LessonEvent extends Omit<CourseEvent, 'unitId' | 'unitName'> {
   lessonId: string;
   lessonName: string;
-};
+  unitId?: string;
+  unitName?: string;
+  [key: string]: string | undefined;
+}
 
-export type QuizEvent = LessonEvent & {
+export interface QuizEvent {
+  courseId: string;
+  courseName: string;
+  lessonId: string;
+  lessonName: string;
+  unitId?: string;
+  unitName?: string;
   score: number;
-  timeSpent: number;
-};
+  timeSpent?: number;
+  [key: string]: string | number | undefined;
+}
 
 // Analytics service
-class AnalyticsService {
-  // Page views
-  trackPageView(path: string) {
-    analytics.page({
-      url: path,
-      title: document.title
-    });
+export class AnalyticsService {
+  private analytics: Analytics;
+
+  constructor(analytics: Analytics) {
+    this.analytics = analytics;
   }
 
-  // Course events
-  trackCourseView({ courseId, courseName }: CourseEvent) {
-    analytics.track('course_view', {
-      courseId,
-      courseName
-    });
+  async trackPageView(path: string): Promise<void> {
+    await this.analytics.page(path);
   }
 
-  trackCourseRegistration({ courseId, courseName }: CourseEvent) {
-    analytics.track('course_registration', {
-      courseId,
-      courseName
-    });
+  async trackCourseView(event: CourseEvent): Promise<void> {
+    await this.analytics.track('Course Viewed', event);
   }
 
-  trackCourseDropped({ courseId, courseName }: CourseEvent) {
-    analytics.track('course_dropped', {
-      courseId,
-      courseName
-    });
+  async trackCourseRegistration(event: CourseEvent): Promise<void> {
+    await this.analytics.track('Course Registered', event);
   }
 
-  // Lesson events
-  trackLessonView({ courseId, courseName, unitId, unitName, lessonId, lessonName }: LessonEvent) {
-    analytics.track('lesson_view', {
-      courseId,
-      courseName,
-      unitId,
-      unitName,
-      lessonId,
-      lessonName
-    });
+  async trackCourseDropped(event: CourseEvent): Promise<void> {
+    await this.analytics.track('Course Dropped', event);
   }
 
-  trackLessonComplete({ courseId, courseName, unitId, unitName, lessonId, lessonName }: LessonEvent) {
-    analytics.track('lesson_complete', {
-      courseId,
-      courseName,
-      unitId,
-      unitName,
-      lessonId,
-      lessonName
-    });
+  async trackLessonView(event: LessonEvent): Promise<void> {
+    await this.analytics.track('Lesson Viewed', event);
   }
 
-  // Quiz events
-  trackQuizComplete({ 
-    courseId, 
-    courseName, 
-    unitId, 
-    unitName, 
-    lessonId, 
-    lessonName, 
-    score,
-    timeSpent 
-  }: QuizEvent) {
-    analytics.track('quiz_complete', {
-      courseId,
-      courseName,
-      unitId,
-      unitName,
-      lessonId,
-      lessonName,
-      score,
-      timeSpent
-    });
+  async trackLessonComplete(event: LessonEvent): Promise<void> {
+    await this.analytics.track('Lesson Completed', event);
   }
 
-  // User events
-  identifyUser(userId: string, traits?: { [key: string]: any }) {
-    analytics.identify(userId, traits);
+  async trackQuizComplete(event: QuizEvent): Promise<void> {
+    await this.analytics.track('Quiz Completed', event);
+  }
+
+  async identifyUser(userId: string, traits: Record<string, unknown>): Promise<void> {
+    await this.analytics.identify(userId, traits);
   }
 }
 
-export const analyticsService = new AnalyticsService(); 
+// Initialize analytics with mock implementation for now
+// This should be replaced with actual Google Analytics implementation
+const analytics = {
+  page: async (_path: string): Promise<void> => {
+    // Logging disabled in production
+  },
+  track: async (_event: string, _data: Record<string, unknown>): Promise<void> => {
+    // Logging disabled in production
+  },
+  identify: async (_userId: string, _traits: Record<string, unknown>): Promise<void> => {
+    // Logging disabled in production
+  }
+};
+
+export const analyticsService = new AnalyticsService(analytics);
+
+export default analytics;

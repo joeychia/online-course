@@ -42,12 +42,12 @@ function extractVideoInfo(qianliContent) {
   if (htmlMatch) {
     return {
       'video-title': htmlMatch[2],
-      'video-url': htmlMatch[1].replace('_blank', '')
+      'video-url': htmlMatch[1]
     };
   }
   
   // Fallback to markdown format
-  const markdownMatch = qianliContent.match(/\[([^\]]+)\]\((https:\/\/youtu[^\)]+)\)/);
+  const markdownMatch = qianliContent.match(/\[([^\]]+)\](https:\/\/youtu[^)]+)/);
   if (markdownMatch) {
     return {
       'video-title': markdownMatch[1],
@@ -104,7 +104,7 @@ function generateMockData() {
     }
 
     const { data: frontmatter, content } = dailyContent;
-    const { weekNum, dayNum, date } = frontmatter;
+    const { weekNum, date } = frontmatter;
 
     // Create new unit for each week
     if (weekNum !== currentWeek) {

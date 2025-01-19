@@ -75,12 +75,11 @@ function extractMarkdownContent($, element) {
   }).get().join('\n\n');
 }
 
-async function convertHtmlToJson(html, filename) {
+async function convertHtmlToJson(html) {
   const $ = cheerio.load(html);
   
   // Find Qianli link
   const qianliLink = $('#dailyContent ul:last-of-type a[href*="qianli.html"]').attr('href');
-  let qianliContent = null;
   let youtubeData = null;
 
   if (qianliLink) {
@@ -165,7 +164,7 @@ async function convertData() {
     try {
       console.log(`Converting ${filename}...`);
       const html = fs.readFileSync(path.join(RAW_DIR, filename), 'utf-8');
-      const content = await convertHtmlToJson(html, filename);
+      const content = await convertHtmlToJson(html);
       
       const outputPath = path.join(OUTPUT_DIR, filename.replace('.html', '.json'));
       fs.writeFileSync(outputPath, JSON.stringify(content, null, 2));

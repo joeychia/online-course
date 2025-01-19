@@ -5,7 +5,7 @@ import CourseView from './pages/CourseView';
 // import UnitView from './pages/UnitView';
 // import LessonView from './pages/LessonView';
 import Login from './pages/Login';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from './contexts/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

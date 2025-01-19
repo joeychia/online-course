@@ -17,7 +17,7 @@ import NavPanel from '../components/NavPanel';
 import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
 import { Lesson, Course, UserProgress } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
 

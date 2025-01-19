@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Viewer } from '@toast-ui/react-editor';
+import type { HTMLConvertorMap, MdNode } from '@toast-ui/editor';
 import { 
   Box, 
   Button, 
@@ -27,7 +28,7 @@ import {
   getNotesForLesson,
   getQuizHistoryForUserLesson,
 } from '../services/dataService';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
 
 // Function to encode URLs in markdown content
@@ -35,7 +36,7 @@ function encodeMarkdownUrls(content: string): string {
   // First encode URLs in markdown links
   let processedContent = content.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
-    (match, text, url) => {
+    (match: string, text: string, url: string): string => {
       // Only encode if URL contains unencoded spaces
       if (url.includes(' ') && !url.includes('%20')) {
         const encodedUrl = url.replace(/ /g, '%20');
@@ -47,8 +48,8 @@ function encodeMarkdownUrls(content: string): string {
 
   // Transform markdown tables to have empty headers
   processedContent = processedContent.replace(
-    /(\|[^\n]+\|)\n\|[\s\-\|]+\|(\n\|[^\n]+\|)\n\|[\s\-\|]+\|/g,
-    (_, firstRow, secondRow) => {
+    /(\|[^\n]+\|)\n\|[\s-|]+\|(\n\|[^\n]+\|)\n\|[\s-|]+\|/g,
+    (_: string, firstRow: string, secondRow: string): string => {
       return '| | | | |\n|---|---|---|---|\n' + firstRow + secondRow;
     }
   );
@@ -75,11 +76,46 @@ function getYouTubeVideoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-export default function LessonView({ courseId, lesson, onComplete, isCompleted: initialIsCompleted = false }: LessonViewProps) {
+interface LinkNode extends MdNode {
+  destination: string;
+  title?: string;
+}
+
+interface OpenTagToken {
+  type: 'openTag';
+  tagName: string;
+  attributes?: Record<string, string>;
+}
+
+interface CloseTagToken {
+  type: 'closeTag';
+  tagName: string;
+}
+
+const linkRenderer: HTMLConvertorMap = {
+  link: (node: MdNode): OpenTagToken | CloseTagToken => {
+    const linkNode = node as LinkNode;
+    if ('entering' in node && node.entering) {
+      return {
+        type: 'openTag',
+        tagName: 'a',
+        attributes: {
+          href: linkNode.destination,
+          title: linkNode.title || '',
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
+      };
+    }
+    return { type: 'closeTag', tagName: 'a' };
+  }
+};
+
+export default function LessonView({ courseId, lesson, onComplete, isCompleted: initialIsCompleted = false }: LessonViewProps): JSX.Element {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState<string>("");
-  const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string } | null>(null);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string> | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(null);
@@ -90,13 +126,13 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
 
   // Track lesson view
   useEffect(() => {
-    async function trackView() {
+    async function trackView(): Promise<void> {
       if (lesson.unitId) {
         const unit = await getUnit(lesson.unitId);
         if (unit) {
-          analyticsService.trackLessonView({
+          void analyticsService.trackLessonView({
             courseId,
-            courseName: unit.courseId, // We might want to fetch course name if needed
+            courseName: unit.courseId,
             unitId: unit.id,
             unitName: unit.name,
             lessonId: lesson.id,
@@ -105,12 +141,12 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         }
       }
     }
-    trackView();
-  }, [lesson.id, courseId]);
+    void trackView();
+  }, [lesson.id, lesson.name, lesson.unitId, courseId]);
 
   // Load quiz and quiz history if lesson has quizId
   useEffect(() => {
-    async function loadQuizData() {
+    async function loadQuizData(): Promise<void> {
       if (lesson?.quizId && currentUser) {
         try {
           const [quizData, historyData] = await Promise.all([
@@ -138,12 +174,12 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
       setLoading(false);
     }
     
-    loadQuizData();
+    void loadQuizData();
   }, [lesson?.quizId, currentUser, lesson?.id]);
 
   // Load existing note when component mounts
   useEffect(() => {
-    async function loadNote() {
+    async function loadNote(): Promise<void> {
       if (!currentUser || !lesson) return;
       try {
         const existingNote = await getNotesForLesson(currentUser.uid, lesson.id);
@@ -154,10 +190,10 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         console.error('Error loading note:', err);
       }
     }
-    loadNote();
-  }, [lesson?.id, currentUser]);
+    void loadNote();
+  }, [lesson?.id, currentUser, lesson]);
 
-  const handleSaveNote = async () => {
+  const handleSaveNote = async (): Promise<void> => {
     if (!currentUser) return;
     
     try {
@@ -173,7 +209,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
     }
   };
 
-  const handleQuizSubmit = async (answers: { [key: string]: string }) => {
+  const handleQuizSubmit = async (answers: Record<string, string>): Promise<void> => {
     if (!quiz || !currentUser) return;
 
     const endTime = new Date();
@@ -182,8 +218,8 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
     // Calculate score
     let correct = 0;
     Object.entries(answers).forEach(([questionIndex, answerId]) => {
-      const question = quiz.questions[parseInt(questionIndex)];
-      if (question?.options && question.options[parseInt(answerId)]?.isCorrect) {
+      const question = quiz.questions[parseInt(questionIndex, 10)];
+      if (question?.options && question.options[parseInt(answerId, 10)]?.isCorrect) {
         correct++;
       }
     });
@@ -194,9 +230,9 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
     // Track quiz completion
     const unit = await getUnit(lesson.unitId);
     if (unit) {
-      analyticsService.trackQuizComplete({
+      void analyticsService.trackQuizComplete({
         courseId,
-        courseName: unit.courseId, // We might want to fetch course name if needed
+        courseName: unit.courseId,
         unitId: unit.id,
         unitName: unit.name,
         lessonId: lesson.id,
@@ -318,50 +354,17 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         <Viewer 
           key={lesson.id}
           initialValue={encodedContent}
-          customHTMLRenderer={{
-            link: (node: any, { entering }: any) => {
-              if (entering) {
-                const { destination, title } = node;
-                return {
-                  type: 'openTag',
-                  tagName: 'a',
-                  attributes: {
-                    href: destination,
-                    title: title || '',
-                    target: '_blank',
-                    rel: 'noopener noreferrer',
-                  },
-                };
-              } else {
-                return { type: 'closeTag', tagName: 'a' };
-              }
-            },
-          }}
+          customHTMLRenderer={linkRenderer}
         />
       </Box>
 
       {/* Meditation Section */}
       {lesson.meditation && (
         <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
-          <Viewer initialValue={encodedMeditation} customHTMLRenderer={{
-            link: (node: any, { entering }: any) => {
-              if (entering) {
-                const { destination, title } = node;
-                return {
-                  type: 'openTag',
-                  tagName: 'a',
-                  attributes: {
-                    href: destination,
-                    title: title || '',
-                    target: '_blank',
-                    rel: 'noopener noreferrer',
-                  },
-                };
-              } else {
-                return { type: 'closeTag', tagName: 'a' };
-              }
-            },
-          }}/>
+          <Viewer 
+            initialValue={encodedMeditation} 
+            customHTMLRenderer={linkRenderer}
+          />
         </Paper>
       )}
 

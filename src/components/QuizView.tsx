@@ -14,7 +14,7 @@ import {
   Divider,
 } from '@mui/material';
 import { saveQuizHistory } from '../services/dataService';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import type { Quiz } from '../types';
 
 interface QuizViewProps {

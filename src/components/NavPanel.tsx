@@ -98,7 +98,7 @@ export default function NavPanel({
         loadLessons(unit);
       }
     });
-  }, [units, expandedUnits, loading]);
+  }, [units, expandedUnits, loading, unitLessons]);
 
   const toggleUnit = (unitId: string) => {
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));

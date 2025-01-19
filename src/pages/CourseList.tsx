@@ -17,7 +17,7 @@ import {
 import LockIcon from '@mui/icons-material/Lock';
 import { Course } from '../types';
 import { getAllCourses } from '../services/dataService';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 interface CourseCardProps {
   course: Course;

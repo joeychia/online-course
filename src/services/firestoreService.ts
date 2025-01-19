@@ -24,13 +24,34 @@ class FirestoreService {
     async getAllCourses(): Promise<Course[]> {
         const coursesRef = collection(db, 'courses');
         const snapshot = await getDocs(coursesRef);
-        return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() } as Course));
+        return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                name: data.name as string,
+                description: data.description as string,
+                units: data.units as Array<{ id: string; name: string }>,
+                settings: data.settings as { unlockLessonIndex: number },
+                groupIds: data.groupIds as Record<string, boolean>,
+                isPublic: data.isPublic as boolean | undefined
+            };
+        });
     }
 
     async getCourseById(id: string): Promise<Course | null> {
         const docRef = doc(db, 'courses', id);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Course : null;
+        if (!docSnap.exists()) return null;
+        const data = docSnap.data();
+        return {
+            id: docSnap.id,
+            name: data.name as string,
+            description: data.description as string,
+            units: data.units as Array<{ id: string; name: string }>,
+            settings: data.settings as { unlockLessonIndex: number },
+            groupIds: data.groupIds as Record<string, boolean>,
+            isPublic: data.isPublic as boolean | undefined
+        };
     }
 
     // Unit operations
@@ -43,7 +64,15 @@ class FirestoreService {
     async getUnitById(id: string): Promise<Unit | null> {
         const docRef = doc(db, 'units', id);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Unit : null;
+        if (!docSnap.exists()) return null;
+        const data = docSnap.data();
+        return {
+            id: docSnap.id,
+            name: data.name as string,
+            description: data.description as string,
+            lessons: data.lessons as Array<{ id: string; name: string }>,
+            courseId: data.courseId as string
+        };
     }
 
     // Lesson operations
@@ -56,14 +85,29 @@ class FirestoreService {
     async getLessonById(id: string): Promise<Lesson | null> {
         const docRef = doc(db, 'lessons', id);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Lesson : null;
+        if (!docSnap.exists()) return null;
+        const data = docSnap.data();
+        return {
+            id: docSnap.id,
+            name: data.name as string,
+            content: data.content as string,
+            unitId: data.unitId as string,
+            quizId: data.quizId as string | null,
+            'video-title': data['video-title'] as string | undefined,
+            'video-url': data['video-url'] as string | undefined
+        };
     }
 
     // Quiz operations
     async getQuizById(id: string): Promise<Quiz | null> {
         const docRef = doc(db, 'quizzes', id);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Quiz : null;
+        if (!docSnap.exists()) return null;
+        const data = docSnap.data();
+        return {
+            id: docSnap.id,
+            questions: data.questions as Quiz['questions']
+        };
     }
 
     // Quiz History operations
@@ -81,16 +125,16 @@ class FirestoreService {
             const data = doc.data();
             return {
                 id: doc.id,
-                userId: data.userId,
-                courseId: data.courseId,
-                lessonId: data.lessonId,
-                answers: data.answers,
-                score: data.score,
-                completedAt: data.completedAt,
-                timeSpent: data.timeSpent,
-                correct: data.correct,
-                total: data.total
-            } as QuizHistory;
+                userId: data.userId as string,
+                courseId: data.courseId as string,
+                lessonId: data.lessonId as string,
+                answers: data.answers as Record<string, string>,
+                score: data.score as number,
+                completedAt: data.completedAt as string,
+                timeSpent: data.timeSpent as number,
+                correct: data.correct as number,
+                total: data.total as number
+            };
         });
     }
 
@@ -110,15 +154,15 @@ class FirestoreService {
         const data = doc.data();
         return {
             id: doc.id,
-            userId: data.userId,
-            courseId: data.courseId,
-            lessonId: data.lessonId,
-            answers: data.answers,
-            score: data.score,
-            completedAt: data.completedAt,
-            timeSpent: data.timeSpent,
-            correct: data.correct,
-            total: data.total
+            userId: data.userId as string,
+            courseId: data.courseId as string,
+            lessonId: data.lessonId as string,
+            answers: data.answers as Record<string, string>,
+            score: data.score as number,
+            completedAt: data.completedAt as string,
+            timeSpent: data.timeSpent as number,
+            correct: data.correct as number,
+            total: data.total as number
         } as QuizHistory;
     }
 
@@ -218,9 +262,9 @@ class FirestoreService {
             const data = doc.data();
             return {
                 id: doc.id,
-                courseId: data.courseId,
-                userId: data.userId,
-                grade: data.grade
+                courseId: data.courseId as string,
+                userId: data.userId as string,
+                grade: data.grade as number
             } as Grade;
         });
     }
@@ -239,9 +283,9 @@ class FirestoreService {
         const data = doc.data();
         return {
             id: doc.id,
-            courseId: data.courseId,
-            userId: data.userId,
-            grade: data.grade
+            courseId: data.courseId as string,
+            userId: data.userId as string,
+            grade: data.grade as number
         } as Grade;
     }
 }

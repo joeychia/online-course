@@ -3,7 +3,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CourseList from '../pages/CourseList';
 import { getAllCourses } from '../services/dataService';
-import { useAuth } from '../contexts/AuthContext';
 import type { Course } from '../types';
 import type { User as FirebaseUser } from 'firebase/auth';
 
@@ -12,9 +11,20 @@ vi.mock('../services/dataService', () => ({
   getAllCourses: vi.fn()
 }));
 
+// Create a mock function for useAuth
+const mockUseAuth = vi.fn(() => ({
+  currentUser: null,
+  userProfile: null,
+  loading: false,
+  signIn: vi.fn(),
+  signInWithGoogle: vi.fn(),
+  signUp: vi.fn(),
+  signOut: vi.fn()
+}));
+
 // Mock useAuth hook
-vi.mock('../contexts/AuthContext', () => ({
-  useAuth: vi.fn()
+vi.mock('../contexts/useAuth', () => ({
+  useAuth: () => mockUseAuth()
 }));
 
 // Mock data
@@ -47,7 +57,7 @@ interface RenderOptions {
 
 // Test wrapper with router and auth context
 const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOptions = {}) => {
-  vi.mocked(useAuth).mockReturnValue({
+  mockUseAuth.mockImplementation(() => ({
     currentUser: user,
     userProfile: null,
     loading: false,
@@ -55,7 +65,7 @@ const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOpti
     signInWithGoogle: vi.fn(),
     signUp: vi.fn(),
     signOut: vi.fn()
-  });
+  }));
 
   return render(
     <BrowserRouter>

@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '../services/authService';
 import { firestoreService } from '../services/firestoreService';
-import type { UserProfile } from '../types';
+import type { UserProfile } from '../types/user';
 
-interface AuthContextType {
+export interface AuthContextType {
     currentUser: FirebaseUser | null;
     userProfile: UserProfile | null;
     loading: boolean;
@@ -14,15 +14,7 @@ interface AuthContextType {
     signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
-};
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
