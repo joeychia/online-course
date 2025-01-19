@@ -117,9 +117,13 @@ export default function Login() {
                     </Typography>
                     
                     {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
+                        <Typography 
+                            color="error" 
+                            role="alert"
+                            sx={{ mt: 2, textAlign: 'center' }}
+                        >
                             {error}
-                        </Alert>
+                        </Typography>
                     )}
 
                     <form onSubmit={handleEmailSignIn}>
