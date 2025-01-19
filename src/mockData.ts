@@ -22,7 +22,6 @@ export interface Lesson {
   name: string;
   content: string;
   quizId?: string;
-  orderIndex: number;
 }
 
 export interface Quiz {

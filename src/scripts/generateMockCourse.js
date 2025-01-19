@@ -142,7 +142,6 @@ function generateMockData() {
       ...videoInfo,
       meditation: zhuolinContent?.content || '',
       quizId: null,
-      orderIndex: dayNum
     };
 
     lessons[lessonId] = lesson;

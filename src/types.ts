@@ -31,20 +31,18 @@ export interface Lesson {
   content: string;
   "video-title"?: string;
   "video-url"?: string;
-  meditation?: string;
   quizId: string | null;
-  orderIndex: number;
 }
 
 export interface Quiz {
   id: string;
-  questions: Record<string, QuizQuestion>;
+  questions: QuizQuestion[];
 }
 
 export interface QuizQuestion {
   type: 'single_choice' | 'free_form';
   text: string;
-  options: Record<string, QuizOption>;
+  options?: QuizOption[];
 }
 
 export interface QuizOption {

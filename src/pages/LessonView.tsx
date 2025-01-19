@@ -119,18 +119,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
           ]);
 
           if (quizData) {
-            const sortedQuiz = {
-              id: quizData.id,
-              questions: Object.fromEntries(
-                Object.entries(quizData.questions)
-                  .sort(([keyA], [keyB]) => {
-                    const numA = parseInt(keyA.replace(/\D/g, ''), 10);
-                    const numB = parseInt(keyB.replace(/\D/g, ''), 10);
-                    return numA - numB;
-                  })
-              ),
-            };
-            setQuiz(sortedQuiz);
+            setQuiz(quizData);
           } else {
             setQuiz(null);
           }
@@ -192,14 +181,14 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
 
     // Calculate score
     let correct = 0;
-    Object.entries(answers).forEach(([questionId, answerId]) => {
-      const question = quiz.questions[questionId];
-      if (question.options[answerId]?.isCorrect) {
+    Object.entries(answers).forEach(([questionIndex, answerId]) => {
+      const question = quiz.questions[parseInt(questionIndex)];
+      if (question?.options && question.options[parseInt(answerId)]?.isCorrect) {
         correct++;
       }
     });
 
-    const total = Object.keys(quiz.questions).length;
+    const total = quiz.questions.length;
     const score = (correct / total) * 100;
 
     // Track quiz completion

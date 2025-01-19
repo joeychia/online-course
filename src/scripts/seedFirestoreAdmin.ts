@@ -64,12 +64,12 @@ export async function seedFirestore() {
         }
 
         // Add users (optional, you might want to handle this separately)
-        if (mockData.users) {
-            for (const [id, user] of Object.entries(mockData.users)) {
-                await db.doc(`users/${id}`).set(user);
-                console.log(`Added user: ${user.name}`);
-            }
-        }
+        // if (mockData.users) {
+        //     for (const [id, user] of Object.entries(mockData.users)) {
+        //         await db.doc(`users/${id}`).set(user);
+        //         console.log(`Added user: ${user.name}`);
+        //     }
+        // }
 
         console.log('Firestore seeded successfully!');
         process.exit(0);

@@ -15,26 +15,7 @@ import {
 } from '@mui/material';
 import { saveQuizHistory } from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
-
-interface Option {
-  text: string;
-  isCorrect: boolean;
-}
-
-interface Question {
-  type: 'single_choice' | 'free_form';
-  text: string;
-  options?: {
-    [key: string]: Option;
-  };
-}
-
-interface Quiz {
-  id: string;
-  questions: {
-    [key: string]: Question;
-  };
-}
+import type { Quiz } from '../types';
 
 interface QuizViewProps {
   quiz: Quiz;
@@ -46,15 +27,15 @@ interface QuizViewProps {
 
 export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }: QuizViewProps) {
   const { currentUser } = useAuth();
-  const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
 
-  const handleAnswerChange = (questionId: string, value: string) => {
+  const handleAnswerChange = (questionIndex: number, value: string) => {
     if (!submitted) {
       setAnswers(prev => ({
         ...prev,
-        [questionId]: value
+        [questionIndex]: value
       }));
     }
   };
@@ -63,10 +44,10 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
     let correct = 0;
     let total = 0;
 
-    Object.entries(quiz.questions).forEach(([questionId, question]) => {
+    quiz.questions.forEach((question, questionIndex) => {
       if (question.type === 'single_choice') {
-        const selectedOptionId = answers[questionId];
-        if (selectedOptionId && question.options?.[selectedOptionId]?.isCorrect) {
+        const selectedOptionIndex = parseInt(answers[questionIndex] || '-1');
+        if (selectedOptionIndex >= 0 && question.options?.[selectedOptionIndex]?.isCorrect) {
           correct++;
         }
         total++;
@@ -102,30 +83,30 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
   };
 
   const isComplete = () => {
-    return Object.keys(quiz.questions).every(questionId => answers[questionId]);
+    return quiz.questions.every((_, index) => answers[index] !== undefined);
   };
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
       <Paper sx={{ p: 3 }}>
         <Stack spacing={4}>
-          {Object.entries(quiz.questions).map(([questionId, question], index) => (
-            <FormControl key={questionId} component="fieldset">
+          {quiz.questions.map((question, questionIndex) => (
+            <FormControl key={questionIndex} component="fieldset">
               <FormLabel component="legend">
                 <Typography variant="h6" gutterBottom>
-                  {index + 1}. {question.text}
+                  {questionIndex + 1}. {question.text}
                 </Typography>
               </FormLabel>
               {question.type === 'single_choice' ? (
                 <>
                   <RadioGroup
-                    value={answers[questionId] || ''}
-                    onChange={(e) => handleAnswerChange(questionId, e.target.value)}
+                    value={answers[questionIndex] || ''}
+                    onChange={(e) => handleAnswerChange(questionIndex, e.target.value)}
                   >
-                    {question.options && Object.entries(question.options).map(([optionId, option]) => (
+                    {question.options?.map((option, optionIndex) => (
                       <FormControlLabel
-                        key={optionId}
-                        value={optionId}
+                        key={optionIndex}
+                        value={optionIndex.toString()}
                         control={<Radio />}
                         label={option.text}
                         disabled={submitted}
@@ -143,10 +124,10 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
                       variant="body2" 
                       sx={{ 
                         mt: 1,
-                        color: question.options[answers[questionId]]?.isCorrect ? 'success.main' : 'error.main'
+                        color: question.options[parseInt(answers[questionIndex] || '-1')]?.isCorrect ? 'success.main' : 'error.main'
                       }}
                     >
-                      {question.options[answers[questionId]]?.isCorrect ? 
+                      {question.options[parseInt(answers[questionIndex] || '-1')]?.isCorrect ? 
                         '✓ Correct' : 
                         '✗ Incorrect'}
                     </Typography>
@@ -157,8 +138,8 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
                   fullWidth
                   multiline
                   rows={4}
-                  value={answers[questionId] || ''}
-                  onChange={(e) => handleAnswerChange(questionId, e.target.value)}
+                  value={answers[questionIndex] || ''}
+                  onChange={(e) => handleAnswerChange(questionIndex, e.target.value)}
                   placeholder="請在此輸入你的答案..."
                   disabled={submitted}
                 />
