@@ -11,9 +11,20 @@ import {
   MenuItem,
   Avatar,
   Button,
+  Select,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormControlLabel,
+  ToggleButtonGroup,
+  ToggleButton,
+  useTheme as useMuiTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useAuth } from '../contexts/useAuth';
+import { useTheme } from '../contexts/ThemeContext';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,6 +32,10 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { fontSize, setFontSize } = useFontSize();
+  const muiTheme = useMuiTheme();
   const { currentUser, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,11 +74,41 @@ export default function Layout({ children }: LayoutProps) {
     navigate('/login');
   };
 
+  const handleSettingsMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setSettingsAnchorEl(event.currentTarget);
+  };
+
+  const handleSettingsClose = () => {
+    setSettingsAnchorEl(null);
+  };
+
+  const handleFontSizeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newSize: string | null,
+  ) => {
+    if (newSize !== null) {
+      setFontSize(newSize as 'small' | 'medium' | 'large');
+    }
+  };
+
+  const handleThemeChange = () => {
+    toggleTheme();
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column',
       minHeight: '100vh',
+      bgcolor: 'background.default',
+      color: 'text.primary',
+      fontSize: 'var(--font-size-body)',
+      '& h1': { fontSize: 'var(--font-size-h1)' },
+      '& h2': { fontSize: 'var(--font-size-h2)' },
+      '& h3': { fontSize: 'var(--font-size-h3)' },
+      '& h4': { fontSize: 'var(--font-size-h4)' },
+      '& h5': { fontSize: 'var(--font-size-h5)' },
+      '& h6': { fontSize: 'var(--font-size-h6)' },
     }}>
       <AppBar 
         position="fixed" 
@@ -97,6 +142,50 @@ export default function Layout({ children }: LayoutProps) {
             </Typography>
           </Stack>
           <Stack direction="row" spacing={4} alignItems="center">
+            <IconButton
+              color="inherit"
+              onClick={handleSettingsMenu}
+              aria-label="settings"
+            >
+              <SettingsIcon />
+            </IconButton>
+            <Menu
+              anchorEl={settingsAnchorEl}
+              open={Boolean(settingsAnchorEl)}
+              onClose={handleSettingsClose}
+              onClick={handleSettingsClose}
+            >
+              <Box sx={{ p: 2, minWidth: 200 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>Font Size</Typography>
+                <ToggleButtonGroup
+                  value={fontSize}
+                  exclusive
+                  onChange={handleFontSizeChange}
+                  aria-label="font size"
+                  size="small"
+                  sx={{ mb: 2, display: 'flex' }}
+                >
+                  <ToggleButton value="small" aria-label="small font">
+                    <Typography sx={{ fontSize: '0.875rem' }}>Small</Typography>
+                  </ToggleButton>
+                  <ToggleButton value="medium" aria-label="medium font">
+                    <Typography sx={{ fontSize: '1rem' }}>Medium</Typography>
+                  </ToggleButton>
+                  <ToggleButton value="large" aria-label="large font">
+                    <Typography sx={{ fontSize: '1.125rem' }}>Large</Typography>
+                  </ToggleButton>
+                </ToggleButtonGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isDarkMode}
+                      onChange={handleThemeChange}
+                    />
+                  }
+                  label="Dark Mode"
+                />
+              </Box>
+            </Menu>
             {currentUser ? (
               <>
                 <Stack direction="row" spacing={2} alignItems="center">

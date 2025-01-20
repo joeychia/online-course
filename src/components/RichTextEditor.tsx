@@ -1,6 +1,8 @@
 import { useRef, useEffect } from 'react';
 import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
+import { useTheme } from '../contexts/ThemeContext';
+import { Box } from '@mui/material';
 
 interface RichTextEditorProps {
   value: string;
@@ -10,6 +12,7 @@ interface RichTextEditorProps {
 
 const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: RichTextEditorProps) => {
   const editorRef = useRef<Editor>(null);
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     // Update editor content when value prop changes
@@ -27,7 +30,28 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <Box className="border rounded-lg overflow-hidden" sx={{ 
+      '& .toastui-editor-defaultUI': {
+        backgroundColor: theme => theme.palette.background.paper,
+        border: theme => `1px solid ${theme.palette.divider}`,
+      },
+      '& .toastui-editor-toolbar': {
+        backgroundColor: theme => theme.palette.background.paper,
+        borderBottom: theme => `1px solid ${theme.palette.divider}`,
+      },
+      '& .toastui-editor-defaultUI-toolbar': {
+        backgroundColor: theme => theme.palette.background.paper,
+      },
+      '& .toastui-editor-main': {
+        color: theme => theme.palette.text.primary,
+      },
+      '& .toastui-editor-md-container': {
+        backgroundColor: theme => theme.palette.background.paper,
+      },
+      '& .toastui-editor-ww-container': {
+        backgroundColor: theme => theme.palette.background.paper,
+      }
+    }}>
       <Editor
         ref={editorRef}
         initialValue={value}
@@ -45,11 +69,11 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
           ['code', 'codeblock'],
           ['scrollSync'],
         ]}
-        theme="light"
+        theme={isDarkMode ? 'dark' : 'light'}
         autofocus={false}
         hideModeSwitch={true}
       />
-    </div>
+    </Box>
   );
 };
 

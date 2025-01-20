@@ -61,7 +61,6 @@ function encodeMarkdownUrls(content: string): string {
 interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title' | 'meditation'> {
   'video-url'?: string;
   'video-title'?: string;
-  meditation?: string;
 }
 
 interface LessonViewProps {
@@ -324,7 +323,11 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
       )}
             {/* Quiz Section */}
             {quiz && (
-        <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
+        <Paper sx={{ 
+          p: 3, 
+          mb: 4, 
+          bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50'
+        }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h5">
@@ -350,7 +353,68 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         </Paper>
       )}
       {/* Bible Reading Content */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ 
+        mb: 4,
+        '& .toastui-editor-contents': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-body)',
+        },
+        '& .toastui-editor-contents p': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-body)',
+        },
+        '& .toastui-editor-contents h1': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-h1)',
+        },
+        '& .toastui-editor-contents h2': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-h2)',
+        },
+        '& .toastui-editor-contents h3': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-h3)',
+        },
+        '& .toastui-editor-contents h4': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-h4)',
+        },
+        '& .toastui-editor-contents h5': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-h5)',
+        },
+        '& .toastui-editor-contents h6': {
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-h6)',
+        },
+        '& .toastui-editor-contents a': {
+          color: theme => theme.palette.primary.main,
+        },
+        '& .toastui-editor-contents blockquote': {
+          borderLeft: theme => `4px solid ${theme.palette.divider}`,
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-body)',
+        },
+
+        '& .toastui-editor-contents pre': {
+          backgroundColor: theme => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+          fontSize: 'var(--font-size-body)',
+        },
+        '& .toastui-editor-contents table': {
+          borderColor: theme => theme.palette.divider,
+          color: theme => theme.palette.text.secondary,
+          fontSize: 'var(--font-size-body)',
+        },
+        '& .toastui-editor-contents th, & .toastui-editor-contents td': {
+          borderColor: theme => theme.palette.divider,
+        },
+        '& .toastui-editor-contents ul, & .toastui-editor-contents ol': {
+          fontSize: 'var(--font-size-body)',
+        },
+        '& .toastui-editor-contents li': {
+          fontSize: 'var(--font-size-body)',
+        },
+      }}>
         <Viewer 
           key={lesson.id}
           initialValue={encodedContent}
@@ -360,7 +424,76 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
 
       {/* Meditation Section */}
       {lesson.meditation && (
-        <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
+        <Paper sx={{ 
+          p: 3, 
+          mb: 4, 
+          bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50',
+          '& .toastui-editor-contents': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents p': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents h1': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-h1)',
+          },
+          '& .toastui-editor-contents h2': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-h2)',
+          },
+          '& .toastui-editor-contents h3': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-h3)',
+          },
+          '& .toastui-editor-contents h4': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-h4)',
+          },
+          '& .toastui-editor-contents h5': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-h5)',
+          },
+          '& .toastui-editor-contents h6': {
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-h6)',
+          },
+          '& .toastui-editor-contents a': {
+            color: theme => theme.palette.primary.main,
+          },
+          '& .toastui-editor-contents blockquote': {
+            borderLeft: theme => `4px solid ${theme.palette.divider}`,
+            color: theme => theme.palette.text.secondary,
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents code': {
+            backgroundColor: theme => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+            color: theme => theme.palette.mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.dark,
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents pre': {
+            backgroundColor: theme => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents table': {
+            borderColor: theme => theme.palette.divider,
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents th, & .toastui-editor-contents td': {
+            borderColor: theme => theme.palette.divider,
+            color: theme => theme.palette.text.primary,
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents ul, & .toastui-editor-contents ol': {
+            fontSize: 'var(--font-size-body)',
+          },
+          '& .toastui-editor-contents li': {
+            fontSize: 'var(--font-size-body)',
+          },
+        }}>
           <Viewer 
             initialValue={encodedMeditation} 
             customHTMLRenderer={linkRenderer}
@@ -400,7 +533,11 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
       </Dialog>
       
       {/* Notes Section */}
-        <Paper sx={{ p: 3, mb: 4, bgcolor: 'grey.50' }}>
+        <Paper sx={{ 
+          p: 3, 
+          mb: 4, 
+          bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50'
+        }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">
               Personal Notes

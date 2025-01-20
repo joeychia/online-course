@@ -30,15 +30,26 @@ const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-disabled': {
     opacity: 0.7,
     cursor: 'not-allowed'
+  },
+  '& .MuiListItemText-primary': {
+    fontSize: 'var(--font-size-body)',
   }
 }));
 
 const StyledUnitListItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-selected': {
-    backgroundColor: theme.palette.grey[200],
+    backgroundColor: theme.palette.mode === 'dark' 
+      ? theme.palette.grey[800]
+      : theme.palette.grey[200],
     '&:hover': {
-      backgroundColor: theme.palette.grey[300],
+      backgroundColor: theme.palette.mode === 'dark'
+        ? theme.palette.grey[700]
+        : theme.palette.grey[300],
     }
+  },
+  '& .MuiListItemText-primary': {
+    fontSize: 'var(--font-size-body)',
+    fontWeight: 500,
   }
 }));
 
@@ -153,10 +164,26 @@ export default function NavPanel({
             }}
             onClick={() => navigate(`/${course.id}`)}
           >
-            <Typography variant="h6" component="h1" noWrap sx={{ transition: 'color 0.2s' }}>
+            <Typography 
+              variant="h6" 
+              component="h4" 
+              noWrap 
+              sx={{ 
+                transition: 'color 0.2s',
+                fontSize: 'var(--font-size-h6)',
+              }}
+            >
               {course.name}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} noWrap>
+            <Typography 
+              variant="body2" 
+              color="text.secondary" 
+              sx={{ 
+                mt: 1,
+                fontSize: 'var(--font-size-body)',
+              }} 
+              noWrap
+            >
               {course.description}
             </Typography>
           </Box>
@@ -200,7 +227,10 @@ export default function NavPanel({
                           data-testid={`lesson-item-${lesson.id}`}
                         >
                           <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
-                            <Typography sx={{ flex: 1 }}>
+                            <Typography sx={{ 
+                              flex: 1,
+                              fontSize: 'var(--font-size-body)',
+                            }}>
                               {lesson.name}
                             </Typography>
                             {!isAccessible ? (
