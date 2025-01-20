@@ -32,6 +32,7 @@ import {
 import { useAuth } from '../contexts/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
 import { useTranslation } from '../hooks/useTranslation';
+import { convertChinese } from '../utils/chineseConverter';
 
 // Function to encode URLs in markdown content
 function encodeMarkdownUrls(content: string): string {
@@ -117,6 +118,7 @@ const linkRenderer: HTMLConvertorMap = {
 
 export default function LessonView({ courseId, lesson, onComplete, isCompleted: initialIsCompleted = false, quizHistory: initialQuizHistory = null, onSaveNote }: LessonViewProps): JSX.Element {
   const { currentUser } = useAuth();
+  const { t, language } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [note, setNote] = useState(lesson.userNote || '');
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string> | null>(null);
@@ -127,7 +129,6 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
   const [isSaving, setIsSaving] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<Date | null>(null);
-  const { t } = useTranslation();
 
   // Track lesson view
   useEffect(() => {
@@ -284,7 +285,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Typography variant="h4" component="h1">
-            {lesson.name}
+            {convertChinese(lesson.name, language)}
           </Typography>
           {isCompleted && (
             <Tooltip title="Lesson completed">
@@ -298,7 +299,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
       {lesson['video-url'] && videoId && (
         <>
           <Typography variant="h6" gutterBottom>
-          {lesson['video-title']}
+            {convertChinese(lesson['video-title'] || '', language)}
           </Typography>
             <Box 
               sx={{
@@ -337,7 +338,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h5">
-                本週測驗
+                {t('weeklyQuiz')}
               </Typography>
               {quizHistory && (
                 <Typography variant="body2" color="text.secondary">
@@ -426,8 +427,8 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         },
       }}>
         <Viewer 
-          key={lesson.id}
-          initialValue={encodedContent}
+          key={`${lesson.id}-${language}`}
+          initialValue={convertChinese(encodedContent, language)}
           customHTMLRenderer={linkRenderer}
         />
       </Box>
@@ -440,7 +441,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         fullWidth
       >
         <DialogTitle sx={{ m: 0, p: 2, pr: 6, position: 'relative' }}>
-          本週測驗
+        {t('weeklyQuiz')}
           <IconButton
             onClick={() => setQuizOpen(false)}
             sx={{

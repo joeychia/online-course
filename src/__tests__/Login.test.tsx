@@ -17,6 +17,34 @@ vi.mock('../contexts/useAuth', () => ({
   })
 }));
 
+// Mock useTranslation hook
+vi.mock('../hooks/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        signIn: '登入',
+        signUp: '註冊',
+        createAccount: '建立帳號',
+        name: '姓名',
+        email: '電子郵件',
+        password: '密碼',
+        confirmPassword: '確認密碼',
+        fillRequiredFields: '請填寫所有必填欄位。',
+        passwordsNotMatch: '密碼不相符。',
+        passwordTooShort: '密碼長度必須至少為6個字符。',
+        failedToCreateAccount: '無法建立帳號。',
+        failedToSignIn: '登入失敗。',
+        continueWithGoogle: '使用Google帳號繼續',
+        noAccount: '還沒有帳號？註冊',
+        haveAccount: '已經有帳號？登入',
+        failedToSignInWithGoogle: '使用Google登入失敗。'
+      };
+      return translations[key] || key;
+    },
+    language: 'zh-TW'
+  })
+}));
+
 // Mock firestoreService
 vi.mock('../services/firestoreService', () => ({
   firestoreService: {
@@ -51,38 +79,42 @@ describe('Login', () => {
   describe('Sign In Mode', () => {
     it('renders sign in form by default', () => {
       renderLogin();
-      expect(screen.getByRole('heading', { name: 'Sign In' })).toBeInTheDocument();
-      expect(screen.getByRole('textbox', { name: /email/i })).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-      expect(screen.queryByLabelText(/confirm password/i)).not.toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: '登入' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /電子郵件/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/密碼/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText(/確認密碼/i)).not.toBeInTheDocument();
     });
 
     it('validates required fields', async () => {
       renderLogin();
-      const signInButton = screen.getByRole('button', { name: 'Sign In' });
+      const signInButton = screen.getByRole('button', { name: '登入' });
       
       await act(async () => {
         fireEvent.submit(signInButton.closest('form')!);
       });
       
       await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('請填寫所有必填欄位。');
       });
-      expect(screen.getByRole('alert')).toHaveTextContent('Please fill in all required fields.');
     });
 
     it('handles successful sign in', async () => {
+      mockSignIn.mockResolvedValueOnce({ uid: 'test123' });
       renderLogin();
       
-      fireEvent.change(screen.getByRole('textbox', { name: /email/i }), {
-        target: { value: 'test@example.com' }
+      await act(async () => {
+        fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
+          target: { value: 'test@example.com' }
+        });
+        fireEvent.change(screen.getByLabelText(/密碼/i), {
+          target: { value: 'password123' }
+        });
+        
+        const signInButton = screen.getByRole('button', { name: '登入' });
+        fireEvent.click(signInButton);
       });
-      fireEvent.change(screen.getByLabelText(/password/i), {
-        target: { value: 'password123' }
-      });
-      
-      const signInButton = screen.getByRole('button', { name: 'Sign In' });
-      fireEvent.click(signInButton);
       
       await waitFor(() => {
         expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123');
@@ -94,74 +126,92 @@ describe('Login', () => {
       mockSignIn.mockRejectedValueOnce(new Error('Invalid credentials'));
       renderLogin();
       
-      fireEvent.change(screen.getByRole('textbox', { name: /email/i }), {
-        target: { value: 'test@example.com' }
+      await act(async () => {
+        fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
+          target: { value: 'test@example.com' }
+        });
+        fireEvent.change(screen.getByLabelText(/密碼/i), {
+          target: { value: 'password123' }
+        });
+        
+        const signInButton = screen.getByRole('button', { name: '登入' });
+        fireEvent.click(signInButton);
       });
-      fireEvent.change(screen.getByLabelText(/password/i), {
-        target: { value: 'password123' }
-      });
-      
-      const signInButton = screen.getByRole('button', { name: 'Sign In' });
-      fireEvent.click(signInButton);
       
       await waitFor(() => {
-        expect(screen.getByText('Failed to sign in.')).toBeInTheDocument();
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('登入失敗。');
       });
     });
   });
 
   describe('Sign Up Mode', () => {
-    const switchToSignUp = () => {
-      fireEvent.click(screen.getByText("Don't have an account? Sign up"));
+    const switchToSignUp = async () => {
+      await act(async () => {
+        fireEvent.click(screen.getByText('還沒有帳號？註冊'));
+      });
     };
 
-    it('switches to sign up mode', () => {
+    it('switches to sign up mode', async () => {
       renderLogin();
-      switchToSignUp();
+      await switchToSignUp();
       
-      expect(screen.getByText('Create Account')).toBeInTheDocument();
-      expect(screen.getByRole('textbox', { name: /name/i })).toBeInTheDocument();
-      expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+      expect(screen.getByText('建立帳號')).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /姓名/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/確認密碼/i)).toBeInTheDocument();
     });
 
     it('validates password match', async () => {
       renderLogin();
-      switchToSignUp();
+      await switchToSignUp();
       
-      fireEvent.change(screen.getByRole('textbox', { name: /email/i }), {
-        target: { value: 'test@example.com' }
-      });
-      fireEvent.change(screen.getByLabelText(/^password/i), {
-        target: { value: 'password123' }
-      });
-      fireEvent.change(screen.getByLabelText(/confirm password/i), {
-        target: { value: 'password456' }
+      await act(async () => {
+        fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
+          target: { value: 'test@example.com' }
+        });
+        fireEvent.change(screen.getByLabelText(/^密碼/i), {
+          target: { value: 'password123' }
+        });
+        fireEvent.change(screen.getByLabelText(/確認密碼/i), {
+          target: { value: 'password456' }
+        });
+        
+        const signUpButton = screen.getByRole('button', { name: '註冊' });
+        fireEvent.click(signUpButton);
       });
       
-      const signUpButton = screen.getByRole('button', { name: 'Sign Up' });
-      fireEvent.click(signUpButton);
-      
-      expect(screen.getByText('Passwords do not match.')).toBeInTheDocument();
+      await waitFor(() => {
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('密碼不相符。');
+      });
     });
 
     it('validates password length', async () => {
       renderLogin();
-      switchToSignUp();
+      await switchToSignUp();
       
-      fireEvent.change(screen.getByRole('textbox', { name: /email/i }), {
-        target: { value: 'test@example.com' }
-      });
-      fireEvent.change(screen.getByLabelText(/^password/i), {
-        target: { value: '12345' }
-      });
-      fireEvent.change(screen.getByLabelText(/confirm password/i), {
-        target: { value: '12345' }
+      await act(async () => {
+        fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
+          target: { value: 'test@example.com' }
+        });
+        fireEvent.change(screen.getByLabelText(/^密碼/i), {
+          target: { value: '12345' }
+        });
+        fireEvent.change(screen.getByLabelText(/確認密碼/i), {
+          target: { value: '12345' }
+        });
+        
+        const signUpButton = screen.getByRole('button', { name: '註冊' });
+        fireEvent.click(signUpButton);
       });
       
-      const signUpButton = screen.getByRole('button', { name: 'Sign Up' });
-      fireEvent.click(signUpButton);
-      
-      expect(screen.getByText('Password must be at least 6 characters long.')).toBeInTheDocument();
+      await waitFor(() => {
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('密碼長度必須至少為6個字符。');
+      });
     });
 
     it('handles successful sign up', async () => {
@@ -169,23 +219,25 @@ describe('Login', () => {
       mockSignUp.mockResolvedValueOnce(mockUserCredential);
       
       renderLogin();
-      switchToSignUp();
+      await switchToSignUp();
       
-      fireEvent.change(screen.getByRole('textbox', { name: /name/i }), {
-        target: { value: 'Test User' }
+      await act(async () => {
+        fireEvent.change(screen.getByRole('textbox', { name: /姓名/i }), {
+          target: { value: 'Test User' }
+        });
+        fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
+          target: { value: 'test@example.com' }
+        });
+        fireEvent.change(screen.getByLabelText(/^密碼/i), {
+          target: { value: 'password123' }
+        });
+        fireEvent.change(screen.getByLabelText(/確認密碼/i), {
+          target: { value: 'password123' }
+        });
+        
+        const signUpButton = screen.getByRole('button', { name: '註冊' });
+        fireEvent.click(signUpButton);
       });
-      fireEvent.change(screen.getByRole('textbox', { name: /email/i }), {
-        target: { value: 'test@example.com' }
-      });
-      fireEvent.change(screen.getByLabelText(/^password/i), {
-        target: { value: 'password123' }
-      });
-      fireEvent.change(screen.getByLabelText(/confirm password/i), {
-        target: { value: 'password123' }
-      });
-      
-      const signUpButton = screen.getByRole('button', { name: 'Sign Up' });
-      fireEvent.click(signUpButton);
       
       await waitFor(() => {
         expect(mockSignUp).toHaveBeenCalledWith('test@example.com', 'password123');
@@ -215,8 +267,10 @@ describe('Login', () => {
       
       renderLogin();
       
-      const googleButton = screen.getByRole('button', { name: /Continue with Google/i });
-      fireEvent.click(googleButton);
+      await act(async () => {
+        const googleButton = screen.getByRole('button', { name: /使用Google帳號繼續/i });
+        fireEvent.click(googleButton);
+      });
       
       await waitFor(() => {
         expect(mockSignInWithGoogle).toHaveBeenCalled();
@@ -252,8 +306,10 @@ describe('Login', () => {
       
       renderLogin();
       
-      const googleButton = screen.getByRole('button', { name: /Continue with Google/i });
-      fireEvent.click(googleButton);
+      await act(async () => {
+        const googleButton = screen.getByRole('button', { name: /使用Google帳號繼續/i });
+        fireEvent.click(googleButton);
+      });
       
       await waitFor(() => {
         expect(mockSignInWithGoogle).toHaveBeenCalled();
@@ -267,11 +323,15 @@ describe('Login', () => {
       
       renderLogin();
       
-      const googleButton = screen.getByRole('button', { name: /Continue with Google/i });
-      fireEvent.click(googleButton);
+      await act(async () => {
+        const googleButton = screen.getByRole('button', { name: /使用Google帳號繼續/i });
+        fireEvent.click(googleButton);
+      });
       
       await waitFor(() => {
-        expect(screen.getByText('Failed to sign in with Google.')).toBeInTheDocument();
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('登入失敗。');
       });
     });
   });

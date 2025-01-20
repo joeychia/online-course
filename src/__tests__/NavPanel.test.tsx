@@ -11,15 +11,29 @@ vi.mock('../services/dataService', () => ({
   getLessonsIdNameForUnit: vi.fn()
 }));
 
+// Mock useTranslation hook
+vi.mock('../hooks/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        unit: '單元',
+        lesson: '課程'
+      };
+      return translations[key] || key;
+    },
+    language: 'zh-TW'
+  })
+}));
+
 const mockUnits = [
-  { id: '1', name: 'Unit 1' },
-  { id: '2', name: 'Unit 2' }
+  { id: '1', name: '第一單元' },
+  { id: '2', name: '第二單元' }
 ];
 
 const mockCourse: Course = {
   id: '1',
-  name: 'Test Course',
-  description: 'Test Description',
+  name: '測試課程',
+  description: '測試課程描述',
   settings: {
     unlockLessonIndex: 1
   },
@@ -28,13 +42,13 @@ const mockCourse: Course = {
 };
 
 const mockLessonsUnit1 = [
-  { id: 'u1l1', name: 'Lesson 1' },
-  { id: 'u1l2', name: 'Lesson 2' }
+  { id: 'u1l1', name: '第一課' },
+  { id: 'u1l2', name: '第二課' }
 ];
 
 const mockLessonsUnit2 = [
-  { id: 'u2l1', name: 'Lesson 1' },
-  { id: 'u2l2', name: 'Lesson 2' }
+  { id: 'u2l1', name: '第一課' },
+  { id: 'u2l2', name: '第二課' }
 ];
 
 const mockProgress = {
@@ -82,8 +96,8 @@ describe('NavPanel', () => {
     const unitButtons = within(drawer).getAllByTestId('unit-button-1');
     expect(unitButtons[0]).toBeInTheDocument();
 
-    const courseName = within(drawer).getByText('Test Course');
-    const courseDesc = within(drawer).getByText('Test Description');
+    const courseName = within(drawer).getByText('測試課程');
+    const courseDesc = within(drawer).getByText('測試課程描述');
     expect(courseName).toBeInTheDocument();
     expect(courseDesc).toBeInTheDocument();
   });

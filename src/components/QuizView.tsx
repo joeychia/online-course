@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import { saveQuizHistory } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
+import { useTranslation } from '../hooks/useTranslation';
+import { convertChinese } from '../utils/chineseConverter';
 import type { Quiz } from '../types';
 
 interface QuizViewProps {
@@ -27,6 +29,7 @@ interface QuizViewProps {
 
 export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }: QuizViewProps) {
   const { currentUser } = useAuth();
+  const { t, language } = useTranslation();
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
@@ -94,7 +97,7 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
             <FormControl key={questionIndex} component="fieldset">
               <FormLabel component="legend">
                 <Typography variant="h6" gutterBottom>
-                  {questionIndex + 1}. {question.text}
+                  {questionIndex + 1}. {convertChinese(question.text, language)}
                 </Typography>
               </FormLabel>
               {question.type === 'single_choice' ? (
@@ -108,7 +111,7 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
                         key={optionIndex}
                         value={optionIndex.toString()}
                         control={<Radio />}
-                        label={option.text}
+                        label={convertChinese(option.text, language)}
                         disabled={submitted}
                         sx={submitted && option.isCorrect ? {
                           '& .MuiFormControlLabel-label': {
@@ -128,8 +131,8 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
                       }}
                     >
                       {question.options[parseInt(answers[questionIndex] || '-1')]?.isCorrect ? 
-                        '✓ Correct' : 
-                        '✗ Incorrect'}
+                        t('correct') : 
+                        t('incorrect')}
                     </Typography>
                   )}
                 </>
@@ -140,7 +143,7 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
                   rows={4}
                   value={answers[questionIndex] || ''}
                   onChange={(e) => handleAnswerChange(questionIndex, e.target.value)}
-                  placeholder="請在此輸入你的答案..."
+                  placeholder={t('enterYourAnswer')}
                   disabled={submitted}
                 />
               )}
@@ -152,15 +155,15 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
               <Divider />
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h5" gutterBottom>
-                  Quiz Results
+                  {t('quizResults')}
                 </Typography>
                 <Typography variant="h4" color={score.correct === score.total ? 'success.main' : 'primary.main'}>
                   {score.correct}/{score.total}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
                   {score.correct === score.total ? 
-                    'Perfect score! Well done!' : 
-                    'Review the answers above to see where you can improve.'}
+                    t('perfectScore') : 
+                    t('reviewAnswers')}
                 </Typography>
               </Box>
             </>
@@ -171,7 +174,7 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
               variant="outlined"
               onClick={onClose}
             >
-              Close
+              {t('close')}
             </Button>
             {!submitted && (
               <Button
@@ -180,7 +183,7 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
                 onClick={handleSubmit}
                 disabled={!isComplete()}
               >
-                Submit
+                {t('submit')}
               </Button>
             )}
           </Stack>

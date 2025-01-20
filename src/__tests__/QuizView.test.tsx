@@ -25,12 +25,32 @@ vi.mock('../contexts/useAuth', () => ({
   useAuth: () => mockUseAuth()
 }));
 
+// Mock useTranslation hook
+vi.mock('../hooks/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        correct: '✓ 正確',
+        incorrect: '✗ 錯誤',
+        enterYourAnswer: '請在此輸入你的答案...',
+        quizResults: '測驗結果',
+        perfectScore: '完美的分數！做得好！',
+        reviewAnswers: '查看上方答案以了解可以改進的地方。',
+        submit: '提交',
+        close: '關閉'
+      };
+      return translations[key] || key;
+    },
+    language: 'zh-TW'
+  })
+}));
+
 const mockQuiz: Quiz = {
   id: 'quiz1',
   questions: [
     {
       type: 'single_choice',
-      text: 'What is 2 + 2?',
+      text: '2 + 2 等於多少？',
       options: [
         { text: '3', isCorrect: false },
         { text: '4', isCorrect: true },
@@ -39,16 +59,16 @@ const mockQuiz: Quiz = {
     },
     {
       type: 'single_choice',
-      text: 'What is the capital of France?',
+      text: '法國的首都是什麼？',
       options: [
-        { text: 'London', isCorrect: false },
-        { text: 'Berlin', isCorrect: false },
-        { text: 'Paris', isCorrect: true }
+        { text: '倫敦', isCorrect: false },
+        { text: '柏林', isCorrect: false },
+        { text: '巴黎', isCorrect: true }
       ]
     },
     {
       type: 'free_form',
-      text: 'Explain the concept of variables in programming.'
+      text: '請解釋程式設計中變數的概念。'
     }
   ]
 };
@@ -66,17 +86,17 @@ describe('QuizView', () => {
     );
 
     // Check if questions are rendered
-    expect(screen.getByText('1. What is 2 + 2?')).toBeInTheDocument();
-    expect(screen.getByText('2. What is the capital of France?')).toBeInTheDocument();
-    expect(screen.getByText('3. Explain the concept of variables in programming.')).toBeInTheDocument();
+    expect(screen.getByText('1. 2 + 2 等於多少？')).toBeInTheDocument();
+    expect(screen.getByText('2. 法國的首都是什麼？')).toBeInTheDocument();
+    expect(screen.getByText('3. 請解釋程式設計中變數的概念。')).toBeInTheDocument();
 
     // Check if options are rendered for multiple choice questions
     expect(screen.getByLabelText('3')).toBeInTheDocument();
     expect(screen.getByLabelText('4')).toBeInTheDocument();
     expect(screen.getByLabelText('5')).toBeInTheDocument();
-    expect(screen.getByLabelText('London')).toBeInTheDocument();
-    expect(screen.getByLabelText('Berlin')).toBeInTheDocument();
-    expect(screen.getByLabelText('Paris')).toBeInTheDocument();
+    expect(screen.getByLabelText('倫敦')).toBeInTheDocument();
+    expect(screen.getByLabelText('柏林')).toBeInTheDocument();
+    expect(screen.getByLabelText('巴黎')).toBeInTheDocument();
 
     // Check if text area is rendered for free form question
     const textAreas = screen.getAllByRole('textbox');
@@ -96,13 +116,13 @@ describe('QuizView', () => {
 
     // Select answers
     fireEvent.click(screen.getByLabelText('4'));
-    fireEvent.click(screen.getByLabelText('Paris'));
+    fireEvent.click(screen.getByLabelText('巴黎'));
     fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Variables are containers for storing data values.' }
+      target: { value: '變數是用來儲存資料的容器。' }
     });
 
     // Submit button should be enabled
-    const submitButton = screen.getByRole('button', { name: /submit/i });
+    const submitButton = screen.getByRole('button', { name: '提交' });
     expect(submitButton).not.toBeDisabled();
   });
 
@@ -120,19 +140,19 @@ describe('QuizView', () => {
 
     // Select correct answers
     fireEvent.click(screen.getByLabelText('4'));
-    fireEvent.click(screen.getByLabelText('Paris'));
+    fireEvent.click(screen.getByLabelText('巴黎'));
     fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Variables are containers for storing data values.' }
+      target: { value: '變數是用來儲存資料的容器。' }
     });
 
     // Submit quiz
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+      fireEvent.click(screen.getByRole('button', { name: '提交' }));
     });
 
     // Check score display
     expect(screen.getByText('2/2')).toBeInTheDocument();
-    expect(screen.getByText('Perfect score! Well done!')).toBeInTheDocument();
+    expect(screen.getByText('完美的分數！做得好！')).toBeInTheDocument();
 
     // Verify that answers were saved
     expect(saveQuizHistory).toHaveBeenCalledWith(
@@ -142,7 +162,7 @@ describe('QuizView', () => {
       {
         0: '1',  // Index of selected option for first question
         1: '2',  // Index of selected option for second question
-        2: 'Variables are containers for storing data values.'
+        2: '變數是用來儲存資料的容器。'
       },
       2,  // Correct answers
       2   // Total questions (excluding free form)
@@ -165,13 +185,13 @@ describe('QuizView', () => {
 
     // Select answers and submit
     fireEvent.click(screen.getByLabelText('4'));
-    fireEvent.click(screen.getByLabelText('Paris'));
+    fireEvent.click(screen.getByLabelText('巴黎'));
     fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Test answer' }
+      target: { value: '測試答案' }
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+      fireEvent.click(screen.getByRole('button', { name: '提交' }));
     });
 
     // Check if inputs are disabled
@@ -181,7 +201,7 @@ describe('QuizView', () => {
     });
 
     expect(screen.getByRole('textbox')).toBeDisabled();
-    expect(screen.queryByRole('button', { name: /submit/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '提交' })).not.toBeInTheDocument();
   });
 
   it('shows correct/incorrect indicators after submission', async () => {
@@ -197,18 +217,18 @@ describe('QuizView', () => {
 
     // Select a mix of correct and incorrect answers
     fireEvent.click(screen.getByLabelText('3')); // Wrong answer
-    fireEvent.click(screen.getByLabelText('Paris')); // Correct answer
+    fireEvent.click(screen.getByLabelText('巴黎')); // Correct answer
     fireEvent.change(screen.getByRole('textbox'), {
-      target: { value: 'Test answer' }
+      target: { value: '測試答案' }
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+      fireEvent.click(screen.getByRole('button', { name: '提交' }));
     });
 
     // Check for correct/incorrect indicators
-    expect(screen.getByText('✗ Incorrect')).toBeInTheDocument();
-    expect(screen.getByText('✓ Correct')).toBeInTheDocument();
+    expect(screen.getByText('✗ 錯誤')).toBeInTheDocument();
+    expect(screen.getByText('✓ 正確')).toBeInTheDocument();
   });
 
   it('handles close button click', () => {
@@ -223,7 +243,7 @@ describe('QuizView', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /close/i }));
+    fireEvent.click(screen.getByRole('button', { name: '關閉' }));
     expect(onClose).toHaveBeenCalled();
   });
 }); 

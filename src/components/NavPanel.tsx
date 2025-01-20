@@ -19,6 +19,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
 import { Course } from '../types';
 import { getLessonsIdNameForUnit } from '../services/dataService';
+import { convertChinese } from '../utils/chineseConverter';
+import { useTranslation } from '../hooks/useTranslation';
 
 const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-selected': {
@@ -79,6 +81,7 @@ export default function NavPanel({
   onToggle,
 }: NavPanelProps) {
   const navigate = useNavigate();
+  const { language } = useTranslation();
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>(
     units.reduce((acc, unit) => ({ 
       ...acc, 
@@ -173,7 +176,7 @@ export default function NavPanel({
                 fontSize: 'var(--font-size-h6)',
               }}
             >
-              {course.name}
+              {convertChinese(course.name, language)}
             </Typography>
             <Typography 
               variant="body2" 
@@ -184,7 +187,7 @@ export default function NavPanel({
               }} 
               noWrap
             >
-              {course.description}
+              {convertChinese(course.description, language)}
             </Typography>
           </Box>
         </Stack>
@@ -201,7 +204,7 @@ export default function NavPanel({
                 data-testid={`unit-button-${unit.id}`}
               >
                 <ListItemText
-                  primary={unit.name}
+                  primary={convertChinese(unit.name, language)}
                   sx={{ m: 0 }}
                 />
                 {expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />}
@@ -231,7 +234,7 @@ export default function NavPanel({
                               flex: 1,
                               fontSize: 'var(--font-size-body)',
                             }}>
-                              {lesson.name}
+                              {convertChinese(lesson.name, language)}
                             </Typography>
                             {!isAccessible ? (
                               <LockIcon color="disabled" fontSize="small" data-testid={`lesson-lock-${lesson.id}`} />

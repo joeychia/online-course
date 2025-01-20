@@ -19,15 +19,18 @@ import { Course } from '../types';
 import { getAllCourses } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
+import { convertChinese } from '../utils/chineseConverter';
 
 interface CourseCardProps {
   course: Course;
   isAuthenticated: boolean;
   onSignInClick: () => void;
+  language: string;
 }
 
-const CourseCard = ({ course, isAuthenticated, onSignInClick }: CourseCardProps) => {
+const CourseCard = ({ course, isAuthenticated, onSignInClick, language }: CourseCardProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleClick = () => {
     if (isAuthenticated) {
@@ -42,16 +45,16 @@ const CourseCard = ({ course, isAuthenticated, onSignInClick }: CourseCardProps)
       <CardActionArea onClick={handleClick}>
         <CardContent>
           <Typography variant="h5" component="h2" gutterBottom>
-            {course.name}
+            {convertChinese(course.name, language)}
           </Typography>
           <Typography color="text.secondary" paragraph>
-            {course.description}
+            {convertChinese(course.description, language)}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             {!isAuthenticated && (
               <Chip
                 icon={<LockIcon />}
-                label="請登入以訪問課程"
+                label={t('signInToAccess')}
                 color="primary"
                 variant="outlined"
                 size="small"
@@ -70,7 +73,7 @@ export default function CourseList() {
   const [error, setError] = useState<string | null>(null);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -168,7 +171,7 @@ export default function CourseList() {
                       fontSize: 'var(--font-size-h6)',
                     }}
                   >
-                    {course.name}
+                    {convertChinese(course.name, language)}
                   </Typography>
                   {!currentUser && (
                     <Chip
@@ -186,7 +189,7 @@ export default function CourseList() {
                     fontSize: 'var(--font-size-body)',
                   }}
                 >
-                  {course.description}
+                  {convertChinese(course.description, language)}
                 </Typography>
               </CardContent>
             </Card>

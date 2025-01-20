@@ -240,5 +240,39 @@ export const translations: Translations = {
   continueWithGoogle: {
     'zh-TW': '使用Google帳號繼續',
     'zh-CN': '使用Google账号继续'
+  },
+
+  // Quiz View
+  correct: {
+    'zh-TW': '✓ 正確',
+    'zh-CN': '✓ 正确'
+  },
+  incorrect: {
+    'zh-TW': '✗ 錯誤',
+    'zh-CN': '✗ 错误'
+  },
+  enterYourAnswer: {
+    'zh-TW': '請在此輸入你的答案...',
+    'zh-CN': '请在此输入你的答案...'
+  },
+  quizResults: {
+    'zh-TW': '測驗結果',
+    'zh-CN': '测验结果'
+  },
+  perfectScore: {
+    'zh-TW': '完美的分數！做得好！',
+    'zh-CN': '完美的分数！做得好！'
+  },
+  reviewAnswers: {
+    'zh-TW': '查看上方答案以了解可以改進的地方。',
+    'zh-CN': '查看上方答案以了解可以改进的地方。'
+  },
+  submit: {
+    'zh-TW': '提交',
+    'zh-CN': '提交'
+  },
+  weeklyQuiz: {
+    'zh-TW': '本週測驗',
+    'zh-CN': '本周测验'
   }
 }; 
