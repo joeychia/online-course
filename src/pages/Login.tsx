@@ -14,6 +14,7 @@ import {
 import GoogleIcon from '@mui/icons-material/Google';
 import { useAuth } from '../contexts/useAuth';
 import { firestoreService } from '../services/firestoreService';
+import { useTranslation } from '../hooks/useTranslation';
 
 export default function Login() {
     const [isSignUp, setIsSignUp] = useState(false);
@@ -25,19 +26,20 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { signIn, signUp, signInWithGoogle } = useAuth();
+    const { t } = useTranslation();
 
     const validateForm = () => {
         if (!email || !password) {
-            setError('Please fill in all required fields.');
+            setError(t('fillRequiredFields'));
             return false;
         }
         if (isSignUp) {
             if (password !== confirmPassword) {
-                setError('Passwords do not match.');
+                setError(t('passwordsNotMatch'));
                 return false;
             }
             if (password.length < 6) {
-                setError('Password must be at least 6 characters long.');
+                setError(t('passwordTooShort'));
                 return false;
             }
         }
@@ -69,7 +71,7 @@ export default function Login() {
             navigate('/');
         } catch (err) {
             console.error(err);
-            setError(isSignUp ? 'Failed to create account.' : 'Failed to sign in.');
+            setError(isSignUp ? t('failedToCreateAccount') : t('failedToSignIn'));
         } finally {
             setLoading(false);
         }
@@ -95,7 +97,7 @@ export default function Login() {
             }
             navigate('/');
         } catch (err) {
-            setError('Failed to sign in with Google.');
+            setError(t('failedToSignIn'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -112,7 +114,7 @@ export default function Login() {
             <Box sx={{ mt: 8, mb: 4 }}>
                 <Paper elevation={3} sx={{ p: 4 }}>
                     <Typography variant="h4" component="h1" align="center" gutterBottom>
-                        {isSignUp ? 'Create Account' : 'Sign In'}
+                        {isSignUp ? t('createAccount') : t('signIn')}
                     </Typography>
                     
                     {error && (
@@ -129,14 +131,14 @@ export default function Login() {
                         <Stack spacing={2}>
                             {isSignUp && (
                                 <TextField
-                                    label="Name"
+                                    label={t('name')}
                                     fullWidth
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
                             )}
                             <TextField
-                                label="Email"
+                                label={t('email')}
                                 type="email"
                                 fullWidth
                                 value={email}
@@ -144,7 +146,7 @@ export default function Login() {
                                 required
                             />
                             <TextField
-                                label="Password"
+                                label={t('password')}
                                 type="password"
                                 fullWidth
                                 value={password}
@@ -153,7 +155,7 @@ export default function Login() {
                             />
                             {isSignUp && (
                                 <TextField
-                                    label="Confirm Password"
+                                    label={t('confirmPassword')}
                                     type="password"
                                     fullWidth
                                     value={confirmPassword}
@@ -168,7 +170,7 @@ export default function Login() {
                                 fullWidth
                                 disabled={loading}
                             >
-                                {isSignUp ? 'Sign Up' : 'Sign In'}
+                                {isSignUp ? t('signUp') : t('signIn')}
                             </Button>
                         </Stack>
                     </form>
@@ -180,13 +182,11 @@ export default function Login() {
                             onClick={toggleMode}
                             sx={{ cursor: 'pointer' }}
                         >
-                            {isSignUp 
-                                ? 'Already have an account? Sign in' 
-                                : "Don't have an account? Sign up"}
+                            {isSignUp ? t('haveAccount') : t('noAccount')}
                         </Link>
                     </Box>
 
-                    <Divider sx={{ my: 3 }}>OR</Divider>
+                    <Divider sx={{ my: 3 }}>{t('or')}</Divider>
 
                     <Button
                         variant="outlined"
@@ -195,7 +195,7 @@ export default function Login() {
                         onClick={handleGoogleSignIn}
                         disabled={loading}
                     >
-                        Continue with Google
+                        {t('continueWithGoogle')}
                     </Button>
                 </Paper>
             </Box>

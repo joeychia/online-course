@@ -15,12 +15,15 @@ import {
   FormControlLabel,
   ToggleButtonGroup,
   ToggleButton,
+  Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useAuth } from '../contexts/useAuth';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSize } from '../contexts/FontSizeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,9 +34,11 @@ export default function Layout({ children }: LayoutProps) {
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
   const { isDarkMode, toggleTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
+  const { language, setLanguage } = useLanguage();
   const { currentUser, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Only show menu button on course pages
@@ -133,7 +138,7 @@ export default function Layout({ children }: LayoutProps) {
               </IconButton>
             )}
             <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
-              ECC在線課程
+              {t('appTitle')}
             </Typography>
           </Stack>
           <Stack direction="row" spacing={4} alignItems="center">
@@ -151,7 +156,7 @@ export default function Layout({ children }: LayoutProps) {
               onClick={handleSettingsClose}
             >
               <Box sx={{ p: 2, minWidth: 200 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>字體大小</Typography>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('fontSize')}</Typography>
                 <ToggleButtonGroup
                   value={fontSize}
                   exclusive
@@ -161,13 +166,13 @@ export default function Layout({ children }: LayoutProps) {
                   sx={{ mb: 2, display: 'flex' }}
                 >
                   <ToggleButton value="small" aria-label="small font">
-                    <Typography sx={{ fontSize: '0.875rem' }}>小</Typography>
+                    <Typography sx={{ fontSize: '0.875rem' }}>{t('small')}</Typography>
                   </ToggleButton>
                   <ToggleButton value="medium" aria-label="medium font">
-                    <Typography sx={{ fontSize: '1rem' }}>中</Typography>
+                    <Typography sx={{ fontSize: '1rem' }}>{t('medium')}</Typography>
                   </ToggleButton>
                   <ToggleButton value="large" aria-label="large font">
-                    <Typography sx={{ fontSize: '1.125rem' }}>大</Typography>
+                    <Typography sx={{ fontSize: '1.125rem' }}>{t('large')}</Typography>
                   </ToggleButton>
                 </ToggleButtonGroup>
                 <FormControlLabel
@@ -177,8 +182,25 @@ export default function Layout({ children }: LayoutProps) {
                       onChange={handleThemeChange}
                     />
                   }
-                  label="深色模式"
+                  label={t('darkMode')}
                 />
+                <Divider sx={{ my: 1.5 }} />
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('language')}</Typography>
+                <ToggleButtonGroup
+                  value={language}
+                  exclusive
+                  onChange={(e, newLang) => newLang && setLanguage(newLang)}
+                  aria-label="language"
+                  size="small"
+                  sx={{ display: 'flex' }}
+                >
+                  <ToggleButton value="zh-TW" aria-label="traditional chinese">
+                    <Typography>{t('traditional')}</Typography>
+                  </ToggleButton>
+                  <ToggleButton value="zh-CN" aria-label="simplified chinese">
+                    <Typography>{t('simplified')}</Typography>
+                  </ToggleButton>
+                </ToggleButtonGroup>
               </Box>
             </Menu>
             {currentUser ? (
@@ -214,7 +236,7 @@ export default function Layout({ children }: LayoutProps) {
                     <MenuItem disabled>
                       {userProfile?.name || currentUser.email}
                     </MenuItem>
-                    <MenuItem onClick={handleSignOut}>登出</MenuItem>
+                    <MenuItem onClick={handleSignOut}>{t('signOut')}</MenuItem>
                   </Menu>
                 </Stack>
               </>
@@ -228,7 +250,7 @@ export default function Layout({ children }: LayoutProps) {
                   }
                 }}
               >
-                登入
+                {t('signIn')}
               </Button>
             )}
           </Stack>

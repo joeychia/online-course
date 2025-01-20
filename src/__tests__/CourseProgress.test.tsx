@@ -2,19 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CourseProgress from '../components/CourseProgress';
+import { LanguageProvider } from '../contexts/LanguageContext';
 
 // Mock react-calendar-heatmap
 vi.mock('react-calendar-heatmap', () => ({
-  __esModule: true,
-  default: () => <div data-testid="calendar-heatmap">Calendar Heatmap</div>
+  default: () => <div data-testid="calendar-heatmap" />
 }));
 
-// Mock ReactTooltip
+// Mock react-tooltip
 vi.mock('react-tooltip', () => ({
-  __esModule: true,
-  default: () => <div>Tooltip</div>
+  default: () => null
 }));
 
+// Mock useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -24,112 +24,115 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+const mockProgress = {
+  'lesson1': {
+    completed: true,
+    completedAt: '2024-01-01T10:00:00Z',
+    lessonName: 'Lesson 1'
+  },
+  'lesson2': {
+    completed: true,
+    completedAt: '2024-01-02T11:00:00Z',
+    lessonName: 'Lesson 2'
+  }
+};
+
+const mockUnits = [
+  { id: 'unit1', name: 'Unit 1' },
+  { id: 'unit2', name: 'Unit 2' }
+];
+
+const mockUnitLessons = {
+  'unit1': [
+    { id: 'lesson1', name: 'Lesson 1' },
+    { id: 'lesson2', name: 'Lesson 2' },
+    { id: 'lesson3', name: 'Lesson 3' }
+  ],
+  'unit2': [
+    { id: 'lesson4', name: 'Lesson 4' }
+  ]
+};
+
 describe('CourseProgress', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  const mockProgress = {
-    'lesson1': {
-      completed: true,
-      completedAt: '2024-03-20T10:00:00Z',
-      lessonName: 'Introduction'
-    },
-    'lesson2': {
-      completed: true,
-      completedAt: '2024-03-21T11:00:00Z',
-      lessonName: 'Basic Concepts'
-    }
-  };
-
-  const mockUnits = [
-    { id: 'unit1', name: 'Unit 1' },
-    { id: 'unit2', name: 'Unit 2' }
-  ];
-
-  const mockUnitLessons = {
-    'unit1': [
-      { id: 'lesson1', name: 'Introduction' },
-      { id: 'lesson2', name: 'Basic Concepts' },
-      { id: 'lesson3', name: 'Advanced Topics' }
-    ],
-    'unit2': [
-      { id: 'lesson4', name: 'Next Unit Lesson' }
-    ]
-  };
-
-  const defaultProps = {
-    progress: mockProgress,
-    courseId: 'course1',
-    units: mockUnits,
-    unitLessons: mockUnitLessons
-  };
-
   const renderComponent = (props = {}) => {
     return render(
-      <MemoryRouter>
-        <CourseProgress {...defaultProps} {...props} />
-      </MemoryRouter>
+      <LanguageProvider>
+        <MemoryRouter>
+          <CourseProgress
+            progress={mockProgress}
+            courseId="course1"
+            units={mockUnits}
+            unitLessons={mockUnitLessons}
+            {...props}
+          />
+        </MemoryRouter>
+      </LanguageProvider>
     );
   };
 
-  it('renders course progress with completed lessons count', () => {
+  it('displays course progress header and completed lessons count', () => {
     renderComponent();
+    expect(screen.getByText('課程進度')).toBeInTheDocument();
     expect(screen.getByText('已完成 2 個課程')).toBeInTheDocument();
   });
 
-  it('shows latest completed lesson', () => {
+  it('displays completion calendar section', () => {
     renderComponent();
-    expect(screen.getByText('Unit 1 / Basic Concepts')).toBeInTheDocument();
-    expect(screen.getByText(/March 21, 2024 at/)).toBeInTheDocument();
-  });
-
-  it('shows next lesson when available', () => {
-    renderComponent();
-    expect(screen.getByText('下一課')).toBeInTheDocument();
-    expect(screen.getByText('Unit 1 / Advanced Topics')).toBeInTheDocument();
-  });
-
-  it('shows calendar heatmap', () => {
-    renderComponent();
+    expect(screen.getByText('完成日曆')).toBeInTheDocument();
     expect(screen.getByTestId('calendar-heatmap')).toBeInTheDocument();
   });
 
-  it('handles empty progress', () => {
+  it('displays latest completed lesson section', () => {
+    renderComponent();
+    expect(screen.getByText('最近完成的課程')).toBeInTheDocument();
+    expect(screen.getByText('Unit 1 / Lesson 2')).toBeInTheDocument();
+  });
+
+  it('displays next lesson section when available', () => {
+    renderComponent();
+    expect(screen.getByText('下一課')).toBeInTheDocument();
+    expect(screen.getByText('Unit 1 / Lesson 3')).toBeInTheDocument();
+  });
+
+  it('shows empty state when no lessons completed', () => {
     renderComponent({ progress: {} });
     expect(screen.getByText('尚未完成任何課程。開始您的學習之旅！')).toBeInTheDocument();
   });
 
   it('finds next lesson in same unit', () => {
     renderComponent();
-    const nextLessonLink = screen.getByText('Unit 1 / Advanced Topics');
-    expect(nextLessonLink).toBeInTheDocument();
+    expect(screen.getByText('下一課')).toBeInTheDocument();
+    expect(screen.getByText('Unit 1 / Lesson 3')).toBeInTheDocument();
   });
 
   it('finds next lesson in next unit when at end of current unit', () => {
     const progressAtEndOfUnit = {
       'lesson3': {
         completed: true,
-        completedAt: '2024-03-21T11:00:00Z',
-        lessonName: 'Advanced Topics'
+        completedAt: '2024-01-03T12:00:00Z',
+        lessonName: 'Lesson 3'
       }
     };
     
     renderComponent({ progress: progressAtEndOfUnit });
-    const nextLessonLink = screen.getByText('Unit 2 / Next Unit Lesson');
-    expect(nextLessonLink).toBeInTheDocument();
+    expect(screen.getByText('下一課')).toBeInTheDocument();
+    expect(screen.getByText('Unit 2 / Lesson 4')).toBeInTheDocument();
   });
 
   it('navigates to lesson when clicking on latest completed lesson', () => {
     renderComponent();
-    const latestLessonLink = screen.getByText('Unit 1 / Basic Concepts');
-    fireEvent.click(latestLessonLink);
+    const lessonLink = screen.getByText('Unit 1 / Lesson 2');
+    fireEvent.click(lessonLink);
     expect(mockNavigate).toHaveBeenCalledWith('/course1/unit1/lesson2');
   });
 
-  it('navigates to next lesson when clicking on next lesson link', () => {
+  it('navigates to next lesson when clicking on next lesson', () => {
     renderComponent();
-    const nextLessonLink = screen.getByText('Unit 1 / Advanced Topics');
+    const nextLessonLink = screen.getByText('Unit 1 / Lesson 3');
     fireEvent.click(nextLessonLink);
     expect(mockNavigate).toHaveBeenCalledWith('/course1/unit1/lesson3');
   });

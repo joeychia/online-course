@@ -24,6 +24,7 @@ import { Lesson, Course, UserProgress } from '../types';
 import { useAuth } from '../contexts/useAuth';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
+import { useTranslation } from '../hooks/useTranslation';
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -33,6 +34,7 @@ export default function CourseView() {
   }>();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { t } = useTranslation();
   const [course, setCourse] = useState<Course | null>(null);
   const [units, setUnits] = useState<Array<{ id: string; name: string }>>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
@@ -155,7 +157,7 @@ export default function CourseView() {
   }, [currentUser]);
 
   if (!course) {
-    return <Typography>Course not found</Typography>;
+    return <Typography>{t('courseNotFound')}</Typography>;
   }
 
   const handleSelectLesson = (unitId: string, lessonId: string) => {
@@ -228,7 +230,7 @@ export default function CourseView() {
   const handleDropCourse = async () => {
     if (!currentUser || !courseId || !course) return;
     
-    if (window.confirm('Are you sure you want to drop this course? Your progress will be saved but you will need to register again to continue.')) {
+    if (window.confirm(t('dropCourseConfirm'))) {
       try {
         await firestoreService.dropCourse(currentUser.uid, courseId);
         setIsRegistered(false);
@@ -254,6 +256,11 @@ export default function CourseView() {
       lesson={currentLesson}
       onComplete={handleLessonComplete}
       isCompleted={userProgress[currentLesson.id]?.completed}
+      quizHistory={null}
+      onSaveNote={(note) => {
+        // Handle note saving
+        console.log('Note saved:', note);
+      }}
     />
   ) : (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
@@ -276,10 +283,10 @@ export default function CourseView() {
           <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h6" gutterBottom>
-                Register for This Course
+                {t('registerCourseTitle')}
               </Typography>
               <Typography color="text.secondary" paragraph>
-                Register to track your progress and access all course materials.
+                {t('registerCourseDescription')}
               </Typography>
               <Button
                 variant="contained"
@@ -287,7 +294,7 @@ export default function CourseView() {
                 onClick={handleRegisterCourse}
                 sx={{ mt: 2 }}
               >
-                Register Now
+                {t('registerNow')}
               </Button>
             </Box>
           </Paper>
@@ -328,7 +335,7 @@ export default function CourseView() {
               }
             }}
           >
-            Drop Course
+            {t('dropCourse')}
           </Button>
         </Box>
       )}
@@ -382,11 +389,11 @@ export default function CourseView() {
         fullWidth
       >
         <DialogTitle>
-          Congratulations on completing this lesson!
+          {t('congratulationsTitle')}
         </DialogTitle>
         <DialogContent>
           <Typography>
-            You've made great progress in your learning journey.
+            {t('congratulationsMessage')}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -396,7 +403,7 @@ export default function CourseView() {
               navigate(`/${courseId}`);
             }}
           >
-            Close
+            {t('close')}
           </Button>
           {nextLessonId && (
             <Button 
@@ -406,7 +413,7 @@ export default function CourseView() {
                 navigate(`/${courseId}/${unitId}/${nextLessonId}`);
               }}
             >
-              Next Lesson
+              {t('nextLesson')}
             </Button>
           )}
         </DialogActions>

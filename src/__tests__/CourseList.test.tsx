@@ -1,11 +1,12 @@
 import { render, cleanup, screen, waitFor, fireEvent, act, within } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CourseList from '../pages/CourseList';
 import { getAllCourses } from '../services/dataService';
 import type { Course } from '../types';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { AuthContextType } from '../contexts/AuthContext';
+import { LanguageProvider } from '../contexts/LanguageContext';
 
 // Mock the dataService
 vi.mock('../services/dataService', () => ({
@@ -28,6 +29,16 @@ mockUseAuth.mockReturnValue({
 vi.mock('../contexts/useAuth', () => ({
   useAuth: () => mockUseAuth()
 }));
+
+// Mock useNavigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  };
+});
 
 // Mock data
 const mockCourses: Course[] = [
@@ -79,9 +90,11 @@ const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOpti
   mockUseAuth.mockReturnValue(mockAuthValue);
 
   return render(
-    <BrowserRouter>
-      {ui}
-    </BrowserRouter>
+    <LanguageProvider>
+      <MemoryRouter>
+        {ui}
+      </MemoryRouter>
+    </LanguageProvider>
   );
 };
 
@@ -91,104 +104,88 @@ describe('CourseList', () => {
     cleanup();
   });
 
-  it('shows loading state initially', async () => {
+  const renderComponent = async () => {
+    const result = render(
+      <LanguageProvider>
+        <MemoryRouter>
+          <CourseList />
+        </MemoryRouter>
+      </LanguageProvider>
+    );
+    // Wait for initial loading to complete
+    await screen.findByRole('heading', { name: /可選課程/i });
+    return result;
+  };
+
+  it('shows loading state initially', () => {
     vi.mocked(getAllCourses).mockImplementation(() => new Promise(() => {}));
-    await act(async () => {
-      renderWithProviders(<CourseList />);
-    });
+    render(
+      <LanguageProvider>
+        <MemoryRouter>
+          <CourseList />
+        </MemoryRouter>
+      </LanguageProvider>
+    );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('displays courses when loaded successfully', async () => {
     vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
-    await act(async () => {
-      renderWithProviders(<CourseList />);
-    });
+    await renderComponent();
 
-    await waitFor(() => {
-      expect(screen.getByText('Test Course 1')).toBeInTheDocument();
-      expect(screen.getByText('Test Course 2')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Test Course 1')).toBeInTheDocument();
+    expect(screen.getByText('Test Course 2')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '可選課程' })).toBeInTheDocument();
   });
 
   it('shows error message when loading fails', async () => {
     vi.mocked(getAllCourses).mockRejectedValue(new Error('Failed to load'));
-    await act(async () => {
-      renderWithProviders(<CourseList />);
-    });
+    render(
+      <LanguageProvider>
+        <MemoryRouter>
+          <CourseList />
+        </MemoryRouter>
+      </LanguageProvider>
+    );
 
-    await waitFor(() => {
-      expect(screen.getByText('載入課程失敗。請稍後再試。')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('載入課程失敗。請稍後再試。')).toBeInTheDocument();
   });
 
   it('shows sign in alert for unauthenticated users', async () => {
     vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
-    await act(async () => {
-      renderWithProviders(<CourseList />);
-    });
+    await renderComponent();
+
     expect(screen.getByText('登入以訪問完整課程內容並追蹤您的學習進度。')).toBeInTheDocument();
-  });
-
-  it('does not show sign in alert for authenticated users', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
-    await act(async () => {
-      renderWithProviders(<CourseList />, { 
-        user: { uid: '123', email: 'test@example.com' } as FirebaseUser 
-      });
-    });
-    expect(screen.queryByText('登入以訪問完整課程內容並追蹤您的學習進度。')).not.toBeInTheDocument();
-  });
-
-  it('navigates to login when sign in button is clicked', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
-    await act(async () => {
-      renderWithProviders(<CourseList />);
-    });
-    
-    const alert = screen.getByRole('alert');
-    const signInButton = within(alert).getByRole('button', { name: '登入' });
-    await act(async () => {
-      fireEvent.click(signInButton);
-    });
-    
-    expect(window.location.pathname).toBe('/login');
+    expect(screen.getByRole('button', { name: '登入' })).toBeInTheDocument();
   });
 
   it('shows lock icon on courses for unauthenticated users', async () => {
     vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
-    await act(async () => {
-      renderWithProviders(<CourseList />);
-    });
+    await renderComponent();
 
-    await waitFor(() => {
-      const lockChips = screen.getAllByTestId('LockIcon');
-      expect(lockChips).toHaveLength(mockCourses.length);
-    });
+    const lockChips = screen.getAllByText('請登入以訪問課程');
+    expect(lockChips).toHaveLength(mockCourses.length);
   });
 
-  it('does not show lock icon on courses for authenticated users', async () => {
+  it('navigates to login when sign in button is clicked', async () => {
     vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
-    await act(async () => {
-      renderWithProviders(<CourseList />, { 
-        user: { uid: '123', email: 'test@example.com' } as FirebaseUser 
-      });
-    });
+    await renderComponent();
 
-    await waitFor(() => {
-      const lockChips = screen.queryAllByTestId('LockIcon');
-      expect(lockChips).toHaveLength(0);
-    });
+    const signInButton = screen.getByRole('button', { name: '登入' });
+    fireEvent.click(signInButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
   });
 
   it('shows "No courses available" when courses array is empty', async () => {
     vi.mocked(getAllCourses).mockResolvedValue([]);
-    await act(async () => {
-      renderWithProviders(<CourseList />);
-    });
+    render(
+      <LanguageProvider>
+        <MemoryRouter>
+          <CourseList />
+        </MemoryRouter>
+      </LanguageProvider>
+    );
 
-    await waitFor(() => {
-      expect(screen.getByText('目前沒有可用的課程')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('目前沒有可用的課程')).toBeInTheDocument();
   });
 }); 

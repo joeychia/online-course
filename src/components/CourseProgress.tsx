@@ -5,6 +5,8 @@ import CalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatm
 import 'react-calendar-heatmap/dist/styles.css';
 import ReactTooltip from 'react-tooltip';
 import './CourseProgress.css';
+import { formatDate } from '../utils/dateUtils';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface CourseProgressProps {
   progress: Record<string, UserProgress>;
@@ -21,31 +23,13 @@ interface CalendarValue extends ReactCalendarHeatmapValue<string> {
 }
 
 interface TooltipDataAttrs {
-  [key: string]: string | boolean;
-}
-
-function formatDate(dateString: string): string {
-  try {
-    const date = new Date(dateString);
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return 'Recently';
-    }
-    
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch {
-    return 'Recently';
-  }
+  'data-tip': string;
+  'data-multiline'?: boolean;
 }
 
 export default function CourseProgress({ progress, courseId, units, unitLessons }: CourseProgressProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Find the latest completed lesson
   const latestLesson = Object.entries(progress)
@@ -154,10 +138,10 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
     return (
       <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
         <Typography variant="h6" gutterBottom>
-          課程進度
+          {t('courseProgress')}
         </Typography>
         <Typography color="text.secondary">
-          尚未完成任何課程。開始您的學習之旅！
+          {t('noLessonsCompleted')}
         </Typography>
       </Paper>
     );
@@ -187,17 +171,17 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
     <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
         <Typography variant="h6">
-          課程進度
+          {t('courseProgress')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          已完成 {Object.values(progress).filter(data => data.completed).length} 個課程
+          {t('lessonsCompleted', { count: Object.values(progress).filter(data => data.completed).length })}
         </Typography>
       </Box>
       
       {/* Calendar Section */}
       <Box sx={{ mt: 3, mb: 4 }}>
         <Typography variant="subtitle1" gutterBottom>
-          完成日曆
+          {t('completionCalendar')}
         </Typography>
         <CalendarHeatmap
           startDate={startDate}
@@ -214,7 +198,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
           }}
           tooltipDataAttrs={(value: ReactCalendarHeatmapValue<string> | undefined): TooltipDataAttrs => {
             if (!value || !value.date) {
-              return { 'data-tip': '尚未完成任何課程' };
+              return { 'data-tip': String(t('noLessonsCompletedTooltip')) };
             }
             const calendarValue = value as CalendarValue;
             const lessons = calendarValue.lessons.map(l => l.name).join('\n');
@@ -235,7 +219,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
       {/* Latest Lesson Section */}
       <Box sx={{ mt: 2 }}>
         <Typography variant="subtitle1" gutterBottom>
-          最近完成的課程
+          {t('latestCompletedLesson')}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Box>
@@ -275,7 +259,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
               borderColor: 'primary.100'
             }}>
               <Typography variant="h6" color="primary" gutterBottom>
-                下一課
+                {t('nextUp')}
               </Typography>
               <Box>
                 <Link

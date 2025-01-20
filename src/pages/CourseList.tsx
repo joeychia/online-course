@@ -18,6 +18,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import { Course } from '../types';
 import { getAllCourses } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface CourseCardProps {
   course: Course;
@@ -69,78 +70,129 @@ export default function CourseList() {
   const [error, setError] = useState<string | null>(null);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
-    async function loadCourses() {
+    const fetchCourses = async () => {
       try {
-        setLoading(true);
+        const coursesData = await getAllCourses();
+        setCourses(coursesData);
         setError(null);
-        const data = await getAllCourses();
-        setCourses(data);
       } catch (err) {
-        console.error('Error loading courses:', err);
-        setError('載入課程失敗。請稍後再試。');
+        setError(String(t('failedToLoadCourses')));
+        console.error('Error fetching courses:', err);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    loadCourses();
-  }, []);
+    fetchCourses();
+  }, [t]);
 
   const handleSignInClick = () => {
     navigate('/login');
   };
 
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          可選課程
-        </Typography>
-        {!currentUser && (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            登入以訪問完整課程內容並追蹤您的學習進度。
-            <Button
-              color="primary"
-              onClick={handleSignInClick}
-              sx={{ ml: 2 }}
-            >
-              登入
-            </Button>
-          </Alert>
-        )}
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
       </Box>
+    );
+  }
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          {t('noCourses')}
+        </Typography>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      {!currentUser && (
+        <Alert 
+          severity="info" 
+          action={
+            <Button 
+              color="inherit" 
+              size="small" 
+              onClick={handleSignInClick}
+            >
+              {t('signIn')}
+            </Button>
+          }
+          sx={{ mb: 3 }}
+        >
+          {t('signInMessage')}
         </Alert>
       )}
+      
+      <Typography variant="h4" gutterBottom>
+        {t('availableCourses')}
+      </Typography>
 
-      {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-          <CircularProgress />
-        </Box>
-      ) : courses.length === 0 ? (
-        <Box textAlign="center" py={4}>
-          <Typography variant="h6" color="text.secondary">
-            目前沒有可用的課程
-          </Typography>
-        </Box>
-      ) : (
-        <Grid container spacing={3}>
-          {courses.map((course) => (
-            <Grid item key={course.id} xs={12} sm={6} md={4}>
-              <CourseCard 
-                course={course} 
-                isAuthenticated={!!currentUser}
-                onSignInClick={handleSignInClick}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      )}
+      <Grid container spacing={3}>
+        {courses.map((course) => (
+          <Grid item xs={12} sm={6} md={4} key={course.id}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'pointer',
+                '&:hover': {
+                  boxShadow: 6,
+                },
+              }}
+              onClick={() => navigate(`/${course.id}`)}
+            >
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                  <Typography 
+                    variant="h6" 
+                    component="h2"
+                    sx={{ 
+                      flexGrow: 1,
+                      fontSize: 'var(--font-size-h6)',
+                    }}
+                  >
+                    {course.name}
+                  </Typography>
+                  {!currentUser && (
+                    <Chip
+                      icon={<LockIcon />}
+                      label={t('signInToAccess')}
+                      size="small"
+                      sx={{ ml: 1 }}
+                    />
+                  )}
+                </Box>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontSize: 'var(--font-size-body)',
+                  }}
+                >
+                  {course.description}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Container>
   );
 } 

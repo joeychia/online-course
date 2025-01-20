@@ -13,6 +13,7 @@ import {
   DialogContent,
   IconButton,
   CircularProgress,
+  TextField,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
@@ -30,6 +31,7 @@ import {
 } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
+import { useTranslation } from '../hooks/useTranslation';
 
 // Function to encode URLs in markdown content
 function encodeMarkdownUrls(content: string): string {
@@ -61,6 +63,7 @@ function encodeMarkdownUrls(content: string): string {
 interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title'> {
   'video-url'?: string;
   'video-title'?: string;
+  userNote?: string;
 }
 
 interface LessonViewProps {
@@ -68,6 +71,8 @@ interface LessonViewProps {
   lesson: ExtendedLesson;
   onComplete?: (lessonId: string) => void;
   isCompleted?: boolean;
+  quizHistory: QuizHistory | null;
+  onSaveNote: (note: string) => void;
 }
 
 function getYouTubeVideoId(url: string): string | null {
@@ -110,18 +115,19 @@ const linkRenderer: HTMLConvertorMap = {
   }
 };
 
-export default function LessonView({ courseId, lesson, onComplete, isCompleted: initialIsCompleted = false }: LessonViewProps): JSX.Element {
+export default function LessonView({ courseId, lesson, onComplete, isCompleted: initialIsCompleted = false, quizHistory: initialQuizHistory = null, onSaveNote }: LessonViewProps): JSX.Element {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [note, setNote] = useState<string>("");
+  const [note, setNote] = useState(lesson.userNote || '');
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string> | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(null);
+  const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(initialQuizHistory);
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
   const [isSaving, setIsSaving] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<Date | null>(null);
+  const { t } = useTranslation();
 
   // Track lesson view
   useEffect(() => {
@@ -201,6 +207,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
       setIsCompleted(true);
       onComplete?.(lesson.id);
       setNoteSaved(true);
+      onSaveNote(note);
     } catch (err) {
       console.error('Error saving note:', err);
     } finally {
@@ -334,7 +341,11 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
               </Typography>
               {quizHistory && (
                 <Typography variant="body2" color="text.secondary">
-                  上次成績：{quizHistory.correct}/{quizHistory.total} 於 {new Date(quizHistory.completedAt).toLocaleDateString()}
+                  {t('previousScore', {
+                    score: quizHistory.correct,
+                    total: quizHistory.total,
+                    date: new Date(quizHistory.completedAt).toLocaleDateString('zh-TW')
+                  })}
                 </Typography>
               )}
             </Box>
@@ -346,7 +357,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
                 setQuizOpen(true);
               }}
             >
-              {quizHistory || quizAnswers ? '重新測驗' : '開始測驗'}
+              {t(quizHistory ? 'retakeQuiz' : 'startQuiz')}
             </Button>
           </Stack>
         </Paper>
@@ -460,10 +471,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">
-              個人筆記
-              <Typography variant="body2" color="text.secondary">
-                您必須撰寫筆記以完成此課程
-              </Typography>
+              {t('personalNotes')}
             </Typography>
             <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
               <Button
@@ -480,15 +488,20 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
                   )
                 }
               >
-                {isSaving ? '保存中...' : '保存筆記並完成課程'}
+                {isSaving ? t('saving') : t('saveAndComplete')}
               </Button>
             </Stack>
           </Stack>
           <RichTextEditor
             value={note}
             onChange={setNote}
-            placeholder="在此撰寫您的筆記..."
+            placeholder={t('writeNotesHere')}
           />
+          {!note && (
+            <Typography color="warning.main" sx={{ mt: 2 }}>
+              {t('mustWriteNote')}
+            </Typography>
+          )}
         </Paper>
     </Box>
   );
