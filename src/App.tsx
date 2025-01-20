@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
 import Login from './pages/Login';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { useAuth } from './contexts/useAuth';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FontSizeProvider } from './contexts/FontSizeContext';
