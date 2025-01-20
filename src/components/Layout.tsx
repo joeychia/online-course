@@ -133,7 +133,7 @@ export default function Layout({ children }: LayoutProps) {
               </IconButton>
             )}
             <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
-              ECC Online Classes
+              ECC在線課程
             </Typography>
           </Stack>
           <Stack direction="row" spacing={4} alignItems="center">
@@ -151,7 +151,7 @@ export default function Layout({ children }: LayoutProps) {
               onClick={handleSettingsClose}
             >
               <Box sx={{ p: 2, minWidth: 200 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>Font Size</Typography>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>字體大小</Typography>
                 <ToggleButtonGroup
                   value={fontSize}
                   exclusive
@@ -161,13 +161,13 @@ export default function Layout({ children }: LayoutProps) {
                   sx={{ mb: 2, display: 'flex' }}
                 >
                   <ToggleButton value="small" aria-label="small font">
-                    <Typography sx={{ fontSize: '0.875rem' }}>Small</Typography>
+                    <Typography sx={{ fontSize: '0.875rem' }}>小</Typography>
                   </ToggleButton>
                   <ToggleButton value="medium" aria-label="medium font">
-                    <Typography sx={{ fontSize: '1rem' }}>Medium</Typography>
+                    <Typography sx={{ fontSize: '1rem' }}>中</Typography>
                   </ToggleButton>
                   <ToggleButton value="large" aria-label="large font">
-                    <Typography sx={{ fontSize: '1.125rem' }}>Large</Typography>
+                    <Typography sx={{ fontSize: '1.125rem' }}>大</Typography>
                   </ToggleButton>
                 </ToggleButtonGroup>
                 <FormControlLabel
@@ -177,7 +177,7 @@ export default function Layout({ children }: LayoutProps) {
                       onChange={handleThemeChange}
                     />
                   }
-                  label="Dark Mode"
+                  label="深色模式"
                 />
               </Box>
             </Menu>
@@ -214,7 +214,7 @@ export default function Layout({ children }: LayoutProps) {
                     <MenuItem disabled>
                       {userProfile?.name || currentUser.email}
                     </MenuItem>
-                    <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+                    <MenuItem onClick={handleSignOut}>登出</MenuItem>
                   </Menu>
                 </Stack>
               </>
@@ -228,7 +228,7 @@ export default function Layout({ children }: LayoutProps) {
                   }
                 }}
               >
-                Sign In
+                登入
               </Button>
             )}
           </Stack>

@@ -154,10 +154,10 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
     return (
       <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
         <Typography variant="h6" gutterBottom>
-          Course Progress
+          課程進度
         </Typography>
         <Typography color="text.secondary">
-          No lessons completed yet. Start your learning journey!
+          尚未完成任何課程。開始您的學習之旅！
         </Typography>
       </Paper>
     );
@@ -187,23 +187,25 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
     <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
         <Typography variant="h6">
-          Course Progress
+          課程進度
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {Object.values(progress).filter(data => data.completed).length} lessons completed
+          已完成 {Object.values(progress).filter(data => data.completed).length} 個課程
         </Typography>
       </Box>
       
       {/* Calendar Section */}
       <Box sx={{ mt: 3, mb: 4 }}>
         <Typography variant="subtitle1" gutterBottom>
-          Completion Calendar
+          完成日曆
         </Typography>
         <CalendarHeatmap
           startDate={startDate}
           endDate={new Date()}
           values={calendarValues}
           showWeekdayLabels={true}
+          weekdayLabels={['日', '一', '二', '三', '四', '五', '六']}
+          monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']}
           classForValue={(value) => {
             if (!value) {
               return 'color-empty';
@@ -212,12 +214,12 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
           }}
           tooltipDataAttrs={(value: ReactCalendarHeatmapValue<string> | undefined): TooltipDataAttrs => {
             if (!value || !value.date) {
-              return { 'data-tip': 'No lessons completed' };
+              return { 'data-tip': '尚未完成任何課程' };
             }
             const calendarValue = value as CalendarValue;
             const lessons = calendarValue.lessons.map(l => l.name).join('\n');
             return {
-              'data-tip': `${new Date(calendarValue.date).toLocaleDateString()}\n${lessons}`,
+              'data-tip': `${new Date(calendarValue.date).toLocaleDateString('zh-TW')}\n${lessons}`,
               'data-multiline': true
             };
           }}
@@ -233,7 +235,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
       {/* Latest Lesson Section */}
       <Box sx={{ mt: 2 }}>
         <Typography variant="subtitle1" gutterBottom>
-          Latest Completed Lesson
+          最近完成的課程
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Box>
@@ -273,7 +275,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
               borderColor: 'primary.100'
             }}>
               <Typography variant="h6" color="primary" gutterBottom>
-                Next Up
+                下一課
               </Typography>
               <Box>
                 <Link

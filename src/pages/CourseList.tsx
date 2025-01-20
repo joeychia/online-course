@@ -50,7 +50,7 @@ const CourseCard = ({ course, isAuthenticated, onSignInClick }: CourseCardProps)
             {!isAuthenticated && (
               <Chip
                 icon={<LockIcon />}
-                label="Sign in to access"
+                label="請登入以訪問課程"
                 color="primary"
                 variant="outlined"
                 size="small"
@@ -79,7 +79,7 @@ export default function CourseList() {
         setCourses(data);
       } catch (err) {
         console.error('Error loading courses:', err);
-        setError('Failed to load courses. Please try again later.');
+        setError('載入課程失敗。請稍後再試。');
       } finally {
         setLoading(false);
       }
@@ -96,17 +96,17 @@ export default function CourseList() {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Available Courses
+          可選課程
         </Typography>
         {!currentUser && (
           <Alert severity="info" sx={{ mb: 2 }}>
-            Sign in to access full course content and track your progress.
+            登入以訪問完整課程內容並追蹤您的學習進度。
             <Button
               color="primary"
               onClick={handleSignInClick}
               sx={{ ml: 2 }}
             >
-              Sign In
+              登入
             </Button>
           </Alert>
         )}
@@ -125,7 +125,7 @@ export default function CourseList() {
       ) : courses.length === 0 ? (
         <Box textAlign="center" py={4}>
           <Typography variant="h6" color="text.secondary">
-            No courses available
+            目前沒有可用的課程
           </Typography>
         </Box>
       ) : (

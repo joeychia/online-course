@@ -334,7 +334,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
               </Typography>
               {quizHistory && (
                 <Typography variant="body2" color="text.secondary">
-                  Previous Score: {quizHistory.correct}/{quizHistory.total} on {new Date(quizHistory.completedAt).toLocaleDateString()}
+                  上次成績：{quizHistory.correct}/{quizHistory.total} 於 {new Date(quizHistory.completedAt).toLocaleDateString()}
                 </Typography>
               )}
             </Box>
@@ -346,7 +346,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
                 setQuizOpen(true);
               }}
             >
-              {quizHistory || quizAnswers ? '重新测验' : '開始測驗'}
+              {quizHistory || quizAnswers ? '重新測驗' : '開始測驗'}
             </Button>
           </Stack>
         </Paper>
@@ -460,9 +460,9 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">
-              Personal Notes
+              個人筆記
               <Typography variant="body2" color="text.secondary">
-                You must write a note to complete this lesson
+                您必須撰寫筆記以完成此課程
               </Typography>
             </Typography>
             <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
@@ -480,14 +480,14 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
                   )
                 }
               >
-                {isSaving ? 'Saving...' : 'Save Note & Complete Lesson'}
+                {isSaving ? '保存中...' : '保存筆記並完成課程'}
               </Button>
             </Stack>
           </Stack>
           <RichTextEditor
             value={note}
             onChange={setNote}
-            placeholder="Write your notes here..."
+            placeholder="在此撰寫您的筆記..."
           />
         </Paper>
     </Box>

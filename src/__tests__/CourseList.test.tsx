@@ -118,7 +118,7 @@ describe('CourseList', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Failed to load courses/i)).toBeInTheDocument();
+      expect(screen.getByText('載入課程失敗。請稍後再試。')).toBeInTheDocument();
     });
   });
 
@@ -127,7 +127,7 @@ describe('CourseList', () => {
     await act(async () => {
       renderWithProviders(<CourseList />);
     });
-    expect(screen.getByText(/Sign in to access full course content/i)).toBeInTheDocument();
+    expect(screen.getByText('登入以訪問完整課程內容並追蹤您的學習進度。')).toBeInTheDocument();
   });
 
   it('does not show sign in alert for authenticated users', async () => {
@@ -137,7 +137,7 @@ describe('CourseList', () => {
         user: { uid: '123', email: 'test@example.com' } as FirebaseUser 
       });
     });
-    expect(screen.queryByText(/Sign in to access full course content/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('登入以訪問完整課程內容並追蹤您的學習進度。')).not.toBeInTheDocument();
   });
 
   it('navigates to login when sign in button is clicked', async () => {
@@ -147,7 +147,7 @@ describe('CourseList', () => {
     });
     
     const alert = screen.getByRole('alert');
-    const signInButton = within(alert).getByRole('button', { name: /sign in/i });
+    const signInButton = within(alert).getByRole('button', { name: '登入' });
     await act(async () => {
       fireEvent.click(signInButton);
     });
@@ -188,7 +188,7 @@ describe('CourseList', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/no courses available/i)).toBeInTheDocument();
+      expect(screen.getByText('目前沒有可用的課程')).toBeInTheDocument();
     });
   });
 }); 

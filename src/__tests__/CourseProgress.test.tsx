@@ -75,7 +75,7 @@ describe('CourseProgress', () => {
 
   it('renders course progress with completed lessons count', () => {
     renderComponent();
-    expect(screen.getByText('2 lessons completed')).toBeInTheDocument();
+    expect(screen.getByText('已完成 2 個課程')).toBeInTheDocument();
   });
 
   it('shows latest completed lesson', () => {
@@ -86,7 +86,7 @@ describe('CourseProgress', () => {
 
   it('shows next lesson when available', () => {
     renderComponent();
-    expect(screen.getByText('Next Up')).toBeInTheDocument();
+    expect(screen.getByText('下一課')).toBeInTheDocument();
     expect(screen.getByText('Unit 1 / Advanced Topics')).toBeInTheDocument();
   });
 
@@ -97,7 +97,7 @@ describe('CourseProgress', () => {
 
   it('handles empty progress', () => {
     renderComponent({ progress: {} });
-    expect(screen.getByText('No lessons completed yet. Start your learning journey!')).toBeInTheDocument();
+    expect(screen.getByText('尚未完成任何課程。開始您的學習之旅！')).toBeInTheDocument();
   });
 
   it('finds next lesson in same unit', () => {
