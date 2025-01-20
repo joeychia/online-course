@@ -10,6 +10,10 @@ import {
   CircularProgress,
   Button,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { getLesson, getCourse, getUnitsIdNameForCourse, getLessonsIdNameForUnit, getUser, updateUserProgress } from '../services/dataService';
 import { analyticsService } from '../services/analyticsService';
@@ -37,6 +41,8 @@ export default function CourseView() {
   const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [nextLessonId, setNextLessonId] = useState<string | null>(null);
 
   // Toggle drawer handler
   const handleDrawerToggle = () => {
@@ -186,6 +192,18 @@ export default function CourseView() {
         lessonName
       }
     }));
+
+    // Find next lesson
+    if (unitId && unitLessons[unitId]) {
+      const currentLessonIndex = unitLessons[unitId].findIndex(lesson => lesson.id === completedLessonId);
+      if (currentLessonIndex !== -1 && currentLessonIndex < unitLessons[unitId].length - 1) {
+        setNextLessonId(unitLessons[unitId][currentLessonIndex + 1].id);
+      } else {
+        setNextLessonId(null);
+      }
+    }
+
+    setShowCompletionDialog(true);
   };
 
   const handleRegisterCourse = async () => {
@@ -311,42 +329,81 @@ export default function CourseView() {
   );
 
   return (
-    <Box sx={{ 
-      display: 'flex',
-      minHeight: '100vh',
-      overflow: 'hidden' // Prevent body scroll
-    }}>
-      <NavPanel
-        course={course}
-        units={units}
-        progress={userProgress}
-        selectedUnitId={unitId}
-        selectedLessonId={lessonId}
-        onSelectLesson={handleSelectLesson}
-        isOpen={isDrawerOpen}
-        onToggle={handleDrawerToggle}
-      />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          m: { xs: 2, sm: 3 },
-          width: '100%',
-          height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
-          overflow: 'auto',
-          ml: { xs: 0 },
-          '& > *': {
-            maxWidth: 'lg',
-            mx: 'auto'
-          },
-          transition: theme => theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        }}
-      >
-        {mainContent}
+    <>
+      <Box sx={{ 
+        display: 'flex',
+        minHeight: '100vh',
+        overflow: 'hidden' // Prevent body scroll
+      }}>
+        <NavPanel
+          course={course}
+          units={units}
+          progress={userProgress}
+          selectedUnitId={unitId}
+          selectedLessonId={lessonId}
+          onSelectLesson={handleSelectLesson}
+          isOpen={isDrawerOpen}
+          onToggle={handleDrawerToggle}
+        />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            m: { xs: 2, sm: 3 },
+            width: '100%',
+            height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
+            overflow: 'auto',
+            ml: { xs: 0 },
+            '& > *': {
+              maxWidth: 'lg',
+              mx: 'auto'
+            },
+            transition: theme => theme.transitions.create('margin', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+          }}
+        >
+          {mainContent}
+        </Box>
       </Box>
-    </Box>
+
+      <Dialog
+        open={showCompletionDialog}
+        onClose={() => setShowCompletionDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Congratulations on completing this lesson!
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            You've made great progress in your learning journey.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => {
+              setShowCompletionDialog(false);
+              navigate(`/${courseId}`);
+            }}
+          >
+            Close
+          </Button>
+          {nextLessonId && (
+            <Button 
+              variant="contained" 
+              onClick={() => {
+                setShowCompletionDialog(false);
+                navigate(`/${courseId}/${unitId}/${nextLessonId}`);
+              }}
+            >
+              Next Lesson
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+    </>
   );
 } 
