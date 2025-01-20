@@ -80,6 +80,8 @@ export interface UserProfile {
   groupIds: Record<string, boolean>;
   notes: Record<string, Note>;
   QuizHistory: Record<string, QuizHistory>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Group {

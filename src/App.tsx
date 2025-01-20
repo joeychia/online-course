@@ -11,7 +11,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 import WeChatBrowserWarning from './components/WeChatBrowserWarning';
-import { AdminDashboard } from './pages/AdminDashboard';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -81,6 +80,13 @@ function App() {
                       </Layout>
                     </ProtectedRoute>
                   } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <AdminDashboard />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
                 </Routes>
               </Router>
             </LanguageProvider>
@@ -88,23 +94,6 @@ function App() {
         </FontSizeProvider>
       </ThemeProvider>
     </>
-        <Route path="/:courseId/:unitId/:lessonId" element={
-          <ProtectedRoute>
-            <Layout>
-              <CourseView />
-            </Layout>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <Layout>
-              <AdminDashboard />
-            </Layout>
-          </ProtectedRoute>
-        } />
-      </Routes>
-    </Router>
   );
 }
 

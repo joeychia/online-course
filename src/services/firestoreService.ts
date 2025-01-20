@@ -11,7 +11,6 @@ import {
     updateDoc,
     DocumentData,
     QueryDocumentSnapshot,
-    limit
     addDoc,
     limit,
     deleteDoc
