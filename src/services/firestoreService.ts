@@ -240,6 +240,7 @@ class FirestoreService {
                 id: noteSnap.id,
                 lessonId,
                 text: noteSnap.data().text,
+                updatedAt: noteSnap.data().updatedAt
             };
         } catch (error) {
             console.error(`[getNoteForLesson] Error getting note for user ${userId} and lesson ${lessonId}:`, error);
@@ -249,16 +250,13 @@ class FirestoreService {
 
     async saveNote(userId: string, lessonId: string, text: string): Promise<Note> {
         try {
-            console.log(`[saveNote] Attempting to save note for user ${userId} and lesson ${lessonId}`);
             const noteRef = doc(db, `users/${userId}/notes/${lessonId}`);
             const note = {
-                userId,
                 lessonId,
                 text,
                 updatedAt: new Date().toISOString()
             };
             await setDoc(noteRef, note);
-            console.log(`[saveNote] Successfully saved note for user ${userId} and lesson ${lessonId}`);
             return {
                 id: lessonId,
                 ...note

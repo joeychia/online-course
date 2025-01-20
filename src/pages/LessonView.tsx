@@ -125,6 +125,7 @@ const LessonView: React.FC<LessonViewProps> = ({
   const { currentUser } = useAuth();
   const { t, language } = useTranslation();
   const [note, setNote] = useState(lesson?.userNote || '');
+  const [noteLastUpdated, setNoteLastUpdated] = useState<string | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(null);
@@ -215,6 +216,7 @@ const LessonView: React.FC<LessonViewProps> = ({
         const existingNote = await getNotesForLesson(currentUser.uid, lesson.id);
         if (existingNote) {
           setNote(existingNote.text);
+          setNoteLastUpdated(existingNote.updatedAt);
         }
       } catch (err) {
         console.error('Error loading note:', err);
@@ -484,6 +486,16 @@ const LessonView: React.FC<LessonViewProps> = ({
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">
               {t('personalNotes')}
+              {(noteSaved || noteLastUpdated) && (
+                <Typography 
+                  component="span" 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{ ml: 1 }}
+                >
+                  {t('lastUpdate', { date: noteSaved ? new Date().toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') : new Date(noteLastUpdated!).toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') })}
+                </Typography>
+              )}
             </Typography>
             <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
               <Button

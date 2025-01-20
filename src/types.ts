@@ -97,4 +97,5 @@ export interface Note {
   id: string;
   lessonId: string;
   text: string;
-} 
+  updatedAt: string;
+}

@@ -274,5 +274,9 @@ export const translations: Translations = {
   weeklyQuiz: {
     'zh-TW': '本週測驗',
     'zh-CN': '本周测验'
-  }
-}; 
+  },
+  lastUpdate: {
+    'zh-TW': '最後更新：{{date}}',
+    'zh-CN': '最后更新：{{date}}'
+  },
+};

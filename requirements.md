@@ -178,9 +178,10 @@ User Profiles & Progress
       // Add more groupIds as needed
     },
     "notes": {
-      "$lessonId_$userId": {
+      "$lessonId": {
         "lessonId": "lessonId",
-        "text": "User's note here"
+        "text": "User's note here",
+        "updatedAt": "timestamp"
       }
     }
   }
