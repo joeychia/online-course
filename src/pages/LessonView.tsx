@@ -194,9 +194,6 @@ const LessonView: React.FC<LessonViewProps> = ({
           }
 
           setQuizHistory(historyData);
-          if (historyData) {
-            console.log('Quiz already completed');
-          }
         } catch (err) {
           console.error('Error loading quiz data:', err);
         }
@@ -522,4 +519,4 @@ const LessonView: React.FC<LessonViewProps> = ({
   );
 }
 
-export default LessonView; 
+export default LessonView;

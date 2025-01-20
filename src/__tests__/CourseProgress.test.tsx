@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CourseProgress from '../components/CourseProgress';
 import { LanguageProvider } from '../contexts/LanguageContext';
-import { useTranslation } from '../hooks/useTranslation';
+
 
 // Mock react-calendar-heatmap
 vi.mock('react-calendar-heatmap', () => ({
@@ -167,4 +167,4 @@ describe('CourseProgress', () => {
     fireEvent.click(nextLessonLink);
     expect(mockNavigate).toHaveBeenCalledWith('/course1/unit1/lesson3');
   });
-}); 
+});

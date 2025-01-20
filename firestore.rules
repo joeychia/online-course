@@ -26,18 +26,15 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.token.admin == true;
     }
 
-    // Allow users to read and write their own data
+    // Allow users to read and write their own data and notes
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Allow users to read and write their own notes
-    match /notes/{noteId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null && 
-        resource.data.userId == request.auth.uid && 
-        request.resource.data.userId == request.auth.uid;
+      
+      match /notes/{noteId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // Allow users to read and write their own grades
@@ -48,9 +45,10 @@ service cloud.firestore {
     // Allow users to read and write their quiz history
     match /quizHistory/{historyId} {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null 
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.keys().hasAll(['userId', 'courseId', 'lessonId', 'answers', 'correct', 'total', 'completedAt']);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.userId == request.auth.uid;
     }
   }
 }

@@ -164,7 +164,6 @@ export default function CourseView() {
   }
 
   const handleSelectLesson = (unitId: string, lessonId: string) => {
-    console.log('Navigating to unit:', unitId, 'lesson:', lessonId);
     navigate(`/${courseId}/${unitId}/${lessonId}`);
   };
 
@@ -251,7 +250,8 @@ export default function CourseView() {
   };
 
   const handleSaveNote = async (lessonId: string, note: string) => {
-    await firestoreService.saveNote(courseId!, lessonId, note);
+    if (!currentUser) return;
+    await firestoreService.saveNote(currentUser.uid, lessonId, note);
   };
 
   const mainContent = loading ? (
@@ -425,4 +425,4 @@ export default function CourseView() {
       </Dialog>
     </>
   );
-} 
+}

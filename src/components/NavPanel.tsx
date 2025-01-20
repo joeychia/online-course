@@ -119,7 +119,7 @@ export default function NavPanel({
   };
 
   const isLessonAccessible = (lessonIndex: number, unitLessons: Array<{ id: string }>) => {
-    // return true; // for debuggging
+
     // If course has unlockLessonIndex, only that lesson is accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
       if(lessonIndex === course.settings.unlockLessonIndex) {
@@ -318,4 +318,4 @@ export default function NavPanel({
       </Drawer>
     </Box>
   );
-} 
+}

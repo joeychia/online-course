@@ -229,29 +229,45 @@ class FirestoreService {
 
     // Note operations
     async getNoteForLesson(userId: string, lessonId: string): Promise<Note | null> {
-        const noteId = `${lessonId}_${userId}`;
-        const userRef = doc(db, 'users', userId);
-
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) return null;
-
-        const note = userSnap.data()?.notes?.[noteId] || null;
-        
-        return note ? { ...note, id: noteId } : null;
+        try {
+            const noteRef = doc(db, `users/${userId}/notes/${lessonId}`);
+            const noteSnap = await getDoc(noteRef);
+            if (!noteSnap.exists()) {
+                console.log(`[getNoteForLesson] Note not found for user ${userId} and lesson ${lessonId}`);
+                return null;
+            }
+            return {
+                id: noteSnap.id,
+                lessonId,
+                text: noteSnap.data().text,
+            };
+        } catch (error) {
+            console.error(`[getNoteForLesson] Error getting note for user ${userId} and lesson ${lessonId}:`, error);
+            return null;
+        }
     }
 
     async saveNote(userId: string, lessonId: string, text: string): Promise<Note> {
-        const userRef = doc(db, 'users', userId);
-        const noteId = `${lessonId}_${userId}`;
-        const note: Note = { id: noteId, lessonId, text };
-        // Update or set the note directly
-        await updateDoc(userRef, {
-            [`notes.${noteId}`]:note
-        });
-
-        return note;
+        try {
+            console.log(`[saveNote] Attempting to save note for user ${userId} and lesson ${lessonId}`);
+            const noteRef = doc(db, `users/${userId}/notes/${lessonId}`);
+            const note = {
+                userId,
+                lessonId,
+                text,
+                updatedAt: new Date().toISOString()
+            };
+            await setDoc(noteRef, note);
+            console.log(`[saveNote] Successfully saved note for user ${userId} and lesson ${lessonId}`);
+            return {
+                id: lessonId,
+                ...note
+            };
+        } catch (error) {
+            console.error(`[saveNote] Error saving note for user ${userId} and lesson ${lessonId}:`, error);
+            throw error;
+        }
     }
-
 
     // Grade operations
     async getGradesForCourse(courseId: string): Promise<Grade[]> {
@@ -290,4 +306,4 @@ class FirestoreService {
     }
 }
 
-export const firestoreService = new FirestoreService(); 
+export const firestoreService = new FirestoreService();
