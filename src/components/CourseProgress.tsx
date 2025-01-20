@@ -10,6 +10,8 @@ import './CourseProgress.css';
 interface CourseProgressProps {
   progress: Record<string, UserProgress>;
   courseId: string;
+  units: Array<{ id: string; name: string }>;
+  unitLessons: { [key: string]: Array<{ id: string; name: string }> };
 }
 
 interface CalendarValue extends ReactCalendarHeatmapValue<string> {
@@ -43,7 +45,7 @@ function formatDate(dateString: string): string {
   }
 }
 
-export default function CourseProgress({ progress, courseId }: CourseProgressProps) {
+export default function CourseProgress({ progress, courseId, units, unitLessons }: CourseProgressProps) {
   const navigate = useNavigate();
 
   // Find the latest completed lesson
@@ -59,6 +61,52 @@ export default function CourseProgress({ progress, courseId }: CourseProgressPro
         return 0;
       }
     })[0];
+
+  // Find the next lesson
+  const findNextLesson = () => {
+    if (!latestLesson) {
+      return null;
+    }
+
+    const [completedLessonId] = latestLesson;
+    
+    // Find which unit contains the completed lesson
+    for (const unit of units) {
+      const lessons = unitLessons[unit.id] || [];
+      const lessonIndex = lessons.findIndex(lesson => lesson.id === completedLessonId);
+      
+      if (lessonIndex !== -1) {
+        // If there's a next lesson in the same unit
+        if (lessonIndex < lessons.length - 1) {
+          const nextLesson = {
+            id: lessons[lessonIndex + 1].id,
+            name: lessons[lessonIndex + 1].name,
+            unitId: unit.id
+          };
+          return nextLesson;
+        }
+        
+        // If we're at the end of this unit, look for the first lesson of the next unit
+        const currentUnitIndex = units.findIndex(u => u.id === unit.id);
+        if (currentUnitIndex !== -1 && currentUnitIndex < units.length - 1) {
+          const nextUnit = units[currentUnitIndex + 1];
+          const nextUnitLessons = unitLessons[nextUnit.id] || [];
+          if (nextUnitLessons.length > 0) {
+            const nextLesson = {
+              id: nextUnitLessons[0].id,
+              name: nextUnitLessons[0].name,
+              unitId: nextUnit.id
+            };
+            return nextLesson;
+          }
+        }
+        break;
+      }
+    }
+    return null;
+  };
+
+  const nextLesson = findNextLesson();
 
   // Prepare calendar data
   const calendarData = Object.entries(progress)
@@ -175,27 +223,54 @@ export default function CourseProgress({ progress, courseId }: CourseProgressPro
         <Typography variant="subtitle1" gutterBottom>
           Latest Completed Lesson
         </Typography>
-        <Link
-          component="button"
-          variant="body1"
-          onClick={handleLatestLessonClick}
-          sx={{ 
-            color: 'primary.main',
-            textAlign: 'left',
-            display: 'block',
-            mb: 1,
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}
-        >
-          {lessonData.lessonName}
-        </Link>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
-          <AccessTimeIcon fontSize="small" />
-          <Typography variant="body2">
-            Completed {formattedDate}
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
+          <Box>
+            <Link
+              component="button"
+              variant="body1"
+              onClick={handleLatestLessonClick}
+              sx={{ 
+                color: 'primary.main',
+                textAlign: 'left',
+                display: 'block',
+                mb: 1,
+                '&:hover': {
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              {lessonData.lessonName}
+            </Link>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+              <AccessTimeIcon fontSize="small" />
+              <Typography variant="body2">
+                Completed {formattedDate}
+              </Typography>
+            </Box>
+          </Box>
+
+          {nextLesson && (
+            <Box>
+              <Typography variant="subtitle2" gutterBottom color="text.secondary">
+                Next Up
+              </Typography>
+              <Link
+                component="button"
+                variant="body1"
+                onClick={() => navigate(`/${courseId}/${nextLesson.unitId}/${nextLesson.id}`)}
+                sx={{ 
+                  color: 'primary.main',
+                  textAlign: 'left',
+                  display: 'block',
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                {nextLesson.name}
+              </Link>
+            </Box>
+          )}
         </Box>
       </Box>
     </Paper>

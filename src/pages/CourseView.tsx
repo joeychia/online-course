@@ -105,8 +105,10 @@ export default function CourseView() {
 
     if (unitId) {
       loadUnitLessons(unitId);
+    } else {
+      units.forEach(unit => loadUnitLessons(unit.id));
     }
-  }, [unitId, unitLessons]);
+  }, [unitId, unitLessons, units]);
 
   // Load selected lesson
   useEffect(() => {
@@ -264,7 +266,12 @@ export default function CourseView() {
         </Typography>
 
         {isRegistered ? (
-          <CourseProgress progress={userProgress} courseId={courseId} />
+          <CourseProgress 
+            progress={userProgress} 
+            courseId={courseId}
+            units={units}
+            unitLessons={unitLessons}
+          />
         ) : (
           <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
             <Box sx={{ textAlign: 'center' }}>

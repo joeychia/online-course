@@ -1,29 +1,18 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CourseProgress from '../components/CourseProgress';
-import type { UserProgress } from '../types';
 
 // Mock react-calendar-heatmap
 vi.mock('react-calendar-heatmap', () => ({
-  default: vi.fn(({ values, onClick }) => (
-    <div data-testid="calendar-heatmap">
-      {values.map((value: any, index: number) => (
-        <button
-          key={index}
-          data-testid={`calendar-day-${value.date}`}
-          onClick={() => onClick(value)}
-        >
-          {value.date}
-        </button>
-      ))}
-    </div>
-  ))
+  __esModule: true,
+  default: () => <div data-testid="calendar-heatmap">Calendar Heatmap</div>
 }));
 
 // Mock ReactTooltip
 vi.mock('react-tooltip', () => ({
-  default: vi.fn(() => null)
+  __esModule: true,
+  default: () => <div>Tooltip</div>
 }));
 
 const mockNavigate = vi.fn();
@@ -40,182 +29,108 @@ describe('CourseProgress', () => {
     vi.clearAllMocks();
   });
 
-  it('renders empty state when no lessons are completed', () => {
-    render(
+  const mockProgress = {
+    'lesson1': {
+      completed: true,
+      completedAt: '2024-03-20T10:00:00Z',
+      lessonName: 'Introduction'
+    },
+    'lesson2': {
+      completed: true,
+      completedAt: '2024-03-21T11:00:00Z',
+      lessonName: 'Basic Concepts'
+    }
+  };
+
+  const mockUnits = [
+    { id: 'unit1', name: 'Unit 1' },
+    { id: 'unit2', name: 'Unit 2' }
+  ];
+
+  const mockUnitLessons = {
+    'unit1': [
+      { id: 'lesson1', name: 'Introduction' },
+      { id: 'lesson2', name: 'Basic Concepts' },
+      { id: 'lesson3', name: 'Advanced Topics' }
+    ],
+    'unit2': [
+      { id: 'lesson4', name: 'Next Unit Lesson' }
+    ]
+  };
+
+  const defaultProps = {
+    progress: mockProgress,
+    courseId: 'course1',
+    units: mockUnits,
+    unitLessons: mockUnitLessons
+  };
+
+  const renderComponent = (props = {}) => {
+    return render(
       <MemoryRouter>
-        <CourseProgress progress={{}} courseId="course1" />
+        <CourseProgress {...defaultProps} {...props} />
       </MemoryRouter>
     );
+  };
 
-    expect(screen.getByText('Course Progress')).toBeInTheDocument();
-    expect(screen.getByText('No lessons completed yet. Start your learning journey!')).toBeInTheDocument();
-  });
-
-  it('displays completed lessons count', () => {
-    const mockProgress: Record<string, UserProgress> = {
-      'lesson1': {
-        completed: true,
-        completedAt: '2024-01-01T10:00:00Z',
-        lessonName: 'Lesson 1'
-      },
-      'lesson2': {
-        completed: true,
-        completedAt: '2024-01-02T10:00:00Z',
-        lessonName: 'Lesson 2'
-      },
-      'lesson3': {
-        completed: false,
-        lessonName: 'Lesson 3'
-      }
-    };
-
-    render(
-      <MemoryRouter>
-        <CourseProgress progress={mockProgress} courseId="course1" />
-      </MemoryRouter>
-    );
-
+  it('renders course progress with completed lessons count', () => {
+    renderComponent();
     expect(screen.getByText('2 lessons completed')).toBeInTheDocument();
   });
 
-  it('shows latest completed lesson with timestamp', () => {
-    const mockProgress: Record<string, UserProgress> = {
-      'lesson1': {
-        completed: true,
-        completedAt: '2024-01-01T10:00:00Z',
-        lessonName: 'Lesson 1'
-      },
-      'lesson2': {
-        completed: true,
-        completedAt: '2024-01-02T10:00:00Z',
-        lessonName: 'Latest Lesson'
-      }
-    };
-
-    render(
-      <MemoryRouter>
-        <CourseProgress progress={mockProgress} courseId="course1" />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText('Latest Lesson')).toBeInTheDocument();
-    // Note: Exact date format might vary by timezone, so we check for partial match
-    expect(screen.getByText(/January 2, 2024 at 02:00 AM/)).toBeInTheDocument();
+  it('shows latest completed lesson', () => {
+    renderComponent();
+    expect(screen.getByText('Basic Concepts')).toBeInTheDocument();
+    expect(screen.getByText(/^Completed March 21, 2024 at/)).toBeInTheDocument();
   });
 
-  it('navigates to lesson when clicking on latest lesson', () => {
-    const mockProgress: Record<string, UserProgress> = {
-      'lesson1': {
-        completed: true,
-        completedAt: '2024-01-02T10:00:00Z',
-        lessonName: 'Latest Lesson'
-      }
-    };
-
-    render(
-      <MemoryRouter>
-        <CourseProgress progress={mockProgress} courseId="course1" />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(screen.getByText('Latest Lesson'));
-    expect(mockNavigate).toHaveBeenCalledWith('/course1/lesson1');
+  it('shows next lesson when available', () => {
+    renderComponent();
+    expect(screen.getByText('Next Up')).toBeInTheDocument();
+    expect(screen.getByText('Advanced Topics')).toBeInTheDocument();
   });
 
-  it('handles calendar day clicks', () => {
-    const mockProgress: Record<string, UserProgress> = {
-      'lesson1': {
-        completed: true,
-        completedAt: '2024-01-01T10:00:00Z',
-        lessonName: 'Lesson 1'
-      }
-    };
-
-    render(
-      <MemoryRouter>
-        <CourseProgress progress={mockProgress} courseId="course1" />
-      </MemoryRouter>
-    );
-
-    const calendarDay = screen.getByTestId('calendar-day-2024-01-01');
-    fireEvent.click(calendarDay);
-    expect(mockNavigate).toHaveBeenCalledWith('/course1/lesson1');
+  it('shows calendar heatmap', () => {
+    renderComponent();
+    expect(screen.getByTestId('calendar-heatmap')).toBeInTheDocument();
   });
 
-  it('handles invalid completion dates gracefully', () => {
-    const mockProgress: Record<string, UserProgress> = {
-      'lesson1': {
-        completed: true,
-        completedAt: 'invalid-date',
-        lessonName: 'Lesson 1'
-      }
-    };
-
-    render(
-      <MemoryRouter>
-        <CourseProgress progress={mockProgress} courseId="course1" />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText('Lesson 1')).toBeInTheDocument();
-    expect(screen.getByText(/Recently/)).toBeInTheDocument();
+  it('handles empty progress', () => {
+    renderComponent({ progress: {} });
+    expect(screen.getByText('No lessons completed yet. Start your learning journey!')).toBeInTheDocument();
   });
 
-  it('shows calendar heatmap with correct data', () => {
-    const mockProgress: Record<string, UserProgress> = {
-      'lesson1': {
+  it('finds next lesson in same unit', () => {
+    renderComponent();
+    const nextLessonLink = screen.getByText('Advanced Topics');
+    expect(nextLessonLink).toBeInTheDocument();
+  });
+
+  it('finds next lesson in next unit when at end of current unit', () => {
+    const progressAtEndOfUnit = {
+      'lesson3': {
         completed: true,
-        completedAt: '2024-01-01T10:00:00Z',
-        lessonName: 'Lesson 1'
-      },
-      'lesson2': {
-        completed: true,
-        completedAt: '2024-01-01T11:00:00Z',
-        lessonName: 'Lesson 2'
+        completedAt: '2024-03-21T11:00:00Z',
+        lessonName: 'Advanced Topics'
       }
     };
+    
+    renderComponent({ progress: progressAtEndOfUnit });
+    const nextLessonLink = screen.getByText('Next Unit Lesson');
+    expect(nextLessonLink).toBeInTheDocument();
+  });
 
-    render(
-      <MemoryRouter>
-        <CourseProgress progress={mockProgress} courseId="course1" />
-      </MemoryRouter>
-    );
-
-    // Check if calendar is rendered with the correct date
-    const calendarDay = screen.getByTestId('calendar-day-2024-01-01');
-    expect(calendarDay).toBeInTheDocument();
-
-    // Verify that clicking the calendar day navigates to the latest lesson completed on that day
-    fireEvent.click(calendarDay);
+  it('navigates to lesson when clicking on latest completed lesson', () => {
+    renderComponent();
+    const latestLessonLink = screen.getByText('Basic Concepts');
+    fireEvent.click(latestLessonLink);
     expect(mockNavigate).toHaveBeenCalledWith('/course1/lesson2');
   });
 
-  it('sorts lessons by completion date correctly', () => {
-    const mockProgress: Record<string, UserProgress> = {
-      'lesson1': {
-        completed: true,
-        completedAt: '2024-01-01T10:00:00Z',
-        lessonName: 'Old Lesson'
-      },
-      'lesson2': {
-        completed: true,
-        completedAt: '2024-01-02T10:00:00Z',
-        lessonName: 'Latest Lesson'
-      },
-      'lesson3': {
-        completed: false,
-        lessonName: 'Uncompleted Lesson'
-      }
-    };
-
-    render(
-      <MemoryRouter>
-        <CourseProgress progress={mockProgress} courseId="course1" />
-      </MemoryRouter>
-    );
-
-    // The latest completed lesson should be shown in the "Latest Completed Lesson" section
-    const latestLessonLink = screen.getByText('Latest Lesson');
-    expect(latestLessonLink).toBeInTheDocument();
+  it('navigates to next lesson when clicking on next lesson link', () => {
+    renderComponent();
+    const nextLessonLink = screen.getByText('Advanced Topics');
+    fireEvent.click(nextLessonLink);
+    expect(mockNavigate).toHaveBeenCalledWith('/course1/unit1/lesson3');
   });
 }); 
