@@ -12,8 +12,7 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
-  CircularProgress,
-  TextField,
+  CircularProgress
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
@@ -24,14 +23,15 @@ import QuizView from '../components/QuizView';
 import { 
   getQuiz, 
   getUnit,
-  updateUserProgress,
-  saveNote,
   getNotesForLesson,
   getQuizHistoryForUserLesson,
+  getLesson,
 } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
 import { useTranslation } from '../hooks/useTranslation';
+import { useParams } from 'react-router-dom';
+import { getYouTubeVideoId } from '../utils/urlUtils';
 import { convertChinese } from '../utils/chineseConverter';
 
 // Function to encode URLs in markdown content
@@ -65,20 +65,7 @@ interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title'> {
   'video-url'?: string;
   'video-title'?: string;
   userNote?: string;
-}
-
-interface LessonViewProps {
   courseId: string;
-  lesson: ExtendedLesson;
-  onComplete?: (lessonId: string) => void;
-  isCompleted?: boolean;
-  quizHistory: QuizHistory | null;
-  onSaveNote: (note: string) => void;
-}
-
-function getYouTubeVideoId(url: string): string | null {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
-  return match ? match[1] : null;
 }
 
 interface LinkNode extends MdNode {
@@ -116,39 +103,79 @@ const linkRenderer: HTMLConvertorMap = {
   }
 };
 
-export default function LessonView({ courseId, lesson, onComplete, isCompleted: initialIsCompleted = false, quizHistory: initialQuizHistory = null, onSaveNote }: LessonViewProps): JSX.Element {
+interface LessonViewProps {
+  courseId: string;
+  lesson: Lesson;
+  onComplete: (lessonId: string) => Promise<void>;
+  isCompleted: boolean;
+  onSaveNote: (lessonId: string, note: string) => Promise<void>;
+}
+
+const LessonView: React.FC<LessonViewProps> = ({ 
+  courseId,
+  lesson: initialLesson,
+  onComplete,
+  isCompleted,
+  onSaveNote
+}) => {
+  const { lessonId } = useParams<{ lessonId: string }>();
+  const [lesson, setLesson] = useState<ExtendedLesson>({ ...initialLesson, courseId });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { currentUser } = useAuth();
   const { t, language } = useTranslation();
-  const [loading, setLoading] = useState(true);
-  const [note, setNote] = useState(lesson.userNote || '');
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, string> | null>(null);
+  const [note, setNote] = useState(lesson?.userNote || '');
   const [quizOpen, setQuizOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(initialQuizHistory);
-  const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
+  const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
-  const [quizStartTime, setQuizStartTime] = useState<Date | null>(null);
 
-  // Track lesson view
   useEffect(() => {
-    async function trackView(): Promise<void> {
-      if (lesson.unitId) {
+    if (initialLesson) {
+      setLesson({ ...initialLesson, courseId });
+      return;
+    }
+    
+    const fetchLesson = async () => {
+      try {
+        if (!lessonId) return;
+        const lessonData = await getLesson(lessonId);
+        if (!lessonData) {
+          setError('Lesson not found');
+          return;
+        }
+        setLesson({ ...lessonData, courseId });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load lesson');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLesson();
+  }, [lessonId, initialLesson]);
+
+  useEffect(() => {
+    async function trackView() {
+      if (lesson?.unitId) {
         const unit = await getUnit(lesson.unitId);
         if (unit) {
           void analyticsService.trackLessonView({
-            courseId,
+            courseId: lesson.courseId,
             courseName: unit.courseId,
             unitId: unit.id,
             unitName: unit.name,
             lessonId: lesson.id,
-            lessonName: lesson.name
+            lessonName: lesson.name,
           });
         }
       }
     }
-    void trackView();
-  }, [lesson.id, lesson.name, lesson.unitId, courseId]);
+    if (lesson) {
+      void trackView();
+    }
+  }, [lesson]);
 
   // Load quiz and quiz history if lesson has quizId
   useEffect(() => {
@@ -168,7 +195,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
 
           setQuizHistory(historyData);
           if (historyData) {
-            setQuizAnswers(historyData.answers);
+            console.log('Quiz already completed');
           }
         } catch (err) {
           console.error('Error loading quiz data:', err);
@@ -200,15 +227,12 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
   }, [lesson?.id, currentUser, lesson]);
 
   const handleSaveNote = async (): Promise<void> => {
-    if (!currentUser) return;
+    if (!currentUser || !lesson) return;
     
     try {
       setIsSaving(true);
-      await saveNote(currentUser.uid, lesson.id, note);
-      setIsCompleted(true);
-      onComplete?.(lesson.id);
+      await onSaveNote(lesson.id, note);
       setNoteSaved(true);
-      onSaveNote(note);
     } catch (err) {
       console.error('Error saving note:', err);
     } finally {
@@ -216,63 +240,54 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
     }
   };
 
-  const handleQuizSubmit = async (answers: Record<string, string>): Promise<void> => {
-    if (!quiz || !currentUser) return;
+  const handleQuizSubmit = async (answers: Record<string, string>) => {
+    if (!lesson || !currentUser || !quiz) return;
 
-    const endTime = new Date();
-    const timeSpent = quizStartTime ? (endTime.getTime() - quizStartTime.getTime()) / 1000 : 0;
+    try {
+      const unit = await getUnit(lesson.unitId);
+      if (unit) {
+        // Calculate score
+        let correct = 0;
+        Object.entries(answers).forEach(([questionIndex, answerId]) => {
+          const question = quiz.questions[parseInt(questionIndex, 10)];
+          if (question?.options && question.options[parseInt(answerId, 10)]?.isCorrect) {
+            correct++;
+          }
+        });
 
-    // Calculate score
-    let correct = 0;
-    Object.entries(answers).forEach(([questionIndex, answerId]) => {
-      const question = quiz.questions[parseInt(questionIndex, 10)];
-      if (question?.options && question.options[parseInt(answerId, 10)]?.isCorrect) {
-        correct++;
+        const total = quiz.questions.length;
+        const score = (correct / total) * 100;
+
+        void analyticsService.trackQuizComplete({
+          courseId: lesson.courseId,
+          courseName: unit.courseId,
+          unitId: unit.id,
+          unitName: unit.name,
+          lessonId: lesson.id,
+          lessonName: lesson.name,
+          score,
+        });
+
+        await onComplete(lesson.id);
+        setQuizOpen(false);
       }
-    });
-
-    const total = quiz.questions.length;
-    const score = (correct / total) * 100;
-
-    // Track quiz completion
-    const unit = await getUnit(lesson.unitId);
-    if (unit) {
-      void analyticsService.trackQuizComplete({
-        courseId,
-        courseName: unit.courseId,
-        unitId: unit.id,
-        unitName: unit.name,
-        lessonId: lesson.id,
-        lessonName: lesson.name,
-        score,
-        timeSpent
-      });
-    }
-
-    if (lesson && courseId && currentUser) {
-      try {
-        await updateUserProgress(currentUser.uid, courseId, lesson.id);
-        setIsCompleted(true);
-        onComplete?.(lesson.id);
-        setQuizAnswers(answers);
-        // Update quiz history state after submission
-        const newHistory = await getQuizHistoryForUserLesson(currentUser.uid, lesson.id);
-        setQuizHistory(newHistory);
-      } catch (err) {
-        console.error('Error submitting quiz:', err);
-      }
+    } catch (err) {
+      console.error('Error submitting quiz:', err);
     }
   };
 
   if (loading) {
     return (
-      <Box sx={{ 
-        height: '100%', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
-      }}>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !lesson) {
+    return (
+      <Box p={2}>
+        <Typography color="error">{error || 'Lesson not found'}</Typography>
       </Box>
     );
   }
@@ -354,7 +369,6 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
               variant="contained" 
               color="primary"
               onClick={() => {
-                setQuizStartTime(new Date());
                 setQuizOpen(true);
               }}
             >
@@ -457,7 +471,7 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
           {quiz && <QuizView 
             quiz={quiz} 
             onSubmit={handleQuizSubmit}
-            courseId={courseId}
+            courseId={lesson.courseId}
             lessonId={lesson.id}
             onClose={() => setQuizOpen(false)}
           />}
@@ -506,4 +520,6 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
         </Paper>
     </Box>
   );
-} 
+}
+
+export default LessonView; 

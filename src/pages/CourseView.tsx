@@ -18,13 +18,15 @@ import {
 import { getLesson, getCourse, getUnitsIdNameForCourse, getLessonsIdNameForUnit, getUser, updateUserProgress } from '../services/dataService';
 import { analyticsService } from '../services/analyticsService';
 import NavPanel from '../components/NavPanel';
-import LessonView from './LessonView';
 import { useState, useEffect } from 'react';
-import { Lesson, Course, UserProgress } from '../types';
+import { Lesson, Course, UserProgress, Unit } from '../types';
 import { useAuth } from '../contexts/useAuth';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
 import { useTranslation } from '../hooks/useTranslation';
+import LessonView from './LessonView';
+
+
 
 export default function CourseView() {
   const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
@@ -34,9 +36,9 @@ export default function CourseView() {
   }>();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [course, setCourse] = useState<Course | null>(null);
-  const [units, setUnits] = useState<Array<{ id: string; name: string }>>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(window.innerWidth >= 600);
@@ -45,6 +47,7 @@ export default function CourseView() {
   const [loading, setLoading] = useState(false);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [nextLessonId, setNextLessonId] = useState<string | null>(null);
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   // Toggle drawer handler
   const handleDrawerToggle = () => {
@@ -78,7 +81,7 @@ export default function CourseView() {
 
         if (courseData) {
           setCourse(courseData);
-          setUnits(unitsData);
+          setUnits(unitsData as Unit[]);
           
           if (userData) {
             setUserProgress(userData.progress[courseId] || {});
@@ -207,6 +210,7 @@ export default function CourseView() {
       }
     }
 
+    setCompletedLessons(prev => [...prev, completedLessonId]);
     setShowCompletionDialog(true);
   };
 
@@ -246,21 +250,22 @@ export default function CourseView() {
     }
   };
 
+  const handleSaveNote = async (lessonId: string, note: string) => {
+    await firestoreService.saveNote(courseId!, lessonId, note);
+  };
+
   const mainContent = loading ? (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
       <CircularProgress />
     </Box>
   ) : currentLesson ? (
     <LessonView
+      key={`${currentLesson.id}-${language}`}
       courseId={courseId}
       lesson={currentLesson}
       onComplete={handleLessonComplete}
-      isCompleted={userProgress[currentLesson.id]?.completed}
-      quizHistory={null}
-      onSaveNote={(note) => {
-        // Handle note saving
-        console.log('Note saved:', note);
-      }}
+      isCompleted={completedLessons.includes(currentLesson.id)}
+      onSaveNote={handleSaveNote}
     />
   ) : (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>

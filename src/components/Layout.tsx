@@ -189,7 +189,7 @@ export default function Layout({ children }: LayoutProps) {
                 <ToggleButtonGroup
                   value={language}
                   exclusive
-                  onChange={(e, newLang) => newLang && setLanguage(newLang)}
+                  onChange={(_, newLang) => newLang && setLanguage(newLang)}
                   aria-label="language"
                   size="small"
                   sx={{ display: 'flex' }}

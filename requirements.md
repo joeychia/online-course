@@ -154,11 +154,6 @@ Grades
 }
 ```
 
-Notes
-```json
-
-```
-
 User Profiles & Progress
 ```json
 "users": {

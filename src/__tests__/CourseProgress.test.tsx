@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CourseProgress from '../components/CourseProgress';
 import { LanguageProvider } from '../contexts/LanguageContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 // Mock react-calendar-heatmap
 vi.mock('react-calendar-heatmap', () => ({
@@ -23,6 +24,30 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => mockNavigate
   };
 });
+
+// Mock useTranslation
+vi.mock('../hooks/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string, params?: Record<string, any>) => {
+      const translations: Record<string, string> = {
+        'courseProgress': '課程進度',
+        'lessonsCompleted': '已完成 {count} 個課程',
+        'completionCalendar': '完成日曆',
+        'latestCompletedLesson': '最近完成的課程',
+        'nextUp': '下一課',
+        'noLessonsCompleted': '尚未完成任何課程。開始您的學習之旅！'
+      };
+      let text = translations[key] || key;
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          text = text.replace(`{${key}}`, String(value));
+        });
+      }
+      return text;
+    },
+    language: 'zh-TW'
+  })
+}));
 
 const mockProgress = {
   'lesson1': {
@@ -56,6 +81,12 @@ const mockUnitLessons = {
 describe('CourseProgress', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set language to zh-TW in localStorage
+    localStorage.setItem('language', 'zh-TW');
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   const renderComponent = (props = {}) => {
@@ -77,7 +108,7 @@ describe('CourseProgress', () => {
   it('displays course progress header and completed lessons count', () => {
     renderComponent();
     expect(screen.getByText('課程進度')).toBeInTheDocument();
-    expect(screen.getByText('已完成 2 個課程')).toBeInTheDocument();
+    expect(screen.getByText(/已完成 2 個課程/)).toBeInTheDocument();
   });
 
   it('displays completion calendar section', () => {

@@ -1,5 +1,5 @@
-import { render, cleanup, screen, waitFor, fireEvent, act, within } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { render, cleanup, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CourseList from '../pages/CourseList';
 import { getAllCourses } from '../services/dataService';
@@ -68,7 +68,7 @@ interface RenderOptions {
   user?: FirebaseUser | null;
 }
 
-// Test wrapper with router and auth context
+// @ts-ignore - This is used in tests
 const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOptions = {}) => {
   const mockUser = user as FirebaseUser | null;
   const mockAuthValue: AuthContextType = {

@@ -1,28 +1,30 @@
-import { useLanguage } from '../contexts/LanguageContext';
+import { useContext } from 'react';
+import { LanguageContext } from '../contexts/LanguageContext';
 import { translations } from '../utils/translations';
 
-type Language = 'zh-TW' | 'zh-CN';
-
 interface TranslationHook {
-  t: (key: keyof typeof translations, params?: Record<string, string | number>) => string;
-  language: Language;
+  t: (key: string, params?: Record<string, any>) => string;
+  language: 'zh-TW' | 'zh-CN';
 }
 
-export function useTranslation(): TranslationHook {
-  const { language } = useLanguage();
+export const useTranslation = (): TranslationHook => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useTranslation must be used within a LanguageProvider');
+  }
+  const { language } = context;
 
-  const t = (key: keyof typeof translations, params?: Record<string, string | number>) => {
-    const translation = translations[key]?.[language] || String(key);
+  const t = (key: string, params?: Record<string, any>): string => {
+    let translation = translations[key]?.[language as 'zh-TW' | 'zh-CN'] || String(key);
     
-    if (!params) {
-      return translation;
+    if (params) {
+      Object.entries(params).forEach(([param, value]) => {
+        translation = translation.replace(`{{${param}}}`, String(value));
+      });
     }
-
-    return Object.entries(params).reduce(
-      (text, [key, value]) => text.replace(`{${key}}`, String(value)),
-      translation
-    );
+    
+    return translation;
   };
 
-  return { t, language };
-} 
+  return { t, language: language as 'zh-TW' | 'zh-CN' };
+}; 

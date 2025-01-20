@@ -25,9 +25,10 @@ interface CourseCardProps {
   course: Course;
   isAuthenticated: boolean;
   onSignInClick: () => void;
-  language: string;
+  language: 'zh-TW' | 'zh-CN';
 }
 
+// @ts-ignore - This component will be used in the future
 const CourseCard = ({ course, isAuthenticated, onSignInClick, language }: CourseCardProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();

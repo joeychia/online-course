@@ -1,12 +1,13 @@
 import { Box, Typography, Paper, Link } from '@mui/material';
 import { UserProgress } from '../types';
 import { useNavigate } from 'react-router-dom';
-import CalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
+import ReactCalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import ReactTooltip from 'react-tooltip';
 import './CourseProgress.css';
 import { formatDate } from '../utils/dateUtils';
 import { useTranslation } from '../hooks/useTranslation';
+import { TooltipDataAttrs } from 'react-calendar-heatmap';
 
 interface CourseProgressProps {
   progress: Record<string, UserProgress>;
@@ -20,11 +21,6 @@ interface CalendarValue extends ReactCalendarHeatmapValue<string> {
   count: number;
   lessons: { name: string; id: string }[];
   lessonId: string;
-}
-
-interface TooltipDataAttrs {
-  'data-tip': string;
-  'data-multiline'?: boolean;
 }
 
 export default function CourseProgress({ progress, courseId, units, unitLessons }: CourseProgressProps) {
@@ -183,37 +179,37 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
         <Typography variant="subtitle1" gutterBottom>
           {t('completionCalendar')}
         </Typography>
-        <CalendarHeatmap
-          startDate={startDate}
-          endDate={new Date()}
-          values={calendarValues}
-          showWeekdayLabels={true}
-          weekdayLabels={['日', '一', '二', '三', '四', '五', '六']}
-          monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']}
-          classForValue={(value) => {
-            if (!value) {
-              return 'color-empty';
-            }
-            return `color-filled color-scale-${Math.min(value.count, 4)}`;
-          }}
-          tooltipDataAttrs={(value: ReactCalendarHeatmapValue<string> | undefined): TooltipDataAttrs => {
-            if (!value || !value.date) {
-              return { 'data-tip': String(t('noLessonsCompletedTooltip')) };
-            }
-            const calendarValue = value as CalendarValue;
-            const lessons = calendarValue.lessons.map(l => l.name).join('\n');
-            return {
-              'data-tip': `${new Date(calendarValue.date).toLocaleDateString('zh-TW')}\n${lessons}`,
-              'data-multiline': true
-            };
-          }}
-          onClick={(value: ReactCalendarHeatmapValue<string> | undefined) => {
-            if (value) {
-              handleLessonClick(value as CalendarValue);
-            }
-          }}
-        />
-        <ReactTooltip multiline={true} />
+        <Box>
+          <ReactCalendarHeatmap
+            startDate={startDate}
+            endDate={new Date()}
+            values={calendarValues}
+            showWeekdayLabels={true}
+            weekdayLabels={['日', '一', '二', '三', '四', '五', '六']}
+            monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']}
+            classForValue={(value) => {
+              if (!value) {
+                return 'color-empty';
+              }
+              return `color-filled color-scale-${Math.min(value.count, 4)}`;
+            }}
+            tooltipDataAttrs={(value) => {
+              if (!value || !value.date) {
+                return {
+                  'data-tip': String(t('noLessonsCompletedTooltip'))
+                } as TooltipDataAttrs;
+              }
+              const calendarValue = value as CalendarValue;
+              const lessons = calendarValue.lessons.map(l => l.name).join('\n');
+              return {
+                'data-tip': `${new Date(calendarValue.date).toLocaleDateString('zh-TW')}\n${lessons}`,
+                'data-multiline': true
+              } as TooltipDataAttrs;
+            }}
+            onClick={(value) => handleLessonClick(value as CalendarValue)}
+          />
+          <ReactTooltip multiline={true} />
+        </Box>
       </Box>
 
       {/* Latest Lesson Section */}
