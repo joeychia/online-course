@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Login from '../pages/Login';
@@ -62,7 +62,7 @@ describe('Login', () => {
       const signInButton = screen.getByRole('button', { name: 'Sign In' });
       
       await act(async () => {
-        fireEvent.submit(signInButton.closest('form'));
+        fireEvent.submit(signInButton.closest('form')!);
       });
       
       await waitFor(() => {
@@ -243,7 +243,11 @@ describe('Login', () => {
       vi.mocked(firestoreService.getUserById).mockResolvedValueOnce({
         id: 'google123',
         email: 'google@example.com',
-        name: 'Google User'
+        name: 'Google User',
+        registeredCourses: {},
+        progress: {},
+        groupIds: {},
+        notes: {},
       });
       
       renderLogin();

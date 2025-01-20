@@ -1,6 +1,5 @@
 import { Box, Typography, Paper, Link } from '@mui/material';
 import { UserProgress } from '../types';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNavigate } from 'react-router-dom';
 import CalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';

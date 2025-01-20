@@ -57,8 +57,8 @@ function encodeMarkdownUrls(content: string): string {
   return processedContent;
 }
 
-// Update Lesson type to include video and meditation fields
-interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title' | 'meditation'> {
+// Update Lesson type to include video fields
+interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title'> {
   'video-url'?: string;
   'video-title'?: string;
 }
@@ -271,7 +271,6 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
 
   const videoId = lesson['video-url'] ? getYouTubeVideoId(lesson['video-url']) : null;
   const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';
-  const encodedMeditation = lesson.meditation ? encodeMarkdownUrls(lesson.meditation) : '';
 
   return (
     <Box sx={{ flex: 1, height: '100%', p: 3 }}>
@@ -421,85 +420,6 @@ export default function LessonView({ courseId, lesson, onComplete, isCompleted: 
           customHTMLRenderer={linkRenderer}
         />
       </Box>
-
-      {/* Meditation Section */}
-      {lesson.meditation && (
-        <Paper sx={{ 
-          p: 3, 
-          mb: 4, 
-          bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50',
-          '& .toastui-editor-contents': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents p': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents h1': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-h1)',
-          },
-          '& .toastui-editor-contents h2': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-h2)',
-          },
-          '& .toastui-editor-contents h3': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-h3)',
-          },
-          '& .toastui-editor-contents h4': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-h4)',
-          },
-          '& .toastui-editor-contents h5': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-h5)',
-          },
-          '& .toastui-editor-contents h6': {
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-h6)',
-          },
-          '& .toastui-editor-contents a': {
-            color: theme => theme.palette.primary.main,
-          },
-          '& .toastui-editor-contents blockquote': {
-            borderLeft: theme => `4px solid ${theme.palette.divider}`,
-            color: theme => theme.palette.text.secondary,
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents code': {
-            backgroundColor: theme => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-            color: theme => theme.palette.mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.dark,
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents pre': {
-            backgroundColor: theme => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents table': {
-            borderColor: theme => theme.palette.divider,
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents th, & .toastui-editor-contents td': {
-            borderColor: theme => theme.palette.divider,
-            color: theme => theme.palette.text.primary,
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents ul, & .toastui-editor-contents ol': {
-            fontSize: 'var(--font-size-body)',
-          },
-          '& .toastui-editor-contents li': {
-            fontSize: 'var(--font-size-body)',
-          },
-        }}>
-          <Viewer 
-            initialValue={encodedMeditation} 
-            customHTMLRenderer={linkRenderer}
-          />
-        </Paper>
-      )}
 
       {/* Quiz Modal */}
       <Dialog 

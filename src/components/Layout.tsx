@@ -11,14 +11,10 @@ import {
   MenuItem,
   Avatar,
   Button,
-  Select,
-  FormControl,
-  InputLabel,
   Switch,
   FormControlLabel,
   ToggleButtonGroup,
   ToggleButton,
-  useTheme as useMuiTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -35,7 +31,6 @@ export default function Layout({ children }: LayoutProps) {
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
   const { isDarkMode, toggleTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
-  const muiTheme = useMuiTheme();
   const { currentUser, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -83,7 +78,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const handleFontSizeChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     newSize: string | null,
   ) => {
     if (newSize !== null) {
