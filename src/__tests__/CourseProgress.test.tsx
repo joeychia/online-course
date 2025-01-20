@@ -80,14 +80,14 @@ describe('CourseProgress', () => {
 
   it('shows latest completed lesson', () => {
     renderComponent();
-    expect(screen.getByText('Basic Concepts')).toBeInTheDocument();
-    expect(screen.getByText(/^Completed March 21, 2024 at/)).toBeInTheDocument();
+    expect(screen.getByText('Unit 1 / Basic Concepts')).toBeInTheDocument();
+    expect(screen.getByText(/March 21, 2024 at/)).toBeInTheDocument();
   });
 
   it('shows next lesson when available', () => {
     renderComponent();
     expect(screen.getByText('Next Up')).toBeInTheDocument();
-    expect(screen.getByText('Advanced Topics')).toBeInTheDocument();
+    expect(screen.getByText('Unit 1 / Advanced Topics')).toBeInTheDocument();
   });
 
   it('shows calendar heatmap', () => {
@@ -102,7 +102,7 @@ describe('CourseProgress', () => {
 
   it('finds next lesson in same unit', () => {
     renderComponent();
-    const nextLessonLink = screen.getByText('Advanced Topics');
+    const nextLessonLink = screen.getByText('Unit 1 / Advanced Topics');
     expect(nextLessonLink).toBeInTheDocument();
   });
 
@@ -116,20 +116,20 @@ describe('CourseProgress', () => {
     };
     
     renderComponent({ progress: progressAtEndOfUnit });
-    const nextLessonLink = screen.getByText('Next Unit Lesson');
+    const nextLessonLink = screen.getByText('Unit 2 / Next Unit Lesson');
     expect(nextLessonLink).toBeInTheDocument();
   });
 
   it('navigates to lesson when clicking on latest completed lesson', () => {
     renderComponent();
-    const latestLessonLink = screen.getByText('Basic Concepts');
+    const latestLessonLink = screen.getByText('Unit 1 / Basic Concepts');
     fireEvent.click(latestLessonLink);
-    expect(mockNavigate).toHaveBeenCalledWith('/course1/lesson2');
+    expect(mockNavigate).toHaveBeenCalledWith('/course1/unit1/lesson2');
   });
 
   it('navigates to next lesson when clicking on next lesson link', () => {
     renderComponent();
-    const nextLessonLink = screen.getByText('Advanced Topics');
+    const nextLessonLink = screen.getByText('Unit 1 / Advanced Topics');
     fireEvent.click(nextLessonLink);
     expect(mockNavigate).toHaveBeenCalledWith('/course1/unit1/lesson3');
   });

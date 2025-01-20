@@ -167,8 +167,21 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
   const [lessonId, lessonData] = latestLesson;
   const formattedDate = formatDate(lessonData.completedAt);
 
+  // Find the unit for the latest completed lesson
+  const findUnitForLesson = (lessonId: string) => {
+    for (const unit of units) {
+      const lessons = unitLessons[unit.id] || [];
+      if (lessons.some(lesson => lesson.id === lessonId)) {
+        return unit;
+      }
+    }
+    return null;
+  };
+
+  const latestLessonUnit = findUnitForLesson(lessonId);
+
   const handleLatestLessonClick = () => {
-    navigate(`/${courseId}/${lessonId}`);
+    navigate(`/${courseId}/${latestLessonUnit?.id || ''}/${lessonId}`);
   };
 
   return (
@@ -223,52 +236,65 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
         <Typography variant="subtitle1" gutterBottom>
           Latest Completed Lesson
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Box>
-            <Link
-              component="button"
-              variant="body1"
-              onClick={handleLatestLessonClick}
-              sx={{ 
-                color: 'primary.main',
-                textAlign: 'left',
-                display: 'block',
-                mb: 1,
-                '&:hover': {
-                  textDecoration: 'underline'
-                }
-              }}
-            >
-              {lessonData.lessonName}
-            </Link>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
-              <AccessTimeIcon fontSize="small" />
-              <Typography variant="body2">
-                Completed {formattedDate}
-              </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              mb: 1
+            }}>
+              <Box sx={{ flex: 1 }}>
+                <Link
+                  component="button"
+                  variant="body1"
+                  onClick={handleLatestLessonClick}
+                  sx={{ 
+                    color: 'primary.main',
+                    textAlign: 'left',
+                    mr: 2,
+                    '&:hover': {
+                      textDecoration: 'underline'
+                    }
+                  }}
+                >
+                  {latestLessonUnit?.name} / {lessonData.lessonName}
+                </Link>
+                {formattedDate}
+              </Box>
             </Box>
           </Box>
 
           {nextLesson && (
-            <Box>
-              <Typography variant="subtitle2" gutterBottom color="text.secondary">
+            <Box sx={{ 
+              mt: 2,
+              p: 2, 
+              bgcolor: 'primary.50', 
+              borderRadius: 1,
+              border: 1,
+              borderColor: 'primary.100'
+            }}>
+              <Typography variant="h6" color="primary" gutterBottom>
                 Next Up
               </Typography>
-              <Link
-                component="button"
-                variant="body1"
-                onClick={() => navigate(`/${courseId}/${nextLesson.unitId}/${nextLesson.id}`)}
-                sx={{ 
-                  color: 'primary.main',
-                  textAlign: 'left',
-                  display: 'block',
-                  '&:hover': {
-                    textDecoration: 'underline'
-                  }
-                }}
-              >
-                {nextLesson.name}
-              </Link>
+              <Box>
+                <Link
+                  component="button"
+                  variant="h6"
+                  onClick={() => navigate(`/${courseId}/${nextLesson.unitId}/${nextLesson.id}`)}
+                  sx={{ 
+                    color: 'primary.main',
+                    textAlign: 'left',
+                    display: 'block',
+                    fontWeight: 'medium',
+                    mb: 0.5,
+                    '&:hover': {
+                      textDecoration: 'underline'
+                    }
+                  }}
+                >
+                  {units.find(u => u.id === nextLesson.unitId)?.name} / {nextLesson.name}
+                </Link>
+              </Box>
             </Box>
           )}
         </Box>
