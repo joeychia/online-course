@@ -6,6 +6,7 @@ import CourseView from './pages/CourseView';
 // import LessonView from './pages/LessonView';
 import Login from './pages/Login';
 import { useAuth } from './contexts/useAuth';
+import { AdminDashboard } from './pages/AdminDashboard';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -65,6 +66,14 @@ export default function App() {
           <ProtectedRoute>
             <Layout>
               <CourseView />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <Layout>
+              <AdminDashboard />
             </Layout>
           </ProtectedRoute>
         } />

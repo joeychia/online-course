@@ -5,7 +5,7 @@ service cloud.firestore {
     // Allow public read access to courses for guest preview
     match /courses/{courseId} {
       allow read: if true;  // Anyone can read courses
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if request.auth != null && isAdmin();
     }
 
     // Units can be read by anyone but only written by admins
@@ -51,6 +51,14 @@ service cloud.firestore {
       allow create: if request.auth != null 
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.keys().hasAll(['userId', 'courseId', 'lessonId', 'answers', 'correct', 'total', 'completedAt']);
+    }
+
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.admin == true;
+    }
+
+    function hasRole(role) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles[role] == true;
     }
   }
 }
