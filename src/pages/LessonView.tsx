@@ -75,36 +75,6 @@ interface LinkNode extends MdNode {
   title?: string;
 }
 
-interface OpenTagToken {
-  type: 'openTag';
-  tagName: string;
-  attributes?: Record<string, string>;
-}
-
-interface CloseTagToken {
-  type: 'closeTag';
-  tagName: string;
-}
-
-const linkRenderer: HTMLConvertorMap = {
-  link: (node: MdNode): OpenTagToken | CloseTagToken => {
-    const linkNode = node as LinkNode;
-    if ('entering' in node && node.entering) {
-      return {
-        type: 'openTag',
-        tagName: 'a',
-        attributes: {
-          href: linkNode.destination,
-          title: linkNode.title || '',
-          target: '_blank',
-          rel: 'noopener noreferrer',
-        },
-      };
-    }
-    return { type: 'closeTag', tagName: 'a' };
-  }
-};
-
 interface LessonViewProps {
   courseId: string;
   lesson: Lesson;
@@ -475,7 +445,10 @@ const LessonView: React.FC<LessonViewProps> = ({
         <Viewer 
           key={`${lesson.id}-${language}`}
           initialValue={convertChinese(encodedContent, language)}
-          customHTMLRenderer={linkRenderer}
+          linkAttributes={{
+            target: '_blank',
+            rel: 'noopener noreferrer'
+          }}
         />
       </Box>
 
