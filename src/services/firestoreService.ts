@@ -15,6 +15,8 @@ import {
     addDoc,
     limit,
     deleteDoc
+    limit,
+    deleteDoc
 } from 'firebase/firestore';
 import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile as User, QuizHistory } from '../types';
 import { app } from './firebaseConfig';
@@ -295,6 +297,29 @@ class FirestoreService {
             userId: data.userId as string,
             grade: data.grade as number
         } as Grade;
+    }
+
+    async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
+        const courseCollection = collection(db, 'courses');
+        const docRef = await addDoc(courseCollection, courseData);
+        return docRef.id;
+    }
+
+    async updateCourse(courseId: string, courseData: Partial<Course>): Promise<void> {
+        const courseRef = doc(db, 'courses', courseId);
+        await updateDoc(courseRef, courseData);
+    }
+
+    async deleteCourse(courseId: string): Promise<void> {
+        const courseRef = doc(db, 'courses', courseId);
+        
+        // First verify the course exists
+        const courseSnap = await getDoc(courseRef);
+        if (!courseSnap.exists()) {
+            throw new Error('Course not found');
+        }
+        
+        await deleteDoc(courseRef);
     }
 
     async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
