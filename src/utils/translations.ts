@@ -126,8 +126,8 @@ export const translations: Translations = {
     'zh-CN': '保存笔记并完成课程'
   },
   previousScore: {
-    'zh-TW': '上次成績：{score}/{total} 於 {date}',
-    'zh-CN': '上次成绩：{score}/{total} 于 {date}'
+    'zh-TW': '上次成績：{{score}}/{{total}} 於 {{date}}',
+    'zh-CN': '上次成绩：{{score}}/{{total}} 于 {{date}}'
   },
   retakeQuiz: {
     'zh-TW': '重新測驗',

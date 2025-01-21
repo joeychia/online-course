@@ -168,7 +168,9 @@ export default function CourseView() {
   };
 
   const handleLessonComplete = async (completedLessonId: string) => {
-    if (!currentUser || !course || !currentLesson) return;
+    if (!currentUser || !course || !currentLesson) {
+      return;
+    }
 
     const completedAt = new Date().toISOString();
     const lessonName = currentLesson.name;
@@ -203,7 +205,8 @@ export default function CourseView() {
     if (unitId && unitLessons[unitId]) {
       const currentLessonIndex = unitLessons[unitId].findIndex(lesson => lesson.id === completedLessonId);
       if (currentLessonIndex !== -1 && currentLessonIndex < unitLessons[unitId].length - 1) {
-        setNextLessonId(unitLessons[unitId][currentLessonIndex + 1].id);
+        const nextId = unitLessons[unitId][currentLessonIndex + 1].id;
+        setNextLessonId(nextId);
       } else {
         setNextLessonId(null);
       }

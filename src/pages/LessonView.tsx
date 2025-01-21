@@ -232,6 +232,14 @@ const LessonView: React.FC<LessonViewProps> = ({
       setIsSaving(true);
       await onSaveNote(lesson.id, note);
       setNoteSaved(true);
+
+      // If there's no quiz, complete the lesson
+      if (!quiz) {
+        await onComplete(lesson.id);
+      } else if (!quizHistory) {
+        // If quiz exists but not completed, show prompt
+        setQuizOpen(true);
+      }
     } catch (err) {
       console.error('Error saving note:', err);
     } finally {
