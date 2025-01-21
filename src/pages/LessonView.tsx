@@ -266,7 +266,7 @@ const LessonView: React.FC<LessonViewProps> = ({
           }
         });
 
-        const total = quiz.questions.length;
+        const total = quiz.questions.filter((question) => question.type === "single_choice").length;
         const score = (correct / total) * 100;
 
         void analyticsService.trackQuizComplete({
@@ -276,6 +276,21 @@ const LessonView: React.FC<LessonViewProps> = ({
           score
         });
 
+        // Update quiz history state with the new submission
+        const newQuizHistory = {
+          quizId: quiz.id,
+          userId: currentUser.uid,
+          courseId: lesson.courseId,
+          lessonId: lesson.id,
+          answers,
+          correct,
+          total,
+          score: (correct / total) * 100,
+          completedAt: new Date().toISOString()
+        };
+        setQuizHistory({
+          ...newQuizHistory,
+        });
         setQuizComplete(true);
     } catch (err) {
       console.error('Error submitting quiz:', err);
@@ -362,7 +377,18 @@ const LessonView: React.FC<LessonViewProps> = ({
                 {t('weeklyQuiz')}
               </Typography>
               {quizHistory && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{ 
+                    cursor: 'pointer',
+                      textDecoration: 'underline',
+                      color: 'primary.main'
+                  }}
+                  onClick={() => {
+                    setQuizOpen(true);
+                  }}
+                >
                   {t('previousScore', {
                     score: quizHistory.correct,
                     total: quizHistory.total,
@@ -502,6 +528,7 @@ const LessonView: React.FC<LessonViewProps> = ({
             courseId={lesson.courseId}
             lessonId={lesson.id}
             onClose={() => setQuizOpen(false)}
+            readOnlyAnswers={quizHistory?.answers}
           />}
         </DialogContent>
       </Dialog>

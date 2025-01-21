@@ -110,23 +110,6 @@ Quizzes
 }
 ```
 
-Quiz History
-```json
-"quizHistory": {
-  "$quizId": {
-    "userId": "userId",
-    "courseId": "courseId",
-    "lessonId": "lessonId",
-    "answers": {
-      "$questionId": "answer"
-    },
-    "completedAt": "timestamp",
-    "correct": 10,
-    "total": 10
-  }
-}
-```
-
 Groups
 ```json
 "groups": {
@@ -182,6 +165,18 @@ User Profiles & Progress
         "lessonId": "lessonId",
         "text": "User's note here",
         "updatedAt": "timestamp"
+      }
+    },
+    "quizHistory": {
+      "$lessonId": {
+        "quizId": "quizId",
+        "courseId": "courseId",
+        "answers": {
+          "$questionId": "answer"
+        },
+        "completedAt": "timestamp",
+        "correct": 10,
+        "total": 10
       }
     }
   }

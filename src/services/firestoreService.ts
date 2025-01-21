@@ -112,26 +112,24 @@ class FirestoreService {
 
     // Quiz History operations
     async getQuizHistoryForUserCourse(userId: string, courseId: string): Promise<QuizHistory[]> {
-        const quizHistoryRef = collection(db, 'quizHistory');
+        const quizHistoryRef = collection(db, `users/${userId}/quizHistory`);
         const q = query(
             quizHistoryRef,
-            where('userId', '==', userId),
             where('courseId', '==', courseId),
             orderBy('completedAt', 'desc'),
             limit(5)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => {
+        return snapshot.docs.map((doc): QuizHistory => {
             const data = doc.data();
             return {
-                id: doc.id,
                 userId: data.userId as string,
-                courseId: data.courseId as string,
                 lessonId: data.lessonId as string,
-                answers: data.answers as Record<string, string>,
                 score: data.score as number,
+                quizId: data.quizId as string,
+                courseId: data.courseId as string,
+                answers: data.answers as Record<string, string>,
                 completedAt: data.completedAt as string,
-                timeSpent: data.timeSpent as number,
                 correct: data.correct as number,
                 total: data.total as number
             };
@@ -139,39 +137,33 @@ class FirestoreService {
     }
 
     async getQuizHistoryForUserLesson(userId: string, lessonId: string): Promise<QuizHistory | null> {
-        const quizHistoryRef = collection(db, 'quizHistory');
-        const q = query(
-            quizHistoryRef,
-            where('userId', '==', userId),
-            where('lessonId', '==', lessonId),
-            orderBy('completedAt', 'desc'),
-            limit(1)
-        );
-        const snapshot = await getDocs(q);
-        const doc = snapshot.docs[0];
-        if (!doc) return null;
+        const quizHistoryRef = collection(db, `users/${userId}/quizHistory`);
+        const docRef = doc(quizHistoryRef, lessonId);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) return null;
         
-        const data = doc.data();
+        const data = docSnap.data();
         return {
-            id: doc.id,
-            userId: data.userId as string,
-            courseId: data.courseId as string,
+            id: docSnap.id,
+            userId,
+            quizId: data.quizId as string,
             lessonId: data.lessonId as string,
+            courseId: data.courseId as string,
             answers: data.answers as Record<string, string>,
-            score: data.score as number,
             completedAt: data.completedAt as string,
-            timeSpent: data.timeSpent as number,
             correct: data.correct as number,
+            score: data.score as number,
             total: data.total as number
         } as QuizHistory;
     }
 
-    async createQuizHistory(quizHistory: Omit<QuizHistory, 'id'>): Promise<QuizHistory> {
+    async createQuizHistory(userId: string, lessonId: string, quizHistory: Omit<QuizHistory, 'id'>): Promise<QuizHistory> {
         try {
-            const docRef = await addDoc(collection(db, 'quizHistory'), quizHistory);
+            const quizHistoryRef = doc(db, `users/${userId}/quizHistory/${lessonId}`);
+            await setDoc(quizHistoryRef, quizHistory);
             return {
                 ...quizHistory,
-                id: docRef.id
+                id: lessonId
             } as QuizHistory;
         } catch (error) {
             console.error('Error creating quiz history:', error);

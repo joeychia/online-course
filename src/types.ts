@@ -51,7 +51,7 @@ export interface QuizOption {
 }
 
 export interface QuizHistory {
-  id: string;
+  quizId: string;
   userId: string;
   courseId: string;
   lessonId: string;
@@ -60,7 +60,6 @@ export interface QuizHistory {
   completedAt: string;
   correct: number;
   total: number;
-  timeSpent: number;
 }
 
 export interface UserProgress {
@@ -77,6 +76,7 @@ export interface UserProfile {
   progress: Record<string, Record<string, UserProgress>>;
   groupIds: Record<string, boolean>;
   notes: Record<string, Note>;
+  QuizHistory: Record<string, QuizHistory>;
 }
 
 export interface Group {

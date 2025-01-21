@@ -154,20 +154,6 @@ describe('QuizView', () => {
     expect(screen.getByText('2/2')).toBeInTheDocument();
     expect(screen.getByText('完美的分數！做得好！')).toBeInTheDocument();
 
-    // Verify that answers were saved
-    expect(saveQuizHistory).toHaveBeenCalledWith(
-      'test-user-id',
-      'course1',
-      'lesson1',
-      {
-        0: '1',  // Index of selected option for first question
-        1: '2',  // Index of selected option for second question
-        2: '變數是用來儲存資料的容器。'
-      },
-      2,  // Correct answers
-      2   // Total questions (excluding free form)
-    );
-
     // Verify onSubmit was called
     expect(onSubmit).toHaveBeenCalled();
   });
@@ -204,6 +190,60 @@ describe('QuizView', () => {
     expect(screen.queryByRole('button', { name: '提交' })).not.toBeInTheDocument();
   });
 
+  it('renders in readonly mode with previous answers', async () => {
+    const previousAnswers = {
+      0: '0',  // Index of selected option for first question (wrong answer)
+      1: '2',  // Index of selected option for second question (correct answer)
+      2: '測試答案'  // Answer for free form question
+    };
+
+    render(
+      <QuizView
+        quiz={mockQuiz}
+        onSubmit={() => {}}
+        courseId="course1"
+        lessonId="lesson1"
+        onClose={() => {}}
+        readOnlyAnswers={previousAnswers}
+      />
+    );
+
+    // Verify that previous answers are displayed
+    expect(screen.getByLabelText('3')).toBeChecked(); //incorrect
+    expect(screen.getByLabelText('巴黎')).toBeChecked(); //correct
+    expect(screen.getByRole('textbox')).toHaveValue('測試答案');
+
+    // Verify that all inputs are disabled
+    const radioButtons = screen.getAllByRole('radio');
+    radioButtons.forEach(radio => {
+      expect(radio).toBeDisabled();
+    });
+    expect(screen.getByRole('textbox')).toBeDisabled();
+
+    // Verify that submit button is not shown
+    expect(screen.queryByRole('button', { name: '提交' })).not.toBeInTheDocument();
+
+    // Verify correct/incorrect indicators are shown
+    expect(screen.getByText('✗ 錯誤')).toBeInTheDocument();
+    expect(screen.getByText('✓ 正確')).toBeInTheDocument();
+  });
+
+  it('handles close button click', () => {
+    const onClose = vi.fn();
+    render(
+      <QuizView
+        quiz={mockQuiz}
+        onSubmit={() => {}}
+        courseId="course1"
+        lessonId="lesson1"
+        onClose={onClose}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '關閉' }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it('shows correct/incorrect indicators after submission', async () => {
     render(
       <QuizView
@@ -230,20 +270,4 @@ describe('QuizView', () => {
     expect(screen.getByText('✗ 錯誤')).toBeInTheDocument();
     expect(screen.getByText('✓ 正確')).toBeInTheDocument();
   });
-
-  it('handles close button click', () => {
-    const onClose = vi.fn();
-    render(
-      <QuizView
-        quiz={mockQuiz}
-        onSubmit={() => {}}
-        courseId="course1"
-        lessonId="lesson1"
-        onClose={onClose}
-      />
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: '關閉' }));
-    expect(onClose).toHaveBeenCalled();
-  });
-}); 
+});

@@ -25,13 +25,14 @@ interface QuizViewProps {
   courseId: string;
   lessonId: string;
   onClose: () => void;
+  readOnlyAnswers?: { [key: string]: string };
 }
 
-export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }: QuizViewProps) {
+export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose, readOnlyAnswers }: QuizViewProps) {
   const { currentUser } = useAuth();
   const { t, language } = useTranslation();
-  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [answers, setAnswers] = useState<{ [key: number]: string }>(readOnlyAnswers || {});
+  const [submitted, setSubmitted] = useState(!!readOnlyAnswers);
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
 
   const handleAnswerChange = (questionIndex: number, value: string) => {
@@ -70,14 +71,6 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
     setSubmitted(true);
 
     try {
-      await saveQuizHistory(
-        currentUser.uid,
-        courseId,
-        lessonId,
-        answers,
-        result.correct,
-        result.total
-      );
       
       onSubmit(answers);
     } catch (err) {
@@ -192,4 +185,4 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
       </Paper>
     </Box>
   );
-} 
+}
