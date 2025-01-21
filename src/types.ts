@@ -70,13 +70,10 @@ export interface UserProgress {
 
 export type UserRole = 'student' | 'instructor' | 'admin';
 
-export type UserRole = 'student' | 'instructor' | 'admin';
-
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
-  roles: Record<UserRole, boolean>;  // e.g., { student: true, instructor: true, admin: false }
   roles: Record<UserRole, boolean>;  // e.g., { student: true, instructor: true, admin: false }
   registeredCourses: Record<string, boolean>;
   progress: Record<string, Record<string, UserProgress>>;
