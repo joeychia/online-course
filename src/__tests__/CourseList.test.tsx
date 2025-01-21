@@ -163,7 +163,7 @@ describe('CourseList', () => {
     vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
     await renderComponent();
 
-    const lockChips = screen.getAllByText('請登入以訪問課程');
+    const lockChips = screen.getAllByRole('button', { name: '課程介紹' });
     expect(lockChips).toHaveLength(mockCourses.length);
   });
 
@@ -188,4 +188,22 @@ describe('CourseList', () => {
 
     expect(await screen.findByText('目前沒有可用的課程')).toBeInTheDocument();
   });
-}); 
+
+  it('shows course description button for each course', async () => {
+    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    await renderComponent();
+
+    const descriptionButtons = screen.getAllByRole('button', { name: '課程介紹' });
+    expect(descriptionButtons).toHaveLength(mockCourses.length);
+  });
+
+  it('opens description dialog when description button is clicked', async () => {
+    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    await renderComponent();
+
+    const descriptionButton = screen.getAllByRole('button', { name: '課程介紹' })[0];
+    fireEvent.click(descriptionButton);
+
+    expect(screen.getByText('Description 1')).toBeInTheDocument();
+  });
+});

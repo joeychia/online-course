@@ -91,6 +91,14 @@ export const translations: Translations = {
     'zh-TW': '請登入以訪問課程',
     'zh-CN': '请登录以访问课程'
   },
+  viewDescription: {
+    'zh-TW': '課程介紹',
+    'zh-CN': '课程介绍'
+  },
+  enterCourse: {
+    'zh-TW': '進入課程',
+    'zh-CN': '进入课程'
+  },
   failedToLoadCourses: {
     'zh-TW': '載入課程失敗。請稍後再試。',
     'zh-CN': '加载课程失败。请稍后再试。'

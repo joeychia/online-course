@@ -178,17 +178,7 @@ export default function NavPanel({
             >
               {convertChinese(course.name, language)}
             </Typography>
-            <Typography 
-              variant="body2" 
-              color="text.secondary" 
-              sx={{ 
-                mt: 1,
-                fontSize: 'var(--font-size-body)',
-              }} 
-              noWrap
-            >
-              {convertChinese(course.description, language)}
-            </Typography>
+           
           </Box>
         </Stack>
       </Box>

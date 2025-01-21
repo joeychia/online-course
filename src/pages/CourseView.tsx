@@ -276,9 +276,6 @@ export default function CourseView() {
         <Typography variant="h4" component="h1" gutterBottom>
           {course.name}
         </Typography>
-        <Typography variant="body1" paragraph>
-          {course.description}
-        </Typography>
 
         {isRegistered ? (
           <CourseProgress 

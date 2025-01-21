@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Viewer } from '@toast-ui/react-editor';
 import {
   Box,
   Card,
@@ -13,8 +14,14 @@ import {
   CircularProgress,
   Alert,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
+import CloseIcon from '@mui/icons-material/Close';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { Course } from '../types';
 import { getAllCourses } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
@@ -72,6 +79,7 @@ export default function CourseList() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { t, language } = useTranslation();
@@ -95,6 +103,11 @@ export default function CourseList() {
 
   const handleSignInClick = () => {
     navigate('/login');
+  };
+
+  const handleDescriptionClick = (event: React.MouseEvent, course: Course) => {
+    event.stopPropagation();
+    setSelectedCourse(course);
   };
 
   if (loading) {
@@ -160,7 +173,6 @@ export default function CourseList() {
                   boxShadow: 6,
                 },
               }}
-              onClick={() => navigate(`/${course.id}`)}
             >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
@@ -174,29 +186,66 @@ export default function CourseList() {
                   >
                     {convertChinese(course.name, language)}
                   </Typography>
-                  {!currentUser && (
-                    <Chip
-                      icon={<LockIcon />}
-                      label={t('signInToAccess')}
-                      size="small"
-                      sx={{ ml: 1 }}
-                    />
-                  )}
+                 
                 </Box>
-                <Typography 
-                  variant="body2" 
-                  color="text.secondary"
-                  sx={{ 
-                    fontSize: 'var(--font-size-body)',
-                  }}
-                >
-                  {convertChinese(course.description, language)}
-                </Typography>
+               
+                <Stack direction="row" spacing={2} justifyContent="space-between">
+                  <Button
+                    startIcon={<DescriptionIcon />}
+                    onClick={(e) => handleDescriptionClick(e, course)}
+                    size="small"
+                  >
+                    {t('viewDescription')}
+                  </Button>
+                  {currentUser && <Button
+                    onClick={() => navigate(`/${course.id}`)}
+                    size="small"
+                    variant="contained"
+                  >
+                    {t('enterCourse')}
+                  </Button>}
+                </Stack>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
+
+      <Dialog
+        open={Boolean(selectedCourse)}
+        onClose={() => setSelectedCourse(null)}
+        maxWidth="md"
+        fullWidth
+      >
+        {selectedCourse && (
+          <>
+            <DialogTitle sx={{ m: 0, p: 2, pr: 6 }}>
+              {convertChinese(selectedCourse.name, language)}
+              <IconButton
+                onClick={() => setSelectedCourse(null)}
+                sx={{
+                  position: 'absolute',
+                  right: 8,
+                  top: 8,
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent dividers>
+              <Box sx={{
+                '& .toastui-editor-contents': {
+                  fontSize: 'var(--font-size-body)',
+                },
+              }}>
+                <Viewer
+                  initialValue={convertChinese(selectedCourse.description, language)}
+                />
+              </Box>
+            </DialogContent>
+          </>
+        )}
+      </Dialog>
     </Container>
   );
-} 
+}
