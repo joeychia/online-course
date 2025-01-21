@@ -9,6 +9,8 @@ import { FontSizeProvider } from './contexts/FontSizeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 
+import WeChatBrowserWarning from './components/WeChatBrowserWarning';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
@@ -27,58 +29,64 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
-export default function App() {
-  return (
-    <ThemeProvider>
-      <FontSizeProvider>
-        <AuthProvider>
-          <LanguageProvider>
-            <Router>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                
-                {/* Public routes */}
-                <Route path="/" element={
-                  <Layout>
-                    <CourseList />
-                  </Layout>
-                } />
-                
-                <Route path="/courses" element={
-                  <Layout>
-                    <CourseList />
-                  </Layout>
-                } />
-                
-                {/* Protected routes */}
-                <Route path="/:courseId" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <CourseView />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/:courseId/:lessonId" element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <CourseView />
-                    </Layout>
-                  </ProtectedRoute>
-                } />
+function App() {
 
-                <Route path="/:courseId/:unitId/:lessonId" element={
-                  <ProtectedRoute>
+  return (
+    <>
+      <WeChatBrowserWarning />
+      <ThemeProvider>
+        <FontSizeProvider>
+          <AuthProvider>
+            <LanguageProvider>
+              <Router>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  
+                  {/* Public routes */}
+                  <Route path="/" element={
                     <Layout>
-                      <CourseView />
+                      <CourseList />
                     </Layout>
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </Router>
-          </LanguageProvider>
-        </AuthProvider>
-      </FontSizeProvider>
-    </ThemeProvider>
+                  } />
+                  
+                  <Route path="/courses" element={
+                    <Layout>
+                      <CourseList />
+                    </Layout>
+                  } />
+                  
+                  {/* Protected routes */}
+                  <Route path="/:courseId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <CourseView />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/:courseId/:lessonId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <CourseView />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/:courseId/:unitId/:lessonId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <CourseView />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </Router>
+            </LanguageProvider>
+          </AuthProvider>
+        </FontSizeProvider>
+      </ThemeProvider>
+    </>
   );
 }
+
+export default App;
