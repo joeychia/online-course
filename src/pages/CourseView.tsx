@@ -252,11 +252,6 @@ export default function CourseView() {
     }
   };
 
-  const handleSaveNote = async (lessonId: string, note: string) => {
-    if (!currentUser) return;
-    await firestoreService.saveNote(currentUser.uid, lessonId, note);
-  };
-
   const mainContent = loading ? (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
       <CircularProgress />
@@ -268,7 +263,6 @@ export default function CourseView() {
       lesson={currentLesson}
       onComplete={handleLessonComplete}
       isCompleted={completedLessons.includes(currentLesson.id)}
-      onSaveNote={handleSaveNote}
     />
   ) : (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>

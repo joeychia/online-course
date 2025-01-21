@@ -283,6 +283,14 @@ export const translations: Translations = {
     'zh-TW': '本週測驗',
     'zh-CN': '本周测验'
   },
+  quizReminder: {
+    'zh-TW': '測驗提醒',
+    'zh-CN': '测验提醒'
+  },
+  completeQuizReminder: {
+    'zh-TW': '請記得完成本課程的測驗以獲得完整學習體驗。',
+    'zh-CN': '请记得完成本课程的测验以获得完整学习体验。'
+  },
   lastUpdate: {
     'zh-TW': '最後更新：{{date}}',
     'zh-CN': '最后更新：{{date}}'

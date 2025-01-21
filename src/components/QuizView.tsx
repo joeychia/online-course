@@ -116,7 +116,8 @@ export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose }
                         sx={submitted && option.isCorrect ? {
                           '& .MuiFormControlLabel-label': {
                             color: 'success.main',
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            backgroundColor: 'success.light'
                           }
                         } : undefined}
                       />

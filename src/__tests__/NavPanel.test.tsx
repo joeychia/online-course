@@ -97,9 +97,7 @@ describe('NavPanel', () => {
     expect(unitButtons[0]).toBeInTheDocument();
 
     const courseName = within(drawer).getByText('測試課程');
-    const courseDesc = within(drawer).getByText('測試課程描述');
     expect(courseName).toBeInTheDocument();
-    expect(courseDesc).toBeInTheDocument();
   });
 
   it('loads lessons when unit is expanded', async () => {

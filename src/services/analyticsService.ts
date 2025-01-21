@@ -24,13 +24,8 @@ export interface LessonEvent extends Omit<CourseEvent, 'unitId' | 'unitName'> {
 
 export interface QuizEvent {
   courseId: string;
-  courseName: string;
   lessonId: string;
-  lessonName: string;
-  unitId?: string;
-  unitName?: string;
   score: number;
-  timeSpent?: number;
   [key: string]: string | number | undefined;
 }
 

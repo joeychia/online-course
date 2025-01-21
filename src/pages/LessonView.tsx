@@ -12,7 +12,8 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
-  CircularProgress
+  CircularProgress,
+  DialogActions
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
@@ -26,6 +27,7 @@ import {
   getNotesForLesson,
   getQuizHistoryForUserLesson,
   getLesson,
+  saveNote,
 } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
@@ -108,7 +110,6 @@ interface LessonViewProps {
   lesson: Lesson;
   onComplete: (lessonId: string) => Promise<void>;
   isCompleted: boolean;
-  onSaveNote: (lessonId: string, note: string) => Promise<void>;
 }
 
 const LessonView: React.FC<LessonViewProps> = ({ 
@@ -116,7 +117,6 @@ const LessonView: React.FC<LessonViewProps> = ({
   lesson: initialLesson,
   onComplete,
   isCompleted,
-  onSaveNote
 }) => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const [lesson, setLesson] = useState<ExtendedLesson>({ ...initialLesson, courseId });
@@ -127,10 +127,12 @@ const LessonView: React.FC<LessonViewProps> = ({
   const [note, setNote] = useState(lesson?.userNote || '');
   const [noteLastUpdated, setNoteLastUpdated] = useState<string | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [quizReminderOpen, setQuizReminderOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [quizHistory, setQuizHistory] = useState<QuizHistory | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
+  const [quizComplete, setQuizComplete] = useState(false);
 
   useEffect(() => {
     if (initialLesson) {
@@ -193,8 +195,10 @@ const LessonView: React.FC<LessonViewProps> = ({
           } else {
             setQuiz(null);
           }
-
-          setQuizHistory(historyData);
+          if (historyData) {
+            setQuizHistory(historyData);
+            setQuizComplete(true);
+          }
         } catch (err) {
           console.error('Error loading quiz data:', err);
         }
@@ -230,15 +234,17 @@ const LessonView: React.FC<LessonViewProps> = ({
     
     try {
       setIsSaving(true);
-      await onSaveNote(lesson.id, note);
+      await saveNote(currentUser.uid, lesson.id, note);
       setNoteSaved(true);
 
       // If there's no quiz, complete the lesson
       if (!quiz) {
         await onComplete(lesson.id);
-      } else if (!quizHistory) {
-        // If quiz exists but not completed, show prompt
-        setQuizOpen(true);
+      } else if (quizComplete) {
+        await onComplete(lesson.id);
+      } else {
+        // If quiz hasn't completed, show a reminder dialog
+        setQuizReminderOpen(true);
       }
     } catch (err) {
       console.error('Error saving note:', err);
@@ -251,8 +257,6 @@ const LessonView: React.FC<LessonViewProps> = ({
     if (!lesson || !currentUser || !quiz) return;
 
     try {
-      const unit = await getUnit(lesson.unitId);
-      if (unit) {
         // Calculate score
         let correct = 0;
         Object.entries(answers).forEach(([questionIndex, answerId]) => {
@@ -267,17 +271,12 @@ const LessonView: React.FC<LessonViewProps> = ({
 
         void analyticsService.trackQuizComplete({
           courseId: lesson.courseId,
-          courseName: unit.courseId,
-          unitId: unit.id,
-          unitName: unit.name,
           lessonId: lesson.id,
           lessonName: lesson.name,
-          score,
+          score
         });
 
-        await onComplete(lesson.id);
-        setQuizOpen(false);
-      }
+        setQuizComplete(true);
     } catch (err) {
       console.error('Error submitting quiz:', err);
     }
@@ -454,6 +453,28 @@ const LessonView: React.FC<LessonViewProps> = ({
         />
       </Box>
 
+      {/* Quiz Reminder Dialog */}
+      <Dialog
+        open={quizReminderOpen}
+        onClose={() => setQuizReminderOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {t('quizReminder')}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            {t('completeQuizReminder')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setQuizReminderOpen(false)}>
+            {t('ok')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Quiz Modal */}
       <Dialog 
         open={quizOpen} 
@@ -509,7 +530,7 @@ const LessonView: React.FC<LessonViewProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSaveNote}
-                disabled={isSaving}
+                disabled={isSaving || note === ''}
                 startIcon={
                   isSaving ? (
                     <CircularProgress size={20} sx={{ color: 'white' }} />
