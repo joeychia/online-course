@@ -45,20 +45,22 @@ Courses
 ```json
 "courses": {
   "$courseId": {
+    "id": "courseId",
     "name": "Course Name",
     "description": "Course Description",
     "settings": {
       "unlockLessonIndex": 1
     },
     "units": [
-      {"$unitId": "unit name"},
-      {"$unitId2": "unit name2"}
+      {
+        "id": "unitId",
+        "name": "unit name"
+      }
     ],
     "groupIds": {
-      "$groupId": true,
-      "$groupId2": true
-    }
-    // You might also store top-level stats or metadata here.
+      "$groupId": true
+    },
+    "isPublic": false
   }
 }
 ```
@@ -66,12 +68,15 @@ Units
 ```json
 "units": {
   "$unitId": {
+    "id": "unitId",
     "courseId": "courseId",
     "name": "Unit Name",
     "description": "Unit Description",
     "lessons": [
-      {"$lessonId": "lesson name"},
-      {"$lessonId2": "lesson name2"}
+      {
+        "id": "lessonId",
+        "name": "lesson name"
+      }
     ]
   }
 }
@@ -81,12 +86,13 @@ Lessons
 ```json
 "lessons": {
   "$lessonId": {
+    "id": "lessonId",
     "unitId": "unitId",
     "name": "Lesson Title",
     "content": "markdown content",
     "video-title": "video title",
     "video-url": "video url",
-    "quizId": "quizIdIfAny", // reference a quiz in quizzes collection
+    "quizId": null
   }
 }
 ```
@@ -94,9 +100,10 @@ Quizzes
 ```json
 "quizzes": {
   "$quizId": {
+    "id": "quizId",
     "questions": [
       {
-        "type": "single_choice|free_form",
+        "type": "single_choice",
         "text": "Question text",
         "options": [
           {
@@ -114,13 +121,12 @@ Groups
 ```json
 "groups": {
   "$groupId": {
+    "id": "groupId",
     "courseId": "courseId",
     "name": "Group Name",
     "description": "Group Description",
     "members": {
-      "$userId1": true,
-      "$userId2": true,
-      // Add more users as needed
+      "$userId": true
     }
   }
 }
@@ -141,8 +147,14 @@ User Profiles & Progress
 ```json
 "users": {
   "$userId": {
+    "id": "userId",
     "name": "",
     "email": "",
+    "roles": {
+      "student": false,
+      "instructor": false,
+      "admin": false
+    },
     "registeredCourses": {
       "$courseId": true
     },
@@ -157,23 +169,26 @@ User Profiles & Progress
     },
     "groupIds": {
       "$groupId1": true,
-      "$groupId2": true,
-      // Add more groupIds as needed
+      "$groupId2": true
     },
     "notes": {
       "$lessonId": {
+        "id": "noteId",
         "lessonId": "lessonId",
         "text": "User's note here",
         "updatedAt": "timestamp"
       }
     },
-    "quizHistory": {
+    "QuizHistory": {
       "$lessonId": {
         "quizId": "quizId",
+        "userId": "userId",
         "courseId": "courseId",
+        "lessonId": "lessonId",
         "answers": {
           "$questionId": "answer"
         },
+        "score": 85,
         "completedAt": "timestamp",
         "correct": 10,
         "total": 10

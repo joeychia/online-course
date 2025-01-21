@@ -295,29 +295,6 @@ class FirestoreService {
             grade: data.grade as number
         } as Grade;
     }
-
-    async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
-        const courseCollection = collection(db, 'courses');
-        const docRef = await addDoc(courseCollection, courseData);
-        return docRef.id;
-    }
-
-    async updateCourse(courseId: string, courseData: Partial<Course>): Promise<void> {
-        const courseRef = doc(db, 'courses', courseId);
-        await updateDoc(courseRef, courseData);
-    }
-
-    async deleteCourse(courseId: string): Promise<void> {
-        const courseRef = doc(db, 'courses', courseId);
-        
-        // First verify the course exists
-        const courseSnap = await getDoc(courseRef);
-        if (!courseSnap.exists()) {
-            throw new Error('Course not found');
-        }
-        
-        await deleteDoc(courseRef);
-    }
 }
 
 export const firestoreService = new FirestoreService();

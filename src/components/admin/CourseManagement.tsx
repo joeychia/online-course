@@ -8,9 +8,6 @@ import {
   DialogActions,
   TextField,
   List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   IconButton,
   Typography
 } from '@mui/material';
@@ -18,6 +15,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Course } from '../../types';
 import { createCourse, updateCourse, deleteCourse, getAllCourses } from '../../services/dataService';
+import RichTextEditor from '../RichTextEditor';
+import MarkdownViewer from '../MarkdownViewer';
+import { CourseListItem } from './CourseListItem';
 
 export const CourseManagement: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -96,24 +96,16 @@ export const CourseManagement: React.FC = () => {
 
       <List>
         {courses.map((course) => (
-          <ListItem key={course.id} divider>
-            <ListItemText
-              primary={course.name}
-              secondary={course.description}
-            />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" onClick={() => handleEdit(course)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton edge="end" onClick={() => handleDelete(course.id)}>
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
+          <CourseListItem
+            key={course.id}
+            course={course}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         ))}
       </List>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>{editingCourse ? 'Edit Course' : 'Create New Course'}</DialogTitle>
         <DialogContent>
           <TextField
@@ -124,15 +116,16 @@ export const CourseManagement: React.FC = () => {
             value={courseName}
             onChange={(e) => setCourseName(e.target.value)}
           />
-          <TextField
-            margin="dense"
-            label="Course Description"
-            fullWidth
-            multiline
-            rows={4}
-            value={courseDescription}
-            onChange={(e) => setCourseDescription(e.target.value)}
-          />
+          <Box mt={2}>
+            <Typography variant="subtitle2" color="textSecondary" mb={1}>
+              Course Description
+            </Typography>
+            <RichTextEditor
+              value={courseDescription}
+              onChange={setCourseDescription}
+              placeholder="Enter course description..."
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => {
