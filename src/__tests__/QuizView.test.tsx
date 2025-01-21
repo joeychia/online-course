@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react';
 import QuizView from '../components/QuizView';
-import { saveQuizHistory } from '../services/dataService';
 import type { Quiz } from '../types';
 
 // Mock dataService
@@ -79,8 +78,6 @@ describe('QuizView', () => {
       <QuizView
         quiz={mockQuiz}
         onSubmit={() => {}}
-        courseId="course1"
-        lessonId="lesson1"
         onClose={() => {}}
       />
     );
@@ -108,8 +105,6 @@ describe('QuizView', () => {
       <QuizView
         quiz={mockQuiz}
         onSubmit={() => {}}
-        courseId="course1"
-        lessonId="lesson1"
         onClose={() => {}}
       />
     );
@@ -132,8 +127,6 @@ describe('QuizView', () => {
       <QuizView
         quiz={mockQuiz}
         onSubmit={onSubmit}
-        courseId="course1"
-        lessonId="lesson1"
         onClose={() => {}}
       />
     );
@@ -163,8 +156,6 @@ describe('QuizView', () => {
       <QuizView
         quiz={mockQuiz}
         onSubmit={() => {}}
-        courseId="course1"
-        lessonId="lesson1"
         onClose={() => {}}
       />
     );
@@ -201,8 +192,6 @@ describe('QuizView', () => {
       <QuizView
         quiz={mockQuiz}
         onSubmit={() => {}}
-        courseId="course1"
-        lessonId="lesson1"
         onClose={() => {}}
         readOnlyAnswers={previousAnswers}
       />
@@ -234,8 +223,6 @@ describe('QuizView', () => {
       <QuizView
         quiz={mockQuiz}
         onSubmit={() => {}}
-        courseId="course1"
-        lessonId="lesson1"
         onClose={onClose}
       />
     );
@@ -249,8 +236,6 @@ describe('QuizView', () => {
       <QuizView
         quiz={mockQuiz}
         onSubmit={() => {}}
-        courseId="course1"
-        lessonId="lesson1"
         onClose={() => {}}
       />
     );

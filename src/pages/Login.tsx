@@ -63,7 +63,8 @@ export default function Login() {
                     progress: {},
                     registeredCourses: {},
                     groupIds: {},
-                    notes: {}
+                    notes: {},
+                    QuizHistory: {}
                 });
             } else {
                 await signIn(email, password);
@@ -92,7 +93,8 @@ export default function Login() {
                     progress: {},
                     registeredCourses: {},
                     groupIds: {},
-                    notes: {}
+                    notes: {},
+                    QuizHistory: {}
                 });
             }
             navigate('/');
@@ -201,4 +203,4 @@ export default function Login() {
             </Box>
         </Container>
     );
-} 
+}

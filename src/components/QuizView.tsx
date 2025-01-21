@@ -13,7 +13,7 @@ import {
   Stack,
   Divider,
 } from '@mui/material';
-import { saveQuizHistory } from '../services/dataService';
+
 import { useAuth } from '../contexts/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
@@ -22,13 +22,11 @@ import type { Quiz } from '../types';
 interface QuizViewProps {
   quiz: Quiz;
   onSubmit: (answers: { [key: string]: string }) => void;
-  courseId: string;
-  lessonId: string;
   onClose: () => void;
   readOnlyAnswers?: { [key: string]: string };
 }
 
-export default function QuizView({ quiz, onSubmit, courseId, lessonId, onClose, readOnlyAnswers }: QuizViewProps) {
+export default function QuizView({ quiz, onSubmit, onClose, readOnlyAnswers }: QuizViewProps) {
   const { currentUser } = useAuth();
   const { t, language } = useTranslation();
   const [answers, setAnswers] = useState<{ [key: number]: string }>(readOnlyAnswers || {});

@@ -11,7 +11,6 @@ import {
     updateDoc,
     DocumentData,
     QueryDocumentSnapshot,
-    addDoc,
     limit
 } from 'firebase/firestore';
 import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile as User, QuizHistory } from '../types';

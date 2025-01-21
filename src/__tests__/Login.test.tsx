@@ -302,6 +302,7 @@ describe('Login', () => {
         progress: {},
         groupIds: {},
         notes: {},
+        QuizHistory: {}
       });
       
       renderLogin();
@@ -335,4 +336,4 @@ describe('Login', () => {
       });
     });
   });
-}); 
+});

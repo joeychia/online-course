@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Viewer } from '@toast-ui/react-editor';
-import type { HTMLConvertorMap, MdNode } from '@toast-ui/editor';
 import { 
   Box, 
   Button, 
@@ -70,10 +69,7 @@ interface ExtendedLesson extends Omit<Lesson, 'video-url' | 'video-title'> {
   courseId: string;
 }
 
-interface LinkNode extends MdNode {
-  destination: string;
-  title?: string;
-}
+
 
 interface LessonViewProps {
   courseId: string;
@@ -498,8 +494,6 @@ const LessonView: React.FC<LessonViewProps> = ({
           {quiz && <QuizView 
             quiz={quiz} 
             onSubmit={handleQuizSubmit}
-            courseId={lesson.courseId}
-            lessonId={lesson.id}
             onClose={() => setQuizOpen(false)}
             readOnlyAnswers={quizHistory?.answers}
           />}
