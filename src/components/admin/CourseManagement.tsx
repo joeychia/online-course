@@ -11,8 +11,6 @@ import {
   IconButton,
   Typography
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import { Course } from '../../types';
 import { createCourse, updateCourse, deleteCourse, getAllCourses } from '../../services/dataService';
 import RichTextEditor from '../RichTextEditor';

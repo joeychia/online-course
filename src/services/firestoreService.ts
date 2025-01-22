@@ -20,7 +20,7 @@ import { app } from './firebaseConfig';
 
 const db = getFirestore(app);
 
-class FirestoreService {
+export class FirestoreService {
     // Course operations
     async getAllCourses(): Promise<Course[]> {
         const coursesRef = collection(db, 'courses');
@@ -53,6 +53,22 @@ class FirestoreService {
             groupIds: data.groupIds as Record<string, boolean>,
             isPublic: data.isPublic as boolean | undefined
         };
+    }
+
+    async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
+        const courseCollection = collection(db, 'courses');
+        const docRef = await addDoc(courseCollection, courseData);
+        return docRef.id;
+    }
+
+    async updateCourse(courseId: string, courseData: Partial<Course>): Promise<void> {
+        const courseRef = doc(db, 'courses', courseId);
+        await updateDoc(courseRef, courseData);
+    }
+
+    async deleteCourse(courseId: string): Promise<void> {
+        const courseRef = doc(db, 'courses', courseId);
+        await deleteDoc(courseRef);
     }
 
     // Unit operations
