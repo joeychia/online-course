@@ -85,21 +85,3 @@ export async function saveQuizHistory(
   };
   return await firestoreService.createQuizHistory(userId, lessonId, quizHistory);
 }
-
-export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<string> => {
-  const newCourse = {
-    ...courseData,
-    units: [],
-    groupIds: {},
-    isPublic: false
-  };
-  return await firestoreService.createCourse(newCourse);
-};
-
-export const updateCourse = async (courseId: string, courseData: Partial<Course>): Promise<void> => {
-  await firestoreService.updateCourse(courseId, courseData);
-};
-
-export const deleteCourse = async (courseId: string): Promise<void> => {
-  await firestoreService.deleteCourse(courseId);
-};

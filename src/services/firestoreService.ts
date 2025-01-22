@@ -11,7 +11,8 @@ import {
     updateDoc,
     DocumentData,
     QueryDocumentSnapshot,
-    limit
+    limit,
+    admin/CourseManagement
     addDoc,
     limit,
     deleteDoc
