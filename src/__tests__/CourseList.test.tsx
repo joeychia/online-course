@@ -73,14 +73,20 @@ const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOpti
   const mockUser = user as FirebaseUser | null;
   const mockAuthValue: AuthContextType = {
     currentUser: mockUser,
-    userProfile: mockUser ? {
-      id: mockUser.uid,
-      name: mockUser.email?.split('@')[0] || 'Test User',
-      email: mockUser.email || 'test@example.com',
-      role: 'student',
+    userProfile:  {
+
+      id: mockUser!.uid,
+      name: mockUser?.email?.split('@')[0] || 'Test User',
+      email: mockUser?.email || 'test@example.com',
+      roles: {student: true, instructor: false, admin: false},
       createdAt: new Date(),
-      updatedAt: new Date()
-    } : null,
+      updatedAt: new Date(),
+      registeredCourses: {},
+      progress: {},
+      groupIds: {},
+      notes: {},
+      QuizHistory: {}
+    },
     loading: false,
     signIn: vi.fn(),
     signInWithGoogle: vi.fn(),

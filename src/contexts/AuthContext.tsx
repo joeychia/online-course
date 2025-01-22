@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '../services/authService';
 import { firestoreService } from '../services/firestoreService';
-import type { UserProfile } from '../types/user';
+import { UserProfile } from '../types';
 
 export interface AuthContextType {
     currentUser: FirebaseUser | null;
@@ -33,9 +33,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             id: profile.id,
                             name: profile.name || user.displayName || 'Anonymous',
                             email: profile.email || user.email || '',
-                            role: 'student',
+                            roles: profile.roles,
                             createdAt: now,
-                            updatedAt: now
+                            updatedAt: now,
+                            registeredCourses: profile.registeredCourses || [],
+                            progress: profile.progress || {},
+                            groupIds: profile.groupIds || [],
+                            notes: profile.notes || {},
+                            QuizHistory: profile.QuizHistory || []
                         });
                     }
                 } catch (error) {
