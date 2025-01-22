@@ -81,8 +81,8 @@ export default function QuizView({ quiz, onSubmit, onClose, readOnlyAnswers }: Q
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Paper sx={{ p: 3 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', p: 1 }}>
+      <Paper sx={{ p: 1 }}>
         <Stack spacing={4}>
           {quiz.questions.map((question, questionIndex) => (
             <FormControl key={questionIndex} component="fieldset">

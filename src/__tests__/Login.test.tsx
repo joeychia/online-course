@@ -248,7 +248,13 @@ describe('Login', () => {
           progress: {},
           registeredCourses: {},
           groupIds: {},
-          notes: {}
+          notes: {},
+          QuizHistory: {},
+          roles: {
+            student: true,
+            instructor: false,
+            admin: false
+          },
         });
         expect(mockNavigate).toHaveBeenCalledWith('/');
       });
@@ -281,7 +287,13 @@ describe('Login', () => {
           progress: {},
           registeredCourses: {},
           groupIds: {},
-          notes: {}
+          notes: {},
+          QuizHistory: {},
+          roles: {
+            student: true,
+            instructor: false,
+            admin: false
+          },
         });
         expect(mockNavigate).toHaveBeenCalledWith('/');
       });
@@ -302,7 +314,12 @@ describe('Login', () => {
         progress: {},
         groupIds: {},
         notes: {},
-        QuizHistory: {}
+        QuizHistory: {},
+        roles: {
+          student: false,
+          instructor: false,
+          admin: false
+        },
       });
       
       renderLogin();

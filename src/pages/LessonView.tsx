@@ -27,6 +27,7 @@ import {
   getQuizHistoryForUserLesson,
   getLesson,
   saveNote,
+  saveQuizHistory,
 } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
@@ -257,6 +258,7 @@ const LessonView: React.FC<LessonViewProps> = ({
         setQuizHistory({
           ...newQuizHistory,
         });
+        await saveQuizHistory(quiz.id, currentUser.uid, lesson.courseId, lesson.id, answers, correct, total);
         setQuizComplete(true);
     } catch (err) {
       console.error('Error submitting quiz:', err);
@@ -367,6 +369,9 @@ const LessonView: React.FC<LessonViewProps> = ({
               variant="contained" 
               color="primary"
               onClick={() => {
+                // Reset quiz state and clear previous answers before opening
+                setQuizComplete(false);
+                setQuizHistory(null);
                 setQuizOpen(true);
               }}
             >
@@ -490,7 +495,7 @@ const LessonView: React.FC<LessonViewProps> = ({
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{p:1}}>
           {quiz && <QuizView 
             quiz={quiz} 
             onSubmit={handleQuizSubmit}

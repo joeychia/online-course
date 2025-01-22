@@ -45,6 +45,9 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
       '& .toastui-editor-main': {
         color: theme => theme.palette.text.primary,
       },
+      '& .toastui-editor-contents p': {
+        color: theme => theme.palette.text.primary,
+      },
       '& .toastui-editor-md-container': {
         backgroundColor: theme => theme.palette.background.paper,
       },

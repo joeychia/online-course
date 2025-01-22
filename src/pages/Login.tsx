@@ -64,7 +64,12 @@ export default function Login() {
                     registeredCourses: {},
                     groupIds: {},
                     notes: {},
-                    QuizHistory: {}
+                    QuizHistory: {},
+                    roles: {
+                        student: true,
+                        instructor: false,
+                        admin: false
+                    },
                 });
             } else {
                 await signIn(email, password);
@@ -94,7 +99,12 @@ export default function Login() {
                     registeredCourses: {},
                     groupIds: {},
                     notes: {},
-                    QuizHistory: {}
+                    QuizHistory: {},
+                    roles: {
+                        student: true,
+                        instructor: false,
+                        admin: false
+                    },
                 });
             }
             navigate('/');
