@@ -46,12 +46,12 @@ export const updateUserProgress = async (
   await firestoreService.updateUserProgress(userId, courseId, lessonId, completed, completedAt, lessonName);
 };
 
-export const saveNote = async (userId: string, lessonId: string, text: string): Promise<Note> => {
-  return await firestoreService.saveNote(userId, lessonId, text);
+export const saveNote = async (userId: string, lessonId: string, courseId: string, text: string): Promise<Note> => {
+  return await firestoreService.saveNote(userId, lessonId, courseId, text);
 };
 
 export const getNotesForLesson = async (userId: string, lessonId: string): Promise<Note | null> => {
-  return await firestoreService.getNoteForLesson(userId, lessonId);
+  return await firestoreService.getNoteForLesson(userId, lessonId)
 };
 
 // Quiz History operations

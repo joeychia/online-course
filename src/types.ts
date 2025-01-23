@@ -100,6 +100,7 @@ export interface Grade {
 
 export interface Note {
   id: string;
+  courseId: string;
   lessonId: string;
   text: string;
   updatedAt: string;

@@ -57,6 +57,7 @@ export interface Grade {
 export interface Note {
   lessonId: string;
   userId: string;
+  courseId: string;
   text: string;
 }
 
@@ -95,4 +96,4 @@ export const mockData: MockData = {
   grades: {},
   notes: {},
   users: {}
-}; 
+};

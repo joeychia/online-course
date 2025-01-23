@@ -245,11 +245,13 @@ export class FirestoreService {
                 console.log(`[getNoteForLesson] Note not found for user ${userId} and lesson ${lessonId}`);
                 return null;
             }
+            const data = noteSnap.data();
             return {
                 id: noteSnap.id,
                 lessonId,
-                text: noteSnap.data().text,
-                updatedAt: noteSnap.data().updatedAt
+                courseId: data.courseId,
+                text: data.text,
+                updatedAt: data.updatedAt
             };
         } catch (error) {
             console.error(`[getNoteForLesson] Error getting note for user ${userId} and lesson ${lessonId}:`, error);
@@ -257,14 +259,16 @@ export class FirestoreService {
         }
     }
 
-    async saveNote(userId: string, lessonId: string, text: string): Promise<Note> {
+    async saveNote(userId: string, lessonId: string, courseId: string, text: string): Promise<Note> {
         try {
             const noteRef = doc(db, `users/${userId}/notes/${lessonId}`);
             const note = {
+                courseId,
                 lessonId,
                 text,
                 updatedAt: new Date().toISOString()
             };
+            console.log("courseId:", courseId)
             await setDoc(noteRef, note);
             return {
                 id: lessonId,
