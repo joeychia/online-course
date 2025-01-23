@@ -8,13 +8,11 @@ import {
   DialogActions,
   TextField,
   List,
-  IconButton,
   Typography
 } from '@mui/material';
 import { Course } from '../../types';
 import { createCourse, updateCourse, deleteCourse, getAllCourses } from '../../services/dataService';
 import RichTextEditor from '../RichTextEditor';
-import MarkdownViewer from '../MarkdownViewer';
 import { CourseListItem } from './CourseListItem';
 
 export const CourseManagement: React.FC = () => {
@@ -139,4 +137,4 @@ export const CourseManagement: React.FC = () => {
       </Dialog>
     </Box>
   );
-}; 
+};

@@ -2,38 +2,77 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, useParams } from 'react-router-dom';
 import Notebook from '../pages/Notebook';
-import { useAuth } from '../contexts/useAuth';
 import { getNotesForUserCourse, getAllCourses } from '../services/dataService';
-import { useTranslation } from '../hooks/useTranslation';
 import { ThemeProvider } from '../contexts/ThemeContext';
 
-// Mock the required modules
-vi.mock('../contexts/useAuth');
-vi.mock('../services/dataService');
-vi.mock('../hooks/useTranslation');
+// Mock react-router-dom
+const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
-    useParams: vi.fn().mockReturnValue({ courseId: '' })
+    useParams: vi.fn(),
+    useNavigate: () => mockNavigate
   };
 });
 
+// Mock dataService
+vi.mock('../services/dataService', () => ({
+  getAllCourses: vi.fn(),
+  getNotesForUserCourse: vi.fn()
+}));
+
+// Mock useTranslation hook
+vi.mock('../hooks/useTranslation', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        selectCourse: 'selectCourse',
+        pleaseSignIn: 'pleaseSignIn',
+        noNotesFound: 'noNotesFound',
+        myNotes: 'myNotes',
+        failedToLoadNotes: 'failedToLoadNotes'
+      };
+      return translations[key] || key;
+    },
+    language: 'zh-TW'
+  })
+}));
+
 // Mock data
+const mockUser = { uid: 'test-user', email: 'test@example.com' };
+
 const mockCourses = [
-  { id: 'course1', name: '課程1' },
-  { id: 'course2', name: '課程2' },
+  { 
+    id: 'course1', 
+    name: '課程1',
+    description: 'Course 1 description',
+    settings: { unlockLessonIndex: 0 },
+    units: [],
+    groupIds: {}
+  },
+  { 
+    id: 'course2', 
+    name: '課程2',
+    description: 'Course 2 description',
+    settings: { unlockLessonIndex: 0 },
+    units: [],
+    groupIds: {}
+  },
 ];
 
 const mockNotes = [
   {
+    id: 'note1',
+    courseId: 'course1',
     text: '# 筆記 1\n這是筆記1的內容',
     lessonName: '課時1',
     unitName: '單元1',
     updatedAt: '2024-01-01T00:00:00.000Z',
   },
   {
+    id: 'note2',
+    courseId: 'course1',
     text: '# 筆記 2\n這是筆記2的內容',
     lessonName: '課時2',
     unitName: '單元2',
@@ -41,32 +80,17 @@ const mockNotes = [
   },
 ];
 
-// Setup mock functions
-const mockNavigate = vi.fn();
-
-const mockTranslation = {
-  t: (key: string) => {
-    const translations: Record<string, string> = {
-      selectCourse: 'selectCourse',
-      pleaseSignIn: 'pleaseSignIn',
-      noNotesFound: 'noNotesFound',
-      myNotes: 'myNotes',
-      failedToLoadNotes: 'failedToLoadNotes'
-    };
-    return translations[key] || key;
-  },
-  language: 'zh-TW'
-};
-
 describe('Notebook Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAuth as jest.Mock).mockReturnValue({
-      currentUser: { uid: 'testUser' },
-    });
-    (useTranslation as jest.Mock).mockReturnValue(mockTranslation);
-    (getAllCourses as jest.Mock).mockResolvedValue(mockCourses);
-    (getNotesForUserCourse as jest.Mock).mockResolvedValue(mockNotes);
+    // Mock useAuth hook
+    vi.mock('../contexts/useAuth', () => ({
+      useAuth: () => ({
+        currentUser: mockUser
+      })
+    }));
+    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    vi.mocked(getNotesForUserCourse).mockResolvedValue(mockNotes);
   });
 
   const renderNotebook = (initialEntries: string[] = ['']) => {
@@ -80,11 +104,13 @@ describe('Notebook Component', () => {
   };
 
   it('shows loading state initially', () => {
+    vi.mocked(useParams).mockReturnValue({});
     renderNotebook();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('displays course selection when no courseId is provided', async () => {
+    vi.mocked(useParams).mockReturnValue({});
     renderNotebook();
     await waitFor(() => {
       expect(screen.getByText('課程1')).toBeInTheDocument();
@@ -93,6 +119,7 @@ describe('Notebook Component', () => {
   });
 
   it('navigates to course notebook when a course is selected', async () => {
+    vi.mocked(useParams).mockReturnValue({});
     renderNotebook();
     await waitFor(() => {
       expect(screen.getByText('課程1')).toBeInTheDocument();
@@ -102,8 +129,8 @@ describe('Notebook Component', () => {
   });
 
   it('shows error message when notes fail to load', async () => {
-    (getNotesForUserCourse as jest.Mock).mockRejectedValue(new Error('Failed to load'));
     vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
+    vi.mocked(getNotesForUserCourse).mockRejectedValue(new Error('Failed to load'));
     renderNotebook(['/notebook/course1']);
     await waitFor(() => {
       expect(screen.getByText('failedToLoadNotes')).toBeInTheDocument();
@@ -149,7 +176,7 @@ describe('Notebook Component', () => {
 
   it('shows no notes message when notes array is empty', async () => {
     vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
-    (getNotesForUserCourse as jest.Mock).mockResolvedValue([]);
+    vi.mocked(getNotesForUserCourse).mockResolvedValue([]);
     renderNotebook(['/notebook/course1']);
     await waitFor(() => {
       expect(screen.getByText('noNotesFound')).toBeInTheDocument();

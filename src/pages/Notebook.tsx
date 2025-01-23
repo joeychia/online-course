@@ -42,8 +42,6 @@ export default function Notebook() {
   const [error, setError] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   
-  // Get current course name
-  const currentCourseName = courseId && courses.find(course => course.id === courseId)?.name;
 
   useEffect(() => {
     async function loadCourses() {
