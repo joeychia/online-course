@@ -39,13 +39,16 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
         backgroundColor: theme => theme.palette.background.paper,
         borderBottom: theme => `1px solid ${theme.palette.divider}`,
       },
-      '& .toastui-editor-defaultUI-toolbar': {
+      '& .toastui-editor-defaultUI-toolbar, .toastui-editor-popup-add-heading': {
         backgroundColor: theme => theme.palette.background.paper,
       },
       '& .toastui-editor-main': {
         color: theme => theme.palette.text.primary,
       },
       '& .toastui-editor-contents p': {
+        color: theme => theme.palette.text.primary,
+      },
+      '.toastui-editor-contents & h1, & h2, & h3, & h4, & h5, & h6': {
         color: theme => theme.palette.text.primary,
       },
       '& .toastui-editor-md-container': {
@@ -69,7 +72,6 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
           ['hr', 'quote'],
           ['ul', 'ol', 'task'],
           ['table', 'image', 'link'],
-          ['code', 'codeblock'],
           ['scrollSync'],
         ]}
         theme={isDarkMode ? 'dark' : 'light'}

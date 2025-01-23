@@ -7,6 +7,7 @@ import type { Course } from '../types';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { AuthContextType } from '../contexts/AuthContext';
 import { LanguageProvider } from '../contexts/LanguageContext';
+import { ThemeProvider } from '../contexts/ThemeContext';
 
 // Mock the dataService
 vi.mock('../services/dataService', () => ({
@@ -112,11 +113,13 @@ describe('CourseList', () => {
 
   const renderComponent = async () => {
     const result = render(
-      <LanguageProvider>
-        <MemoryRouter>
-          <CourseList />
-        </MemoryRouter>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <MemoryRouter>
+            <CourseList />
+          </MemoryRouter>
+        </LanguageProvider>
+      </ThemeProvider>
     );
     // Wait for initial loading to complete
     await screen.findByRole('heading', { name: /可選課程/i });
@@ -126,11 +129,13 @@ describe('CourseList', () => {
   it('shows loading state initially', () => {
     vi.mocked(getAllCourses).mockImplementation(() => new Promise(() => {}));
     render(
-      <LanguageProvider>
-        <MemoryRouter>
-          <CourseList />
-        </MemoryRouter>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <MemoryRouter>
+            <CourseList />
+          </MemoryRouter>
+        </LanguageProvider>
+      </ThemeProvider>
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -147,11 +152,13 @@ describe('CourseList', () => {
   it('shows error message when loading fails', async () => {
     vi.mocked(getAllCourses).mockRejectedValue(new Error('Failed to load'));
     render(
-      <LanguageProvider>
-        <MemoryRouter>
-          <CourseList />
-        </MemoryRouter>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <MemoryRouter>
+            <CourseList />
+          </MemoryRouter>
+        </LanguageProvider>
+      </ThemeProvider>
     );
 
     expect(await screen.findByText('載入課程失敗。請稍後再試。')).toBeInTheDocument();
@@ -185,11 +192,13 @@ describe('CourseList', () => {
   it('shows "No courses available" when courses array is empty', async () => {
     vi.mocked(getAllCourses).mockResolvedValue([]);
     render(
-      <LanguageProvider>
-        <MemoryRouter>
-          <CourseList />
-        </MemoryRouter>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <MemoryRouter>
+            <CourseList />
+          </MemoryRouter>
+        </LanguageProvider>
+      </ThemeProvider>
     );
 
     expect(await screen.findByText('目前沒有可用的課程')).toBeInTheDocument();

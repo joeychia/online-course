@@ -35,6 +35,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useParams } from 'react-router-dom';
 import { getYouTubeVideoId } from '../utils/urlUtils';
 import { convertChinese } from '../utils/chineseConverter';
+import MarkdownViewer from '../components/MarkdownViewer';
 
 // Function to encode URLs in markdown content
 function encodeMarkdownUrls(content: string): string {
@@ -382,76 +383,8 @@ const LessonView: React.FC<LessonViewProps> = ({
         </Paper>
       )}
       {/* Bible Reading Content */}
-      <Box sx={{ 
-        mb: 4,
-        '& .toastui-editor-contents': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-body)',
-        },
-        '& .toastui-editor-contents p': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-body)',
-        },
-        '& .toastui-editor-contents h1': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-h1)',
-        },
-        '& .toastui-editor-contents h2': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-h2)',
-        },
-        '& .toastui-editor-contents h3': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-h3)',
-        },
-        '& .toastui-editor-contents h4': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-h4)',
-        },
-        '& .toastui-editor-contents h5': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-h5)',
-        },
-        '& .toastui-editor-contents h6': {
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-h6)',
-        },
-        '& .toastui-editor-contents a': {
-          color: theme => theme.palette.primary.main,
-        },
-        '& .toastui-editor-contents blockquote': {
-          borderLeft: theme => `4px solid ${theme.palette.divider}`,
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-body)',
-        },
-
-        '& .toastui-editor-contents pre': {
-          backgroundColor: theme => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-          fontSize: 'var(--font-size-body)',
-        },
-        '& .toastui-editor-contents table': {
-          borderColor: theme => theme.palette.divider,
-          color: theme => theme.palette.text.secondary,
-          fontSize: 'var(--font-size-body)',
-        },
-        '& .toastui-editor-contents th, & .toastui-editor-contents td': {
-          borderColor: theme => theme.palette.divider,
-        },
-        '& .toastui-editor-contents ul, & .toastui-editor-contents ol': {
-          fontSize: 'var(--font-size-body)',
-        },
-        '& .toastui-editor-contents li': {
-          fontSize: 'var(--font-size-body)',
-        },
-      }}>
-        <Viewer 
-          key={`${lesson.id}-${language}`}
-          initialValue={convertChinese(encodedContent, language)}
-          linkAttributes={{
-            target: '_blank',
-            rel: 'noopener noreferrer'
-          }}
-        />
+      <Box sx={{ mb: 4 }}>
+        <MarkdownViewer content={convertChinese(encodedContent, language)} />
       </Box>
 
       {/* Quiz Reminder Dialog */}

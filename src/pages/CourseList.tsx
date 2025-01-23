@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Viewer } from '@toast-ui/react-editor';
 import {
   Box,
   Card,
@@ -27,6 +26,7 @@ import { getAllCourses } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
+import MarkdownViewer from '../components/MarkdownViewer';
 
 interface CourseCardProps {
   course: Course;
@@ -233,13 +233,9 @@ export default function CourseList() {
               </IconButton>
             </DialogTitle>
             <DialogContent dividers>
-              <Box sx={{
-                '& .toastui-editor-contents': {
-                  fontSize: 'var(--font-size-body)',
-                },
-              }}>
-                <Viewer
-                  initialValue={convertChinese(selectedCourse.description, language)}
+              <Box>
+                <MarkdownViewer
+                  content={convertChinese(selectedCourse.description, language)}
                 />
               </Box>
             </DialogContent>
