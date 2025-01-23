@@ -94,7 +94,7 @@ export default function Layout({ children }: LayoutProps) {
   const handleThemeChange = () => {
     toggleTheme();
   };
-
+  const courseId = location.pathname.split('/')[1];
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -142,6 +142,21 @@ export default function Layout({ children }: LayoutProps) {
             </Typography>
           </Stack>
           <Stack direction="row" spacing={4} alignItems="center">
+            {currentUser && (
+              <Button
+                component={RouterLink}
+                to={"/notebook/"+ courseId}
+                color="inherit"
+                sx={{
+                  textDecoration: 'none',
+                  '&:hover': {
+                    color: 'primary.light',
+                  }
+                }}
+              >
+                {t('myNotes')}
+              </Button>
+            )}
             <IconButton
               color="inherit"
               onClick={handleSettingsMenu}
@@ -263,4 +278,4 @@ export default function Layout({ children }: LayoutProps) {
       </Box>
     </Box>
   );
-} 
+}

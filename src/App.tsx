@@ -4,6 +4,7 @@ import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
 import Login from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
+import Notebook from './pages/Notebook';
 import { useAuth } from './contexts/useAuth';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FontSizeProvider } from './contexts/FontSizeContext';
@@ -83,6 +84,20 @@ function App() {
                     <ProtectedRoute>
                       <Layout>
                         <AdminDashboard />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/notebook" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Notebook />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/notebook/:courseId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Notebook />
                       </Layout>
                     </ProtectedRoute>
                   } />

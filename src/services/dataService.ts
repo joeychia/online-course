@@ -54,6 +54,10 @@ export const getNotesForLesson = async (userId: string, lessonId: string): Promi
   return await firestoreService.getNoteForLesson(userId, lessonId)
 };
 
+export const getNotesForUserCourse = async (userId: string, courseId: string): Promise<Note[]> => {
+  return await firestoreService.getNotesForUserCourse(userId, courseId);
+};
+
 // Quiz History operations
 export const getQuizHistoryForUserCourse = async (userId: string, courseId: string): Promise<QuizHistory[]> => {
   return await firestoreService.getQuizHistoryForUserCourse(userId, courseId);

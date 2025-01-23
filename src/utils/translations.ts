@@ -6,6 +6,14 @@ interface Translations {
 }
 
 export const translations: Translations = {
+  noNotesFound: {
+    'zh-TW': '目前沒有筆記',
+    'zh-CN': '目前没有笔记'
+  },
+  myNotes: {
+    'zh-TW': '我的筆記',
+    'zh-CN': '我的笔记'
+  },
   // Layout
   appTitle: {
     'zh-TW': 'ECC在線課程',

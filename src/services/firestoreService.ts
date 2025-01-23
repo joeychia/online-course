@@ -317,6 +317,32 @@ export class FirestoreService {
             grade: data.grade as number
         } as Grade;
     }
+
+    async getNotesForUserCourse(userId: string, courseId: string): Promise<Note[]> {
+        try {
+            const notesRef = collection(db, `users/${userId}/notes`);
+            const q = query(
+                notesRef,
+                where('courseId', '==', courseId),
+                orderBy('updatedAt', 'desc')
+            );
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    unitName: data.unitName,
+                    lessonName: data.lessonName,
+                    courseId: data.courseId,
+                    text: data.text,
+                    updatedAt: data.updatedAt,
+                };
+            });
+        } catch (error) {
+            console.error(`[getNotesForUserCourse] Error getting notes for user ${userId} and course ${courseId}:`, error);
+            return [];
+        }
+    }
 }
 
 export const firestoreService = new FirestoreService();
