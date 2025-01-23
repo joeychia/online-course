@@ -248,10 +248,11 @@ export class FirestoreService {
             const data = noteSnap.data();
             return {
                 id: noteSnap.id,
-                lessonId,
+                unitName: data.unitName,
+                lessonName: data.lessonName,
                 courseId: data.courseId,
                 text: data.text,
-                updatedAt: data.updatedAt
+                updatedAt: data.updatedAt,
             };
         } catch (error) {
             console.error(`[getNoteForLesson] Error getting note for user ${userId} and lesson ${lessonId}:`, error);
@@ -259,12 +260,13 @@ export class FirestoreService {
         }
     }
 
-    async saveNote(userId: string, lessonId: string, courseId: string, text: string): Promise<Note> {
+    async saveNote(userId: string, lessonId: string, courseId: string, text: string, lessonName: string, unitName: string): Promise<Note> {
         try {
             const noteRef = doc(db, `users/${userId}/notes/${lessonId}`);
             const note = {
                 courseId,
-                lessonId,
+                unitName,
+                lessonName,
                 text,
                 updatedAt: new Date().toISOString()
             };

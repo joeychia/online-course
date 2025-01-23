@@ -101,7 +101,8 @@ export interface Grade {
 export interface Note {
   id: string;
   courseId: string;
-  lessonId: string;
+  unitName: string;
+  lessonName: string;
   text: string;
   updatedAt: string;
 }

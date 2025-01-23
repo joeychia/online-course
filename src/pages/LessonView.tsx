@@ -201,7 +201,8 @@ const LessonView: React.FC<LessonViewProps> = ({
     
     try {
       setIsSaving(true);
-      await saveNote(currentUser.uid, lesson.id, lesson.courseId, note);
+      const unit = await getUnit(lesson.unitId);
+      await saveNote(currentUser.uid, lesson.id, lesson.courseId, note, lesson.name, unit!.name);
       setNoteSaved(true);
 
       // If there's no quiz, complete the lesson
