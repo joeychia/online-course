@@ -221,15 +221,6 @@ export default function Layout({ children }: LayoutProps) {
             {currentUser ? (
               <>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <Typography 
-                    variant="body1" 
-                    sx={{ 
-                      display: { xs: 'none', sm: 'block' },
-                      color: 'white'
-                    }}
-                  >
-                    {userProfile?.name || currentUser.email?.split('@')[0]}
-                  </Typography>
                   <IconButton
                     onClick={handleMenu}
                     sx={{ p: 0 }}
@@ -248,8 +239,13 @@ export default function Layout({ children }: LayoutProps) {
                     onClose={handleClose}
                     onClick={handleClose}
                   >
-                    <MenuItem disabled>
-                      {userProfile?.name || currentUser.email}
+                    <MenuItem  sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <Typography variant="body1" color="text.primary">
+                        {userProfile?.name || currentUser.email?.split('@')[0]}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {currentUser.email}
+                      </Typography>
                     </MenuItem>
                     <MenuItem onClick={handleSignOut}>{t('signOut')}</MenuItem>
                   </Menu>
