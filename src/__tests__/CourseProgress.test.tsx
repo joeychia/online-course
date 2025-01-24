@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CourseProgress from '../components/CourseProgress';
 import { LanguageProvider } from '../contexts/LanguageContext';
+import { FontSizeProvider } from '../contexts/FontSizeContext';
 
 
 // Mock react-calendar-heatmap
@@ -92,15 +93,17 @@ describe('CourseProgress', () => {
   const renderComponent = (props = {}) => {
     return render(
       <LanguageProvider>
-        <MemoryRouter>
-          <CourseProgress
-            progress={mockProgress}
-            courseId="course1"
-            units={mockUnits}
-            unitLessons={mockUnitLessons}
-            {...props}
-          />
-        </MemoryRouter>
+        <FontSizeProvider>
+          <MemoryRouter>
+            <CourseProgress
+              progress={mockProgress}
+              courseId="course1"
+              units={mockUnits}
+              unitLessons={mockUnitLessons}
+              {...props}
+            />
+          </MemoryRouter>
+        </FontSizeProvider>
       </LanguageProvider>
     );
   };

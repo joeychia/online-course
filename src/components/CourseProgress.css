@@ -6,11 +6,15 @@
   fill: #ebedf0;
 }
 
+.react-calendar-heatmap .color-empty-dark {
+  fill: #2d333b;
+}
+
 .react-calendar-heatmap .color-filled {
   fill: #1976d2;
 }
 
-/* Color scales for multiple lessons per day */
+/* Color scales for multiple lessons per day - Light theme */
 .react-calendar-heatmap .color-scale-1 {
   fill: #90caf9;
 }
@@ -27,9 +31,31 @@
   fill: #1565c0;
 }
 
+/* Color scales for multiple lessons per day - Dark theme */
+.react-calendar-heatmap .color-scale-1-dark {
+  fill: #4f83cc;
+}
+
+.react-calendar-heatmap .color-scale-2-dark {
+  fill: #5c9ee3;
+}
+
+.react-calendar-heatmap .color-scale-3-dark {
+  fill: #68b5f6;
+}
+
+.react-calendar-heatmap .color-scale-4-dark {
+  fill: #90caf9;
+}
+
 /* Hover effect */
 .react-calendar-heatmap .color-filled:hover {
   fill: #1565c0;
+  cursor: pointer;
+}
+
+.react-calendar-heatmap .color-filled-dark:hover {
+  fill: #90caf9;
   cursor: pointer;
 }
 
@@ -38,4 +64,4 @@
   z-index: 9999;
   white-space: pre-line !important;
   max-width: 300px;
-} 
+}

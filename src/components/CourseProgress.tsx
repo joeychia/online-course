@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Link } from '@mui/material';
+import { Box, Typography, Paper, Link, useTheme } from '@mui/material';
 import { UserProgress } from '../types';
 import { useNavigate } from 'react-router-dom';
 import ReactCalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
@@ -8,6 +8,7 @@ import './CourseProgress.css';
 import { formatDate } from '../utils/dateUtils';
 import { useTranslation } from '../hooks/useTranslation';
 import { TooltipDataAttrs } from 'react-calendar-heatmap';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 interface CourseProgressProps {
   progress: Record<string, UserProgress>;
@@ -26,6 +27,8 @@ interface CalendarValue extends ReactCalendarHeatmapValue<string> {
 export default function CourseProgress({ progress, courseId, units, unitLessons }: CourseProgressProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const theme = useTheme();
+  const { fontSize } = useFontSize();
 
   // Find the latest completed lesson
   const latestLesson = Object.entries(progress)
@@ -132,11 +135,16 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
 
   if (!latestLesson) {
     return (
-      <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
-        <Typography variant="h6" gutterBottom>
+      <Paper sx={{
+        p: 3,
+        mb: 3,
+        bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50',
+        color: theme.palette.text.primary
+      }}>
+        <Typography variant="h6" gutterBottom sx={{ fontSize: `calc(${fontSize}px * 1.25)` }}>
           {t('courseProgress')}
         </Typography>
-        <Typography color="text.secondary">
+        <Typography color="text.secondary" sx={{ fontSize }}>
           {t('noLessonsCompleted')}
         </Typography>
       </Paper>
@@ -164,19 +172,24 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
   };
 
   return (
-    <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
+    <Paper sx={{
+      p: 3,
+      mb: 3,
+      bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50',
+      color: theme.palette.text.primary
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-        <Typography variant="h6">
+        <Typography variant="h6" sx={{ fontSize: `calc(${fontSize}px * 1.25)` }}>
           {t('courseProgress')}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize }}>
           {t('lessonsCompleted', { count: Object.values(progress).filter(data => data.completed).length })}
         </Typography>
       </Box>
       
       {/* Calendar Section */}
       <Box sx={{ mt: 3, mb: 4 }}>
-        <Typography variant="subtitle1" gutterBottom>
+        <Typography variant="subtitle1" gutterBottom sx={{ fontSize: `calc(${fontSize}px * 1.1)` }}>
           {t('completionCalendar')}
         </Typography>
         <Box>
@@ -189,21 +202,23 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
             monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']}
             classForValue={(value) => {
               if (!value) {
-                return 'color-empty';
+                return theme.palette.mode === 'dark' ? 'color-empty-dark' : 'color-empty';
               }
-              return `color-filled color-scale-${Math.min(value.count, 4)}`;
+              return `color-filled color-scale-${Math.min(value.count, 4)}${theme.palette.mode === 'dark' ? '-dark' : ''}`;
             }}
             tooltipDataAttrs={(value) => {
               if (!value || !value.date) {
                 return {
-                  'data-tip': String(t('noLessonsCompletedTooltip'))
+                  'data-tip': String(t('noLessonsCompletedTooltip')),
+                  'style': { fontSize }
                 } as TooltipDataAttrs;
               }
               const calendarValue = value as CalendarValue;
               const lessons = calendarValue.lessons.map(l => l.name).join('\n');
               return {
                 'data-tip': `${new Date(calendarValue.date).toLocaleDateString('zh-TW')}\n${lessons}`,
-                'data-multiline': true
+                'data-multiline': true,
+                'style': { fontSize }
               } as TooltipDataAttrs;
             }}
             onClick={(value) => handleLessonClick(value as CalendarValue)}
@@ -214,7 +229,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
 
       {/* Latest Lesson Section */}
       <Box sx={{ mt: 2 }}>
-        <Typography variant="subtitle1" gutterBottom>
+        <Typography variant="subtitle1" gutterBottom sx={{ fontSize: `calc(${fontSize}px * 1.1)` }}>
           {t('latestCompletedLesson')}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -233,6 +248,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                     color: 'primary.main',
                     textAlign: 'left',
                     mr: 2,
+                    fontSize,
                     '&:hover': {
                       textDecoration: 'underline'
                     }
@@ -240,7 +256,9 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                 >
                   {latestLessonUnit?.name} / {lessonData.lessonName}
                 </Link>
-                {formattedDate}
+                <Typography component="span" sx={{ fontSize, ml: 1 }}>
+                  {formattedDate}
+                </Typography>
               </Box>
             </Box>
           </Box>
@@ -249,12 +267,12 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
             <Box sx={{ 
               mt: 2,
               p: 2, 
-              bgcolor: 'primary.50', 
+              bgcolor: theme.palette.mode === 'dark' ? 'primary.900' : 'primary.50', 
               borderRadius: 1,
               border: 1,
-              borderColor: 'primary.100'
+              borderColor: theme.palette.mode === 'dark' ? 'primary.800' : 'primary.100'
             }}>
-              <Typography variant="h6" color="primary" gutterBottom>
+              <Typography variant="h6" color="primary" gutterBottom sx={{ fontSize: `calc(${fontSize}px * 1.25)` }}>
                 {t('nextUp')}
               </Typography>
               <Box>
@@ -268,6 +286,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                     display: 'block',
                     fontWeight: 'medium',
                     mb: 0.5,
+                    fontSize: `calc(${fontSize}px * 1.25)`,
                     '&:hover': {
                       textDecoration: 'underline'
                     }
@@ -282,4 +301,4 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
       </Box>
     </Paper>
   );
-} 
+}

@@ -70,8 +70,8 @@ export const translations: Translations = {
     'zh-CN': '尚未完成任何课程。开始您的学习之旅！'
   },
   lessonsCompleted: {
-    'zh-TW': '已完成 {count} 個課程',
-    'zh-CN': '已完成 {count} 个课程'
+    'zh-TW': '已完成 {{count}} 課',
+    'zh-CN': '已完成 {{count}} 课'
   },
   completionCalendar: {
     'zh-TW': '完成日曆',

@@ -141,7 +141,7 @@ export default function Layout({ children }: LayoutProps) {
               {t('appTitle')}
             </Typography>
           </Stack>
-          <Stack direction="row" spacing={4} alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center">
             {currentUser && (
               <Button
                 component={RouterLink}
@@ -220,7 +220,7 @@ export default function Layout({ children }: LayoutProps) {
             </Menu>
             {currentUser ? (
               <>
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={1} alignItems="center">
                   <IconButton
                     onClick={handleMenu}
                     sx={{ p: 0 }}
