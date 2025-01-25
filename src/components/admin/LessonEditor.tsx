@@ -31,22 +31,31 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   }, [lessonId]);
 
   const loadLesson = async () => {
-    const loadedLesson = await getLesson(lessonId);
-    setLesson(loadedLesson);
+    try {
+      const loadedLesson = await getLesson(lessonId);
+      setLesson(loadedLesson);
+    } catch (error) {
+      console.error('Error loading lesson:', error);
+      setLesson(null);
+    }
   };
 
   const handleSave = async () => {
     if (!lesson) return;
 
-    await updateLesson(lessonId, {
-      name: lesson.name,
-      content: lesson.content,
-      'video-title': lesson['video-title'],
-      'video-url': lesson['video-url']
-    });
+    try {
+      await updateLesson(lessonId, {
+        name: lesson.name,
+        content: lesson.content,
+        'video-title': lesson['video-title'],
+        'video-url': lesson['video-url']
+      });
 
-    onSave();
-    onClose();
+      onSave();
+      onClose();
+    } catch (error) {
+      console.error('Error saving lesson:', error);
+    }
   };
 
   return (
@@ -91,4 +100,4 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
       </DialogActions>
     </Dialog>
   );
-}; 
+};

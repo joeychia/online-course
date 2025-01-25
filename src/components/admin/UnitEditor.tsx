@@ -40,31 +40,44 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
   }, [unitId]);
 
   const loadUnit = async () => {
-    const loadedUnit = await getUnit(unitId);
-    setUnit(loadedUnit);
+    try {
+      const loadedUnit = await getUnit(unitId);
+      setUnit(loadedUnit);
+    } catch (error) {
+      console.error('Error loading unit:', error);
+      setUnit(null);
+    }
   };
 
   const handleAddLesson = async () => {
     if (!unit || !newLessonName.trim()) return;
 
-    const newLesson = {
-      id: `lesson_${Date.now()}`,
-      name: newLessonName
-    };
+    try {
+      const newLesson = {
+        id: `lesson_${Date.now()}`,
+        name: newLessonName
+      };
 
-    const updatedLessons = [...unit.lessons, newLesson];
-    await updateUnit(unitId, { lessons: updatedLessons });
-    await loadUnit();
-    setIsLessonDialogOpen(false);
-    setNewLessonName('');
+      const updatedLessons = [...unit.lessons, newLesson];
+      await updateUnit(unitId, { lessons: updatedLessons });
+      await loadUnit();
+      setIsLessonDialogOpen(false);
+      setNewLessonName('');
+    } catch (error) {
+      console.error('Error adding lesson:', error);
+    }
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
     if (!unit || !window.confirm('Are you sure you want to delete this lesson?')) return;
 
-    const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonId);
-    await updateUnit(unitId, { lessons: updatedLessons });
-    await loadUnit();
+    try {
+      const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonId);
+      await updateUnit(unitId, { lessons: updatedLessons });
+      await loadUnit();
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+    }
   };
 
   return (
@@ -76,10 +89,19 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
             label="Unit Name"
             fullWidth
             value={unit?.name || ''}
-            onChange={async (e) => {
+            onChange={(e) => {
               if (unit) {
-                await updateUnit(unitId, { name: e.target.value });
-                await loadUnit();
+                setUnit({ ...unit, name: e.target.value });
+              }
+            }}
+            onBlur={async () => {
+              if (unit) {
+                try {
+                  await updateUnit(unitId, { name: unit.name });
+                  await loadUnit();
+                } catch (error) {
+                  console.error('Error updating unit name:', error);
+                }
               }
             }}
           />

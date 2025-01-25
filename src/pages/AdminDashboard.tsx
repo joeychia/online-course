@@ -13,11 +13,17 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (currentUser?.uid) {
-        const userProfile = await getUser(currentUser.uid);
-        setIsAdmin(!!userProfile?.roles?.admin);
+      try {
+        if (currentUser?.uid) {
+          const userProfile = await getUser(currentUser.uid);
+          setIsAdmin(!!userProfile?.roles?.admin);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAdminStatus();
@@ -41,4 +47,4 @@ export const AdminDashboard: React.FC = () => {
       </Box>
     </Container>
   );
-}; 
+};
