@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UnitEditor } from '../components/admin/UnitEditor';
-import { getUnit, updateUnit } from '../services/dataService';
+import { getUnit, updateUnit, createLesson } from '../services/dataService';
 import type { Unit } from '../types';
 
 // Mock services
 vi.mock('../services/dataService', () => ({
   getUnit: vi.fn(),
-  updateUnit: vi.fn()
+  updateUnit: vi.fn(),
+  createLesson: vi.fn()
 }));
 
 // Mock LessonEditor
@@ -41,6 +42,7 @@ describe('UnitEditor', () => {
     vi.clearAllMocks();
     vi.mocked(getUnit).mockResolvedValue(mockUnit);
     vi.mocked(updateUnit).mockResolvedValue();
+    vi.mocked(createLesson).mockResolvedValue();
     vi.spyOn(window, 'confirm').mockImplementation(() => true);
   });
 
@@ -138,6 +140,18 @@ describe('UnitEditor', () => {
       const submitButton = screen.getByText('Add');
       await user.click(submitButton);
 
+      // Verify createLesson was called first
+      expect(createLesson).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          name: 'New Lesson',
+          content: '',
+          unitId: 'unit_1',
+          quizId: null
+        })
+      );
+
+      // Then verify updateUnit was called
       expect(updateUnit).toHaveBeenCalledWith('unit_1', {
         lessons: [
           ...mockUnit.lessons,
@@ -165,6 +179,7 @@ describe('UnitEditor', () => {
       const submitButton = screen.getByText('Add');
       await user.click(submitButton);
 
+      expect(createLesson).not.toHaveBeenCalled();
       expect(updateUnit).not.toHaveBeenCalled();
     });
 
@@ -291,7 +306,7 @@ describe('UnitEditor', () => {
 
     it('handles lesson addition error', async () => {
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-      vi.mocked(updateUnit).mockRejectedValue(new Error('Failed to add lesson'));
+      vi.mocked(createLesson).mockRejectedValue(new Error('Failed to add lesson'));
 
       const user = userEvent.setup();
       render(

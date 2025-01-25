@@ -16,7 +16,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Course } from '../../types';
-import { getCourse, updateCourse } from '../../services/dataService';
+import { getCourse, updateCourse, createUnit } from '../../services/dataService';
 import { UnitEditor } from '../../components/admin/UnitEditor';
 
 export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
@@ -43,14 +43,23 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
     if (!course || !newUnitName.trim()) return;
     
     try {
-      const newUnit = {
-        id: `unit_${Date.now()}`,
+      const newUnitId = `unit_${Date.now()}`;
+      
+      // Create the unit document in Firestore
+      await createUnit(newUnitId, {
+        id: newUnitId,
         name: newUnitName,
         description: '',
         lessons: [],
         courseId
-      };
+      });
 
+      // Update the course's units array
+      const newUnit = {
+        id: newUnitId,
+        name: newUnitName,
+        lessons: []
+      };
       const updatedUnits = [...(course.units || []), newUnit];
       await updateCourse(courseId, { units: updatedUnits });
       await loadCourse();

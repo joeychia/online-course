@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourseEditor } from '../components/admin/CourseEditor';
-import { getCourse, updateCourse } from '../services/dataService';
+import { getCourse, updateCourse, createUnit } from '../services/dataService';
 import type { Course } from '../types';
 
 // Mock services
 vi.mock('../services/dataService', () => ({
   getCourse: vi.fn(),
-  updateCourse: vi.fn()
+  updateCourse: vi.fn(),
+  createUnit: vi.fn()
 }));
 
 // Mock UnitEditor component
@@ -43,6 +44,7 @@ describe('CourseEditor', () => {
     vi.spyOn(window, 'confirm').mockImplementation(() => true);
     vi.mocked(getCourse).mockResolvedValue(mockCourse);
     vi.mocked(updateCourse).mockResolvedValue();
+    vi.mocked(createUnit).mockResolvedValue();
   });
 
   it('loads and displays course data on mount', async () => {
@@ -95,6 +97,7 @@ describe('CourseEditor', () => {
       const submitButton = screen.getByText('Add');
       fireEvent.click(submitButton);
 
+      expect(createUnit).not.toHaveBeenCalled();
       expect(updateCourse).not.toHaveBeenCalled();
     });
 
@@ -114,6 +117,18 @@ describe('CourseEditor', () => {
       const submitButton = screen.getByText('Add');
       await user.click(submitButton);
 
+      // Verify createUnit was called first
+      expect(createUnit).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          name: 'New Unit',
+          description: '',
+          lessons: [],
+          courseId: 'course_1'
+        })
+      );
+
+      // Then verify updateCourse was called
       expect(updateCourse).toHaveBeenCalledWith('course_1', {
         units: expect.arrayContaining([
           expect.objectContaining({
