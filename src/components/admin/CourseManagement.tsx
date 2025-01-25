@@ -14,6 +14,7 @@ import { Course } from '../../types';
 import { createCourse, updateCourse, deleteCourse, getAllCourses } from '../../services/dataService';
 import RichTextEditor from '../RichTextEditor';
 import { CourseListItem } from './CourseListItem';
+import { CourseEditor } from './CourseEditor';
 
 export const CourseManagement: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -21,6 +22,7 @@ export const CourseManagement: React.FC = () => {
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [courseName, setCourseName] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
 
   useEffect(() => {
     loadCourses();
@@ -83,58 +85,70 @@ export const CourseManagement: React.FC = () => {
 
   return (
     <Box p={3}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5">Course Management</Typography>
-        <Button variant="contained" onClick={() => setOpen(true)}>
-          Create New Course
-        </Button>
-      </Box>
-
-      <List>
-        {courses.map((course) => (
-          <CourseListItem
-            key={course.id}
-            course={course}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </List>
-
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{editingCourse ? 'Edit Course' : 'Create New Course'}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Course Name"
-            fullWidth
-            value={courseName}
-            onChange={(e) => setCourseName(e.target.value)}
-          />
-          <Box mt={2}>
-            <Typography variant="subtitle2" color="textSecondary" mb={1}>
-              Course Description
-            </Typography>
-            <RichTextEditor
-              value={courseDescription}
-              onChange={setCourseDescription}
-              placeholder="Enter course description..."
-            />
+      {selectedCourseId ? (
+        <>
+          <Button onClick={() => setSelectedCourseId(null)} sx={{ mb: 2 }}>
+            Back to Course List
+          </Button>
+          <CourseEditor courseId={selectedCourseId} />
+        </>
+      ) : (
+        <>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+            <Typography variant="h5">Course Management</Typography>
+            <Button variant="contained" onClick={() => setOpen(true)}>
+              Create New Course
+            </Button>
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            setOpen(false);
-            resetForm();
-          }}>
-            Cancel
-          </Button>
-          <Button onClick={handleCreateOrUpdate} variant="contained" color="primary">
-            {editingCourse ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+
+          <List>
+            {courses.map((course) => (
+              <CourseListItem
+                key={course.id}
+                course={course}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onSelect={() => setSelectedCourseId(course.id)}
+              />
+            ))}
+          </List>
+
+          <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+            <DialogTitle>{editingCourse ? 'Edit Course' : 'Create New Course'}</DialogTitle>
+            <DialogContent>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Course Name"
+                fullWidth
+                value={courseName}
+                onChange={(e) => setCourseName(e.target.value)}
+              />
+              <Box mt={2}>
+                <Typography variant="subtitle2" color="textSecondary" mb={1}>
+                  Course Description
+                </Typography>
+                <RichTextEditor
+                  value={courseDescription}
+                  onChange={setCourseDescription}
+                  placeholder="Enter course description..."
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => {
+                setOpen(false);
+                resetForm();
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateOrUpdate} variant="contained" color="primary">
+                {editingCourse ? 'Update' : 'Create'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
     </Box>
   );
 };

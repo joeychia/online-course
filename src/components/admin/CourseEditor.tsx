@@ -1,0 +1,136 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Button,
+  Typography,
+  List,
+  ListItem,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Course } from '../../types';
+import { getCourse, updateCourse } from '../../services/dataService';
+import { UnitEditor } from '../../components/admin/UnitEditor';
+
+export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
+  const [course, setCourse] = useState<Course | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
+  const [isUnitDialogOpen, setIsUnitDialogOpen] = useState(false);
+  const [newUnitName, setNewUnitName] = useState('');
+
+  useEffect(() => {
+    loadCourse();
+  }, [courseId]);
+
+  const loadCourse = async () => {
+    const loadedCourse = await getCourse(courseId);
+    setCourse(loadedCourse);
+  };
+
+  const handleAddUnit = async () => {
+    if (!course || !newUnitName.trim()) return;
+    
+    const newUnit = {
+      id: `unit_${Date.now()}`,
+      name: newUnitName,
+      description: '',
+      lessons: [],
+      courseId
+    };
+
+    const updatedUnits = [...(course.units || []), newUnit];
+    await updateCourse(courseId, { units: updatedUnits });
+    await loadCourse();
+    setIsUnitDialogOpen(false);
+    setNewUnitName('');
+  };
+
+  const handleDeleteUnit = async (unitId: string) => {
+    if (!course || !window.confirm('Are you sure you want to delete this unit?')) return;
+
+    const updatedUnits = course.units.filter(unit => unit.id !== unitId);
+    await updateCourse(courseId, { units: updatedUnits });
+    await loadCourse();
+  };
+
+  return (
+    <Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h5">Course Structure</Typography>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          onClick={() => setIsUnitDialogOpen(true)}
+        >
+          Add Unit
+        </Button>
+      </Box>
+
+      <List>
+        {course?.units?.map((unit) => (
+          <ListItem
+            key={unit.id}
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #eee'
+            }}
+          >
+            <Box flex={1}>
+              <Typography variant="h6">{unit.name}</Typography>
+              <Typography color="textSecondary">
+                {unit.lessons?.length || 0} lessons
+              </Typography>
+            </Box>
+            <Box>
+              <IconButton onClick={() => setSelectedUnit(unit.id)}>
+                <EditIcon />
+              </IconButton>
+              <IconButton onClick={() => handleDeleteUnit(unit.id)}>
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </ListItem>
+        ))}
+      </List>
+
+      {/* Add Unit Dialog */}
+      <Dialog open={isUnitDialogOpen} onClose={() => setIsUnitDialogOpen(false)}>
+        <DialogTitle>Add New Unit</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Unit Name"
+            fullWidth
+            value={newUnitName}
+            onChange={(e) => setNewUnitName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsUnitDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleAddUnit} variant="contained">
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Unit Editor Dialog */}
+      {selectedUnit && (
+        <UnitEditor
+          courseId={courseId}
+          unitId={selectedUnit}
+          onClose={() => setSelectedUnit(null)}
+          onSave={loadCourse}
+        />
+      )}
+    </Box>
+  );
+}; 

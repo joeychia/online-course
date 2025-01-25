@@ -107,3 +107,11 @@ export const updateCourse = async (courseId: string, courseData: Partial<Course>
 export const deleteCourse = async (courseId: string): Promise<void> => {
   await firestoreService.deleteCourse(courseId);
 };
+
+export const updateUnit = async (unitId: string, unitData: Partial<Unit>): Promise<void> => {
+  await firestoreService.updateUnit(unitId, unitData);
+};
+
+export const updateLesson = async (lessonId: string, lessonData: Partial<Lesson>): Promise<void> => {
+  await firestoreService.updateLesson(lessonId, lessonData);
+};

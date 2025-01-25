@@ -31,7 +31,10 @@ export class FirestoreService {
                 id: doc.id,
                 name: data.name as string,
                 description: data.description as string,
-                units: data.units as Array<{ id: string; name: string }>,
+                units: (data.units as Array<{ id: string; name: string }>).map(unit => ({
+                    ...unit,
+                    lessons: []
+                })),
                 settings: data.settings as { unlockLessonIndex: number },
                 groupIds: data.groupIds as Record<string, boolean>,
                 isPublic: data.isPublic as boolean | undefined
@@ -48,7 +51,10 @@ export class FirestoreService {
             id: docSnap.id,
             name: data.name as string,
             description: data.description as string,
-            units: data.units as Array<{ id: string; name: string }>,
+            units: (data.units as Array<{ id: string; name: string }>).map(unit => ({
+                ...unit,
+                lessons: []
+            })),
             settings: data.settings as { unlockLessonIndex: number },
             groupIds: data.groupIds as Record<string, boolean>,
             isPublic: data.isPublic as boolean | undefined
@@ -92,6 +98,11 @@ export class FirestoreService {
         };
     }
 
+    async updateUnit(unitId: string, unitData: Partial<Unit>): Promise<void> {
+        const unitRef = doc(db, 'units', unitId);
+        await updateDoc(unitRef, unitData);
+    }
+
     // Lesson operations
     async getLessonsIdNameForUnit(unitId: string): Promise<Array<{ id: string; name: string }>> {
         const unit = await this.getUnitById(unitId);
@@ -113,6 +124,11 @@ export class FirestoreService {
             'video-title': data['video-title'] as string | undefined,
             'video-url': data['video-url'] as string | undefined
         };
+    }
+
+    async updateLesson(lessonId: string, lessonData: Partial<Lesson>): Promise<void> {
+        const lessonRef = doc(db, 'lessons', lessonId);
+        await updateDoc(lessonRef, lessonData);
     }
 
     // Quiz operations

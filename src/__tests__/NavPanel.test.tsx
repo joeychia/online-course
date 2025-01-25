@@ -26,8 +26,8 @@ vi.mock('../hooks/useTranslation', () => ({
 }));
 
 const mockUnits = [
-  { id: '1', name: '第一單元' },
-  { id: '2', name: '第二單元' }
+  { id: '1', name: '第一單元', lessons: [] },
+  { id: '2', name: '第二單元', lessons: [] }
 ];
 
 const mockCourse: Course = {
@@ -243,4 +243,4 @@ describe('NavPanel', () => {
     const mobileDrawer = drawer.querySelector('.MuiDrawer-paper');
     expect(mobileDrawer).toHaveClass('MuiDrawer-paper', 'MuiDrawer-paperAnchorLeft');
   });
-}); 
+});

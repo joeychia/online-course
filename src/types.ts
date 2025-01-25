@@ -8,6 +8,10 @@ export interface Course {
   units: Array<{
     id: string;
     name: string;
+    lessons: Array<{
+      id: string;
+      name: string;
+    }>;
   }>;
   groupIds: Record<string, boolean>;
   isPublic?: boolean;
