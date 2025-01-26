@@ -201,6 +201,7 @@ describe('LessonEditor', () => {
       expect(updateLesson).toHaveBeenCalledWith('lesson_1', {
         name: 'Test Lesson Updated',
         'video-title': 'Test Video Updated',
+        "quizId": null,
         'video-url': 'https://example.com/video/updated',
         content: 'Test Content Updated'
       });
