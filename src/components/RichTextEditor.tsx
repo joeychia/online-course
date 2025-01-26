@@ -3,6 +3,7 @@ import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { useTheme } from '../contexts/ThemeContext';
 import { Box } from '@mui/material';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 interface RichTextEditorProps {
   value: string;
@@ -13,6 +14,7 @@ interface RichTextEditorProps {
 const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: RichTextEditorProps) => {
   const editorRef = useRef<Editor>(null);
   const { isDarkMode } = useTheme();
+  const { fontSize } = useFontSize();
 
   useEffect(() => {
     // Update editor content when value prop changes
@@ -30,7 +32,7 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
   };
 
   return (
-    <Box className="border rounded-lg overflow-hidden" sx={{ 
+    <Box sx={{
       '& .toastui-editor-defaultUI': {
         backgroundColor: theme => theme.palette.background.paper,
         border: theme => `1px solid ${theme.palette.divider}`,
@@ -45,19 +47,15 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
       '& .toastui-editor-main': {
         color: theme => theme.palette.text.primary,
       },
-      '& .toastui-editor-contents p': {
+      '& .toastui-editor-contents': {
         color: theme => theme.palette.text.primary,
-      },
-      '.toastui-editor-contents & h1, & h2, & h3, & h4, & h5, & h6': {
-        color: theme => theme.palette.text.primary,
-      },
-      '& .toastui-editor-md-container': {
-        backgroundColor: theme => theme.palette.background.paper,
+        fontSize: fontSize,
       },
       '& .toastui-editor-ww-container': {
         backgroundColor: theme => theme.palette.background.paper,
+      },
       }
-    }}>
+    }>
       <Editor
         ref={editorRef}
         initialValue={value}

@@ -2,6 +2,7 @@ import { Viewer } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
 import { Box } from '@mui/material';
 import { useTheme } from '../contexts/ThemeContext';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 interface MarkdownViewerProps {
   content: string;
@@ -9,17 +10,18 @@ interface MarkdownViewerProps {
 
 const MarkdownViewer = ({ content }: MarkdownViewerProps) => {
   const { isDarkMode } = useTheme();
-
+  const { fontSize } = useFontSize();
   return (
     <Box sx={{
       '& .toastui-editor-contents': {
         color: theme => theme.palette.text.primary,
-        fontSize: 'var(--font-size-body)',
+        fontSize: fontSize,
         '& p': {
           color: theme => theme.palette.text.primary,
         },
         '& h1, & h2, & h3, & h4, & h5, & h6': {
           color: theme => theme.palette.text.primary,
+          lineHeight: 1.2,
         },
         '& a': {
           color: theme => theme.palette.primary.main,
