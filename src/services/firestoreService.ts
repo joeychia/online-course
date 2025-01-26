@@ -143,6 +143,35 @@ export class FirestoreService {
         };
     }
 
+    async saveQuiz(quizData: Omit<Quiz, 'id'> & { id?: string }): Promise<string> {
+        try {
+            if (quizData.id) {
+                // Check if document exists before updating
+                const quizRef = doc(db, 'quizzes', quizData.id);
+                const docSnap = await getDoc(quizRef);
+
+                const { id, ...dataWithoutId } = quizData;
+                
+                if (docSnap.exists()) {
+                    // Update existing quiz
+                    await updateDoc(quizRef, dataWithoutId);
+                } else {
+                    // Create new quiz with specified ID
+                    await setDoc(quizRef, dataWithoutId);
+                }
+                return id;
+            } else {
+                // Create new quiz with auto-generated ID
+                const quizCollection = collection(db, 'quizzes');
+                const docRef = await addDoc(quizCollection, quizData);
+                return docRef.id;
+            }
+        } catch (error) {
+            console.error('Error saving quiz:', error);
+            throw error;
+        }
+    }
+
     // Quiz History operations
     async getQuizHistoryForUserCourse(userId: string, courseId: string): Promise<QuizHistory[]> {
         const quizHistoryRef = collection(db, `users/${userId}/quizHistory`);

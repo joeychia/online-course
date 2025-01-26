@@ -21,6 +21,10 @@ export const getQuiz = async (quizId: string): Promise<Quiz | null> => {
   return await firestoreService.getQuizById(quizId);
 };
 
+export const saveQuiz = async (quizData: Omit<Quiz, 'id'> & { id?: string }): Promise<string> => {
+  return await firestoreService.saveQuiz(quizData);
+};
+
 // Get only lesson IDs and names for navigation
 export const getLessonsIdNameForUnit = async (unitId: string): Promise<Array<{ id: string; name: string }>> => {
   return await firestoreService.getLessonsIdNameForUnit(unitId);

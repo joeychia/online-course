@@ -6,11 +6,14 @@ import {
   DialogActions,
   Button,
   TextField,
-  Box
+  Box,
+  Divider
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Lesson } from '../../types';
 import { getLesson, updateLesson } from '../../services/dataService';
 import RichTextEditor from '../RichTextEditor';
+import QuizEditor from './QuizEditor';
 
 interface LessonEditorProps {
   unitId: string;
@@ -25,6 +28,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   onSave
 }) => {
   const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [isQuizEditorOpen, setIsQuizEditorOpen] = useState(false);
 
   useEffect(() => {
     loadLesson();
@@ -42,7 +46,8 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
       name: lesson.name,
       content: lesson.content,
       'video-title': lesson['video-title'],
-      'video-url': lesson['video-url']
+      'video-url': lesson['video-url'],
+      quizId: lesson.quizId
     });
 
     onSave();
@@ -81,6 +86,18 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
               onChange={(content) => setLesson(prev => prev ? { ...prev, content } : null)}
             />
           </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Button
+              startIcon={<EditIcon />}
+              variant="outlined"
+              onClick={() => setIsQuizEditorOpen(true)}
+            >
+              {lesson?.quizId ? 'Edit Quiz' : 'Add Quiz'}
+            </Button>
+          </Box>
         </Box>
       </DialogContent>
       <DialogActions>
@@ -89,6 +106,16 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
           Save
         </Button>
       </DialogActions>
+
+      {isQuizEditorOpen && (
+        <QuizEditor
+          quizId={lesson?.quizId}
+          onSave={async (quizId: string) => {
+            setLesson(prev => prev ? { ...prev, quizId } : null);
+            setIsQuizEditorOpen(false);
+          }}
+        />
+      )}
     </Dialog>
   );
-}; 
+};
