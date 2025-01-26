@@ -16,7 +16,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Course } from '../../types';
-import { getCourse, updateCourse } from '../../services/dataService';
+import { getCourse, updateCourse, createUnit } from '../../services/dataService';
 import { UnitEditor } from '../../components/admin/UnitEditor';
 
 export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
@@ -30,34 +30,56 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
   }, [courseId]);
 
   const loadCourse = async () => {
-    const loadedCourse = await getCourse(courseId);
-    setCourse(loadedCourse);
+    try {
+      const loadedCourse = await getCourse(courseId);
+      setCourse(loadedCourse);
+    } catch (error) {
+      console.error('Error loading course:', error);
+      setCourse(null);
+    }
   };
 
   const handleAddUnit = async () => {
     if (!course || !newUnitName.trim()) return;
     
-    const newUnit = {
-      id: `unit_${Date.now()}`,
-      name: newUnitName,
-      description: '',
-      lessons: [],
-      courseId
-    };
+    try {
+      const newUnitId = `unit_${Date.now()}`;
+      
+      // Create the unit document in Firestore
+      await createUnit(newUnitId, {
+        id: newUnitId,
+        name: newUnitName,
+        description: '',
+        lessons: [],
+        courseId
+      });
 
-    const updatedUnits = [...(course.units || []), newUnit];
-    await updateCourse(courseId, { units: updatedUnits });
-    await loadCourse();
-    setIsUnitDialogOpen(false);
-    setNewUnitName('');
+      // Update the course's units array
+      const newUnit = {
+        id: newUnitId,
+        name: newUnitName,
+        lessons: []
+      };
+      const updatedUnits = [...(course.units || []), newUnit];
+      await updateCourse(courseId, { units: updatedUnits });
+      await loadCourse();
+      setIsUnitDialogOpen(false);
+      setNewUnitName('');
+    } catch (error) {
+      console.error('Error adding unit:', error);
+    }
   };
 
   const handleDeleteUnit = async (unitId: string) => {
     if (!course || !window.confirm('Are you sure you want to delete this unit?')) return;
 
-    const updatedUnits = course.units.filter(unit => unit.id !== unitId);
-    await updateCourse(courseId, { units: updatedUnits });
-    await loadCourse();
+    try {
+      const updatedUnits = course.units.filter(unit => unit.id !== unitId);
+      await updateCourse(courseId, { units: updatedUnits });
+      await loadCourse();
+    } catch (error) {
+      console.error('Error deleting unit:', error);
+    }
   };
 
   return (
@@ -133,4 +155,4 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
       )}
     </Box>
   );
-}; 
+};

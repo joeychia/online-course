@@ -16,7 +16,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Unit } from '../../types';
-import { getUnit, updateUnit } from '../../services/dataService';
+import { getUnit, updateUnit, createLesson } from '../../services/dataService';
 import { LessonEditor } from './LessonEditor';
 
 interface UnitEditorProps {
@@ -31,6 +31,8 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
   onClose,
 }) => {
   const [unit, setUnit] = useState<Unit | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [localName, setLocalName] = useState('');
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
   const [newLessonName, setNewLessonName] = useState('');
@@ -40,46 +42,83 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
   }, [unitId]);
 
   const loadUnit = async () => {
-    const loadedUnit = await getUnit(unitId);
-    setUnit(loadedUnit);
+    setIsLoading(true);
+    try {
+      const loadedUnit = await getUnit(unitId);
+      if (loadedUnit) {
+        setUnit(loadedUnit);
+        setLocalName(loadedUnit.name);
+      } else {
+        console.error('Unit not found');
+      }
+    } catch (error) {
+      console.error('Error loading unit:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleAddLesson = async () => {
     if (!unit || !newLessonName.trim()) return;
 
-    const newLesson = {
-      id: `lesson_${Date.now()}`,
-      name: newLessonName
-    };
+    try {
+      // Create a new lesson ID
+      const newLessonId = `lesson_${Date.now()}`;
+      
+      // Create the lesson document in Firestore
+      await createLesson(newLessonId, {
+        id: newLessonId,
+        name: newLessonName,
+        content: '',
+        unitId: unitId,
+        quizId: null
+      });
 
-    const updatedLessons = [...unit.lessons, newLesson];
-    await updateUnit(unitId, { lessons: updatedLessons });
-    await loadUnit();
-    setIsLessonDialogOpen(false);
-    setNewLessonName('');
+      // Update the unit's lessons array
+      const newLesson = {
+        id: newLessonId,
+        name: newLessonName
+      };
+      const updatedLessons = [...unit.lessons, newLesson];
+      await updateUnit(unitId, { lessons: updatedLessons });
+      
+      await loadUnit();
+      setIsLessonDialogOpen(false);
+      setNewLessonName('');
+    } catch (error) {
+      console.error('Error adding lesson:', error);
+    }
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
     if (!unit || !window.confirm('Are you sure you want to delete this lesson?')) return;
 
-    const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonId);
-    await updateUnit(unitId, { lessons: updatedLessons });
-    await loadUnit();
+    try {
+      const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonId);
+      await updateUnit(unitId, { lessons: updatedLessons });
+      await loadUnit();
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+    }
   };
 
   return (
     <Dialog open={true} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Edit Unit: {unit?.name}</DialogTitle>
+      <DialogTitle>Edit Unit: {isLoading ? 'Loading...' : unit?.name}</DialogTitle>
       <DialogContent>
         <Box mb={3}>
           <TextField
             label="Unit Name"
             fullWidth
-            value={unit?.name || ''}
-            onChange={async (e) => {
-              if (unit) {
-                await updateUnit(unitId, { name: e.target.value });
+            value={localName}
+            disabled={isLoading}
+            onChange={(e) => setLocalName(e.target.value)}
+            onBlur={async () => {
+              try {
+                await updateUnit(unitId, { name: localName });
                 await loadUnit();
+              } catch (error) {
+                console.error('Error updating unit name:', error);
               }
             }}
           />
@@ -91,6 +130,7 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
             startIcon={<AddIcon />}
             variant="contained"
             onClick={() => setIsLessonDialogOpen(true)}
+            disabled={isLoading}
           >
             Add Lesson
           </Button>

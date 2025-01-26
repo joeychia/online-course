@@ -98,6 +98,11 @@ export class FirestoreService {
         };
     }
 
+    async createUnit(unitId: string, unitData: Unit): Promise<void> {
+        const unitRef = doc(db, 'units', unitId);
+        await setDoc(unitRef, unitData);
+    }
+
     async updateUnit(unitId: string, unitData: Partial<Unit>): Promise<void> {
         const unitRef = doc(db, 'units', unitId);
         await updateDoc(unitRef, unitData);
@@ -124,6 +129,11 @@ export class FirestoreService {
             'video-title': data['video-title'] as string | undefined,
             'video-url': data['video-url'] as string | undefined
         };
+    }
+
+    async createLesson(lessonId: string, lessonData: Lesson): Promise<void> {
+        const lessonRef = doc(db, 'lessons', lessonId);
+        await setDoc(lessonRef, lessonData);
     }
 
     async updateLesson(lessonId: string, lessonData: Partial<Lesson>): Promise<void> {

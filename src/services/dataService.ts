@@ -112,8 +112,16 @@ export const deleteCourse = async (courseId: string): Promise<void> => {
   await firestoreService.deleteCourse(courseId);
 };
 
+export const createUnit = async (unitId: string, unitData: Unit): Promise<void> => {
+  await firestoreService.createUnit(unitId, unitData);
+};
+
 export const updateUnit = async (unitId: string, unitData: Partial<Unit>): Promise<void> => {
   await firestoreService.updateUnit(unitId, unitData);
+};
+
+export const createLesson = async (lessonId: string, lessonData: Lesson): Promise<void> => {
+  await firestoreService.createLesson(lessonId, lessonData);
 };
 
 export const updateLesson = async (lessonId: string, lessonData: Partial<Lesson>): Promise<void> => {

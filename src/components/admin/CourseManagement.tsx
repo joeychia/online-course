@@ -29,11 +29,21 @@ export const CourseManagement: React.FC = () => {
   }, []);
 
   const loadCourses = async () => {
-    const courseList = await getAllCourses();
-    setCourses(courseList);
+    try {
+      const courseList = await getAllCourses();
+      setCourses(courseList);
+    } catch (error) {
+      console.error('Error loading courses:', error);
+      setCourses([]);
+    }
   };
 
   const handleCreateOrUpdate = async () => {
+    // Validate required fields
+    if (!courseName.trim()) {
+      return;
+    }
+
     try {
       if (editingCourse) {
         await updateCourse(editingCourse.id, {
@@ -53,24 +63,28 @@ export const CourseManagement: React.FC = () => {
       
       setOpen(false);
       resetForm();
-      loadCourses();
+      await loadCourses();
     } catch (error) {
       console.error('Error saving course:', error);
     }
   };
 
   const handleEdit = (course: Course) => {
-    setEditingCourse(course);
-    setCourseName(course.name);
-    setCourseDescription(course.description);
-    setOpen(true);
+    try {
+      setEditingCourse(course);
+      setCourseName(course.name);
+      setCourseDescription(course.description);
+      setOpen(true);
+    } catch (error) {
+      console.error('Error setting up course edit:', error);
+    }
   };
 
   const handleDelete = async (courseId: string) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       try {
         await deleteCourse(courseId);
-        loadCourses();
+        await loadCourses();
       } catch (error) {
         console.error('Error deleting course:', error);
       }
