@@ -398,6 +398,21 @@ export class FirestoreService {
             return [];
         }
     }
+
+    async getRegisteredUsersForCourse(courseId: string): Promise<string[]> {
+        try {
+            const usersRef = collection(db, 'users');
+            const q = query(
+                usersRef,
+                where(`registeredCourses.${courseId}`, '==', true)
+            );
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => doc.id);
+        } catch (error) {
+            console.error(`[getRegisteredUsersForCourse] Error getting registered users for course ${courseId}:`, error);
+            return [];
+        }
+    }
 }
 
 export const firestoreService = new FirestoreService();

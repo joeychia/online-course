@@ -10,20 +10,24 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  Tooltip
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { Course } from '../../types';
-import { getCourse, updateCourse, createUnit } from '../../services/dataService';
+import { getCourse, updateCourse, createUnit, getLessonsIdNameForUnit } from '../../services/dataService';
 import { UnitEditor } from '../../components/admin/UnitEditor';
+import { StudentsQuizResults } from './StudentsQuizResults';
 
 export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
   const [course, setCourse] = useState<Course | null>(null);
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const [isUnitDialogOpen, setIsUnitDialogOpen] = useState(false);
   const [newUnitName, setNewUnitName] = useState('');
+  const [selectedQuizUnit, setSelectedQuizUnit] = useState<{ unitId: string; lessonId: string } | null>(null);
 
   useEffect(() => {
     loadCourse();
@@ -118,6 +122,23 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
               <IconButton onClick={() => handleDeleteUnit(unit.id)}>
                 <DeleteIcon />
               </IconButton>
+              <Tooltip title="View Quiz Results">
+                <IconButton
+                  onClick={async () => {
+                    try {
+                      const lessons = await getLessonsIdNameForUnit(unit.id);
+                      if (lessons && lessons.length > 0) {
+                        const lastLesson = lessons[lessons.length - 1];
+                        setSelectedQuizUnit({ unitId: unit.id, lessonId: lastLesson.id });
+                      }
+                    } catch (error) {
+                      console.error('Error loading lessons for quiz results:', error);
+                    }
+                  }}
+                >
+                  <AssessmentIcon />
+                </IconButton>
+              </Tooltip>
             </Box>
           </ListItem>
         ))}
@@ -151,6 +172,14 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
           unitId={selectedUnit}
           onClose={() => setSelectedUnit(null)}
           onSave={loadCourse}
+        />
+      )}
+
+      {selectedQuizUnit && (
+        <StudentsQuizResults
+          courseId={courseId}
+          lessonId={selectedQuizUnit.lessonId}
+          onClose={() => setSelectedQuizUnit(null)}
         />
       )}
     </Box>
