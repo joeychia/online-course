@@ -18,7 +18,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { Course } from '../../types';
-import { getCourse, updateCourse, createUnit, getLessonsIdNameForUnit } from '../../services/dataService';
+import { getCourse, updateCourse, createUnit, getLessonsIdNameForUnit, getUnit } from '../../services/dataService';
 import { UnitEditor } from '../../components/admin/UnitEditor';
 import { StudentsQuizResults } from './StudentsQuizResults';
 
@@ -36,7 +36,24 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
   const loadCourse = async () => {
     try {
       const loadedCourse = await getCourse(courseId);
-      setCourse(loadedCourse);
+      if (loadedCourse) {
+        // Fetch lesson counts for each unit
+        const unitsWithLessonCounts = await Promise.all(
+          loadedCourse.units.map(async (unit) => {
+            const unitDetails = await getUnit(unit.id);
+            return {
+              ...unit,
+              lessons: unitDetails?.lessons || []
+            };
+          })
+        );
+        setCourse({
+          ...loadedCourse,
+          units: unitsWithLessonCounts
+        });
+      } else {
+        setCourse(null);
+      }
     } catch (error) {
       console.error('Error loading course:', error);
       setCourse(null);

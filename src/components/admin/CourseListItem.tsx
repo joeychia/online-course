@@ -1,4 +1,5 @@
 import React from 'react';
+import MarkdownViewer from '../MarkdownViewer';
 import {
   ListItem,
   Box,
@@ -55,7 +56,7 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
             </Button>
           </Box>
         </Box>
-        <Typography color="textSecondary">{course.description}</Typography>
+        <MarkdownViewer content={course.description} />
       </Box>
     </ListItem>
   );

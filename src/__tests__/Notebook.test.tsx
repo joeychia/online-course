@@ -4,6 +4,7 @@ import { MemoryRouter, useParams } from 'react-router-dom';
 import Notebook from '../pages/Notebook';
 import { getNotesForUserCourse, getAllCourses } from '../services/dataService';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { FontSizeProvider } from '../contexts/FontSizeContext';
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
@@ -97,7 +98,9 @@ describe('Notebook Component', () => {
     return render(
       <MemoryRouter initialEntries={initialEntries}>
         <ThemeProvider>
-          <Notebook />
+          <FontSizeProvider>
+            <Notebook />
+          </FontSizeProvider>
         </ThemeProvider>
       </MemoryRouter>
     );

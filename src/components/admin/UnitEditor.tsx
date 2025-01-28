@@ -29,6 +29,7 @@ interface UnitEditorProps {
 export const UnitEditor: React.FC<UnitEditorProps> = ({
   unitId,
   onClose,
+  onSave,
 }) => {
   const [unit, setUnit] = useState<Unit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +37,8 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
   const [newLessonName, setNewLessonName] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [lessonToDelete, setLessonToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadUnit();
@@ -85,20 +88,30 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
       await loadUnit();
       setIsLessonDialogOpen(false);
       setNewLessonName('');
+      onSave(); // Call onSave to update parent component
     } catch (error) {
       console.error('Error adding lesson:', error);
     }
   };
 
-  const handleDeleteLesson = async (lessonId: string) => {
-    if (!unit || !window.confirm('Are you sure you want to delete this lesson?')) return;
+  const handleDeleteLesson = (lessonId: string) => {
+    setLessonToDelete(lessonId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!unit || !lessonToDelete) return;
 
     try {
-      const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonId);
+      const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonToDelete);
       await updateUnit(unitId, { lessons: updatedLessons });
       await loadUnit();
+      onSave(); // Call onSave to update parent component
     } catch (error) {
       console.error('Error deleting lesson:', error);
+    } finally {
+      setDeleteConfirmOpen(false);
+      setLessonToDelete(null);
     }
   };
 
@@ -180,6 +193,20 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
           <Button onClick={() => setIsLessonDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleAddLesson} variant="contained">
             Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+        <DialogTitle>Delete Lesson</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this lesson?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/useAuth';
 import { Quiz, QuizQuestion, QuizOption } from '../../types';
-import { getUser, saveQuiz, getQuiz } from '../../services/dataService';
+import { saveQuiz, getQuiz } from '../../services/dataService';
 import {
   Box,
   Typography,
@@ -32,11 +32,9 @@ interface QuizEditorProps {
 
 const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
   const { currentUser } = useAuth();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [_, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importText, setImportText] = useState('');
 
@@ -196,15 +194,6 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
       console.error('[QuizEditor] Error saving quiz:', err);
       setError('Failed to save quiz');
     }
-  };
-
-  const createNewQuiz = () => {
-    const newQuiz: Quiz = {
-      id: `quiz_${Date.now()}`,
-      questions: []
-    };
-    console.debug('[QuizEditor] Creating new quiz:', { quizId: newQuiz.id });
-    setSelectedQuiz(newQuiz);
   };
 
   const handleImport = () => {

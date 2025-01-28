@@ -8,6 +8,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import type { AuthContextType } from '../contexts/AuthContext';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { FontSizeProvider } from '../contexts/FontSizeContext';
 
 // Mock the dataService
 vi.mock('../services/dataService', () => ({
@@ -97,11 +98,15 @@ const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOpti
   mockUseAuth.mockReturnValue(mockAuthValue);
 
   return render(
-    <LanguageProvider>
-      <MemoryRouter>
-        {ui}
-      </MemoryRouter>
-    </LanguageProvider>
+    <ThemeProvider>
+      <FontSizeProvider>
+        <LanguageProvider>
+          <MemoryRouter>
+            {ui}
+          </MemoryRouter>
+        </LanguageProvider>
+      </FontSizeProvider>
+    </ThemeProvider>
   );
 };
 
@@ -114,11 +119,13 @@ describe('CourseList', () => {
   const renderComponent = async () => {
     const result = render(
       <ThemeProvider>
-        <LanguageProvider>
-          <MemoryRouter>
-            <CourseList />
-          </MemoryRouter>
-        </LanguageProvider>
+        <FontSizeProvider>
+          <LanguageProvider>
+            <MemoryRouter>
+              <CourseList />
+            </MemoryRouter>
+          </LanguageProvider>
+        </FontSizeProvider>
       </ThemeProvider>
     );
     // Wait for initial loading to complete
@@ -130,11 +137,13 @@ describe('CourseList', () => {
     vi.mocked(getAllCourses).mockImplementation(() => new Promise(() => {}));
     render(
       <ThemeProvider>
-        <LanguageProvider>
-          <MemoryRouter>
-            <CourseList />
-          </MemoryRouter>
-        </LanguageProvider>
+        <FontSizeProvider>
+          <LanguageProvider>
+            <MemoryRouter>
+              <CourseList />
+            </MemoryRouter>
+          </LanguageProvider>
+        </FontSizeProvider>
       </ThemeProvider>
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -153,11 +162,13 @@ describe('CourseList', () => {
     vi.mocked(getAllCourses).mockRejectedValue(new Error('Failed to load'));
     render(
       <ThemeProvider>
-        <LanguageProvider>
-          <MemoryRouter>
-            <CourseList />
-          </MemoryRouter>
-        </LanguageProvider>
+        <FontSizeProvider>
+          <LanguageProvider>
+            <MemoryRouter>
+              <CourseList />
+            </MemoryRouter>
+          </LanguageProvider>
+        </FontSizeProvider>
       </ThemeProvider>
     );
 
@@ -193,11 +204,13 @@ describe('CourseList', () => {
     vi.mocked(getAllCourses).mockResolvedValue([]);
     render(
       <ThemeProvider>
-        <LanguageProvider>
-          <MemoryRouter>
-            <CourseList />
-          </MemoryRouter>
-        </LanguageProvider>
+        <FontSizeProvider>
+          <LanguageProvider>
+            <MemoryRouter>
+              <CourseList />
+            </MemoryRouter>
+          </LanguageProvider>
+        </FontSizeProvider>
       </ThemeProvider>
     );
 

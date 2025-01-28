@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CourseListItem } from '../components/admin/CourseListItem';
+import { ThemeProvider } from '../contexts/ThemeContext';
+import { FontSizeProvider } from '../contexts/FontSizeContext';
 import type { Course } from '../types';
 
 const mockCourse: Course = {
@@ -18,8 +20,18 @@ describe('CourseListItem', () => {
   const mockOnDelete = vi.fn();
   const mockOnSelect = vi.fn();
 
+  const renderWithProviders = (ui: React.ReactElement) => {
+    return render(
+      <ThemeProvider>
+        <FontSizeProvider>
+          {ui}
+        </FontSizeProvider>
+      </ThemeProvider>
+    );
+  };
+
   it('renders course name and description', () => {
-    render(
+    renderWithProviders(
       <CourseListItem
         course={mockCourse}
         onEdit={mockOnEdit}
@@ -33,7 +45,7 @@ describe('CourseListItem', () => {
   });
 
   it('calls onSelect when View Details button is clicked', () => {
-    render(
+    renderWithProviders(
       <CourseListItem
         course={mockCourse}
         onEdit={mockOnEdit}
@@ -49,7 +61,7 @@ describe('CourseListItem', () => {
   });
 
   it('calls onEdit with course when Edit button is clicked', () => {
-    render(
+    renderWithProviders(
       <CourseListItem
         course={mockCourse}
         onEdit={mockOnEdit}
@@ -65,7 +77,7 @@ describe('CourseListItem', () => {
   });
 
   it('calls onDelete with course ID when Delete button is clicked', async () => {
-    render(
+    renderWithProviders(
       <CourseListItem
         course={mockCourse}
         onEdit={mockOnEdit}
@@ -81,7 +93,7 @@ describe('CourseListItem', () => {
   });
 
   it('renders all action buttons with correct icons', () => {
-    render(
+    renderWithProviders(
       <CourseListItem
         course={mockCourse}
         onEdit={mockOnEdit}
@@ -102,7 +114,7 @@ describe('CourseListItem', () => {
   });
 
   it('maintains consistent button styling', () => {
-    render(
+    renderWithProviders(
       <CourseListItem
         course={mockCourse}
         onEdit={mockOnEdit}

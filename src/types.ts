@@ -74,6 +74,12 @@ export interface UserProgress {
 
 export type UserRole = 'student' | 'instructor' | 'admin';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;

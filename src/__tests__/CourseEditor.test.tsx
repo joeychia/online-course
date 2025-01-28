@@ -2,14 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourseEditor } from '../components/admin/CourseEditor';
-import { getCourse, updateCourse, createUnit } from '../services/dataService';
+import { getCourse, updateCourse, createUnit, getUnit } from '../services/dataService';
 import type { Course } from '../types';
 
 // Mock services
 vi.mock('../services/dataService', () => ({
   getCourse: vi.fn(),
   updateCourse: vi.fn(),
-  createUnit: vi.fn()
+  createUnit: vi.fn(),
+  getUnit: vi.fn()
 }));
 
 // Mock UnitEditor component
@@ -45,6 +46,13 @@ describe('CourseEditor', () => {
     vi.mocked(getCourse).mockResolvedValue(mockCourse);
     vi.mocked(updateCourse).mockResolvedValue();
     vi.mocked(createUnit).mockResolvedValue();
+    vi.mocked(getUnit).mockResolvedValue({
+      id: 'unit_1',
+      name: 'Unit 1',
+      courseId: 'course_1',
+      description: 'Test Unit Description',
+      lessons: []
+    });
   });
 
   it('loads and displays course data on mount', async () => {
@@ -52,7 +60,9 @@ describe('CourseEditor', () => {
 
     expect(getCourse).toHaveBeenCalledWith('course_1');
     await waitFor(() => {
-      expect(screen.getByText('Unit 1')).toBeInTheDocument();
+      // Find the Typography element containing "Unit 1"
+      const unitElement = screen.getByRole('heading', { name: 'Unit 1' });
+      expect(unitElement).toBeInTheDocument();
     });
   });
 
@@ -60,7 +70,7 @@ describe('CourseEditor', () => {
     vi.mocked(getCourse).mockImplementation(() => new Promise(() => {}));
     render(<CourseEditor courseId="course_1" />);
 
-    expect(screen.queryByText('Unit 1')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Unit 1' })).not.toBeInTheDocument();
   });
 
   it('handles error when loading course fails', async () => {
@@ -74,7 +84,7 @@ describe('CourseEditor', () => {
       expect(consoleError).toHaveBeenCalledWith('Error loading course:', error);
     });
 
-    expect(screen.queryByText('Unit 1')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Unit 1' })).not.toBeInTheDocument();
     consoleError.mockRestore();
   });
 
@@ -168,8 +178,13 @@ describe('CourseEditor', () => {
     it('shows confirmation dialog when deleting unit', async () => {
       render(<CourseEditor courseId="course_1" />);
 
-      const deleteButton = await screen.findByTestId('DeleteIcon');
-      fireEvent.click(deleteButton);
+      // Wait for course data to load and unit to appear
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+      });
+
+      const deleteButtons = screen.getAllByTestId('DeleteIcon');
+      fireEvent.click(deleteButtons[0]);
 
       expect(window.confirm).toHaveBeenCalled();
     });
@@ -177,8 +192,13 @@ describe('CourseEditor', () => {
     it('deletes unit when confirmed', async () => {
       render(<CourseEditor courseId="course_1" />);
 
-      const deleteButton = await screen.findByTestId('DeleteIcon');
-      fireEvent.click(deleteButton);
+      // Wait for course data to load and unit to appear
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+      });
+
+      const deleteButtons = screen.getAllByTestId('DeleteIcon');
+      fireEvent.click(deleteButtons[0]);
 
       expect(updateCourse).toHaveBeenCalledWith('course_1', {
         units: []
@@ -189,8 +209,13 @@ describe('CourseEditor', () => {
       vi.spyOn(window, 'confirm').mockImplementation(() => false);
       render(<CourseEditor courseId="course_1" />);
 
-      const deleteButton = await screen.findByTestId('DeleteIcon');
-      fireEvent.click(deleteButton);
+      // Wait for course data to load and unit to appear
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+      });
+
+      const deleteButtons = screen.getAllByTestId('DeleteIcon');
+      fireEvent.click(deleteButtons[0]);
 
       expect(updateCourse).not.toHaveBeenCalled();
     });
@@ -200,8 +225,13 @@ describe('CourseEditor', () => {
     it('opens unit editor when clicking edit button', async () => {
       render(<CourseEditor courseId="course_1" />);
 
-      const editButton = await screen.findByTestId('EditIcon');
-      fireEvent.click(editButton);
+      // Wait for course data to load and unit to appear
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+      });
+
+      const editButtons = screen.getAllByTestId('EditIcon');
+      fireEvent.click(editButtons[0]);
 
       expect(screen.getByTestId('unit-editor')).toBeInTheDocument();
     });
@@ -209,9 +239,14 @@ describe('CourseEditor', () => {
     it('closes unit editor', async () => {
       render(<CourseEditor courseId="course_1" />);
 
+      // Wait for course data to load and unit to appear
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+      });
+
       // Open editor
-      const editButton = await screen.findByTestId('EditIcon');
-      fireEvent.click(editButton);
+      const editButtons = screen.getAllByTestId('EditIcon');
+      fireEvent.click(editButtons[0]);
 
       // Close editor
       const closeButton = screen.getByText('Close');
@@ -223,9 +258,14 @@ describe('CourseEditor', () => {
     it('reloads course after unit editor saves', async () => {
       render(<CourseEditor courseId="course_1" />);
 
+      // Wait for course data to load and unit to appear
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+      });
+
       // Open editor
-      const editButton = await screen.findByTestId('EditIcon');
-      fireEvent.click(editButton);
+      const editButtons = screen.getAllByTestId('EditIcon');
+      fireEvent.click(editButtons[0]);
 
       // Clear previous calls to getCourse (from initial load)
       vi.mocked(getCourse).mockClear();

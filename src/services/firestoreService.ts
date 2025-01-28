@@ -31,10 +31,7 @@ export class FirestoreService {
                 id: doc.id,
                 name: data.name as string,
                 description: data.description as string,
-                units: (data.units as Array<{ id: string; name: string }>).map(unit => ({
-                    ...unit,
-                    lessons: []
-                })),
+                units: data.units as Array<{ id: string; name: string; lessons: Array<{ id: string; name: string }> }>,
                 settings: data.settings as { unlockLessonIndex: number },
                 groupIds: data.groupIds as Record<string, boolean>,
                 isPublic: data.isPublic as boolean | undefined
@@ -51,10 +48,7 @@ export class FirestoreService {
             id: docSnap.id,
             name: data.name as string,
             description: data.description as string,
-            units: (data.units as Array<{ id: string; name: string }>).map(unit => ({
-                ...unit,
-                lessons: []
-            })),
+            units: data.units as Array<{ id: string; name: string; lessons: Array<{ id: string; name: string }> }>,
             settings: data.settings as { unlockLessonIndex: number },
             groupIds: data.groupIds as Record<string, boolean>,
             isPublic: data.isPublic as boolean | undefined

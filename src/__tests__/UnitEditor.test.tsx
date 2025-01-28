@@ -43,7 +43,6 @@ describe('UnitEditor', () => {
     vi.mocked(getUnit).mockResolvedValue(mockUnit);
     vi.mocked(updateUnit).mockResolvedValue();
     vi.mocked(createLesson).mockResolvedValue();
-    vi.spyOn(window, 'confirm').mockImplementation(() => true);
   });
 
   it('loads and displays unit data on mount', async () => {
@@ -202,7 +201,12 @@ describe('UnitEditor', () => {
       const deleteButtons = screen.getAllByTestId('DeleteIcon');
       fireEvent.click(deleteButtons[0]);
 
-      expect(window.confirm).toHaveBeenCalled();
+      // Check if delete confirmation dialog is shown
+      expect(screen.getByText('Are you sure you want to delete this lesson?')).toBeInTheDocument();
+      
+      // Click delete button in confirmation dialog
+      const confirmDeleteButton = screen.getByText('Delete');
+      fireEvent.click(confirmDeleteButton);
       expect(updateUnit).toHaveBeenCalledWith('unit_1', {
         lessons: [mockUnit.lessons[1]]
       });

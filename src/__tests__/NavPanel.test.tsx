@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { act } from '@testing-library/react';
 import NavPanel from '../components/NavPanel';
@@ -109,18 +109,17 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
+        selectedUnitId="1"
       />
     );
 
     const drawer = screen.getByTestId('nav-drawer');
-    const unitButtons = within(drawer).getAllByTestId('unit-button-1');
-    await act(async () => {
-      fireEvent.click(unitButtons[0]);
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
 
-    const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
-    expect(lessonItems[0]).toBeInTheDocument();
+    // Wait for lessons to load
+    await waitFor(() => {
+      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
+      expect(lessonItems[0]).toBeInTheDocument();
+    });
   });
 
   it('shows completion status correctly', async () => {
@@ -132,18 +131,22 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
+        selectedUnitId="1" // Set selectedUnitId to ensure first unit is expanded
       />
     );
 
     const drawer = screen.getByTestId('nav-drawer');
-    const unitButtons = within(drawer).getAllByTestId('unit-button-1');
+    
+    // Wait for lessons to load
     await act(async () => {
-      fireEvent.click(unitButtons[0]);
       await new Promise(resolve => setTimeout(resolve, 100));
     });
 
-    const completeIcon = within(drawer).getAllByTestId('lesson-complete-u1l1')[0];
-    expect(completeIcon).toBeInTheDocument();
+    // Wait for completion icon to appear
+    await waitFor(() => {
+      const completeIcon = within(drawer).getByTestId('lesson-complete-u1l1');
+      expect(completeIcon).toBeInTheDocument();
+    });
   });
 
   it('calls onSelectLesson when a lesson is clicked', async () => {
@@ -156,18 +159,20 @@ describe('NavPanel', () => {
         onSelectLesson={onSelectLesson}
         isOpen={true}
         onToggle={() => {}}
+        selectedUnitId="1"
       />
     );
 
     const drawer = screen.getByTestId('nav-drawer');
-    const unitButtons = within(drawer).getAllByTestId('unit-button-1');
-    await act(async () => {
-      fireEvent.click(unitButtons[0]);
-      await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Wait for lessons to load
+    await waitFor(() => {
+      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
+      expect(lessonItems[0]).toBeInTheDocument();
     });
 
-    const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
-    fireEvent.click(lessonItems[0]);
+    const lessonItem = within(drawer).getByTestId('lesson-item-u1l1');
+    fireEvent.click(lessonItem);
     expect(onSelectLesson).toHaveBeenCalledWith('1', 'u1l1');
   });
 
@@ -180,18 +185,17 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
+        selectedUnitId="1"
       />
     );
 
     const drawer = screen.getByTestId('nav-drawer');
-    const unitButtons = within(drawer).getAllByTestId('unit-button-1');
-    await act(async () => {
-      fireEvent.click(unitButtons[0]);
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
 
-    const unlockedIcon = within(drawer).getAllByTestId('lesson-unlocked-u1l2')[0];
-    expect(unlockedIcon).toBeInTheDocument();
+    // Wait for lessons to load
+    await waitFor(() => {
+      const unlockedIcon = within(drawer).getByTestId('lesson-unlocked-u1l2');
+      expect(unlockedIcon).toBeInTheDocument();
+    });
   });
 
   it('toggles unit expansion when clicked', async () => {
@@ -202,29 +206,34 @@ describe('NavPanel', () => {
         progress={mockProgress}
         isOpen={true}
         onToggle={() => {}}
+        selectedUnitId="1" // Set selectedUnitId to ensure first unit is expanded
       />
     );
 
-    // Initially expanded
-    let lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
-    expect(lessonItems.length).toBe(1);
+    // Wait for initial lessons to load
+    await waitFor(() => {
+      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
+      expect(lessonItems.length).toBe(1);
+    });
 
     // Click to collapse
     const unitButton = within(drawer).getByTestId('unit-button-1');
-    await act(async () => {
-      unitButton.click();
-      // Wait for the collapse animation to complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    fireEvent.click(unitButton);
+
+    // Wait for collapse animation and verify lessons are hidden
+    await waitFor(() => {
+      const lessonItems = within(drawer).queryAllByTestId('lesson-item-u1l1');
+      expect(lessonItems.length).toBe(0);
     });
 
-    // Wait for the element to be unmounted
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
+    // Click to expand again
+    fireEvent.click(unitButton);
 
-    // Check that the lessons are no longer visible
-    lessonItems = within(drawer).queryAllByTestId('lesson-item-u1l1');
-    expect(lessonItems.length).toBe(0);
+    // Wait for lessons to reappear
+    await waitFor(() => {
+      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
+      expect(lessonItems.length).toBe(1);
+    });
   });
 
   it('handles mobile view correctly', async () => {
