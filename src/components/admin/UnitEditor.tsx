@@ -6,18 +6,16 @@ import {
   DialogActions,
   Button,
   TextField,
-  List,
-  ListItem,
-  IconButton,
   Box,
   Typography
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { Unit } from '../../types';
 import { getUnit, updateUnit, createLesson } from '../../services/dataService';
 import { LessonEditor } from './LessonEditor';
+import { AddLessonDialog } from './dialogs/AddLessonDialog';
+import { DeleteLessonDialog } from './dialogs/DeleteLessonDialog';
+import { LessonList } from './LessonList';
 
 interface UnitEditorProps {
   courseId: string;
@@ -65,10 +63,8 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
     if (!unit || !newLessonName.trim()) return;
 
     try {
-      // Create a new lesson ID
       const newLessonId = `lesson_${Date.now()}`;
       
-      // Create the lesson document in Firestore
       await createLesson(newLessonId, {
         id: newLessonId,
         name: newLessonName,
@@ -77,7 +73,6 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
         quizId: null
       });
 
-      // Update the unit's lessons array
       const newLesson = {
         id: newLessonId,
         name: newLessonName
@@ -88,7 +83,7 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
       await loadUnit();
       setIsLessonDialogOpen(false);
       setNewLessonName('');
-      onSave(); // Call onSave to update parent component
+      onSave();
     } catch (error) {
       console.error('Error adding lesson:', error);
     }
@@ -106,7 +101,7 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
       const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonToDelete);
       await updateUnit(unitId, { lessons: updatedLessons });
       await loadUnit();
-      onSave(); // Call onSave to update parent component
+      onSave();
     } catch (error) {
       console.error('Error deleting lesson:', error);
     } finally {
@@ -149,69 +144,32 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
           </Button>
         </Box>
 
-        <List>
-          {unit?.lessons.map((lesson) => (
-            <ListItem
-              key={lesson.id}
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                borderBottom: '1px solid #eee'
-              }}
-            >
-              <Typography>{lesson.name}</Typography>
-              <Box>
-                <IconButton onClick={() => setSelectedLesson(lesson.id)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={() => handleDeleteLesson(lesson.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </ListItem>
-          ))}
-        </List>
+        {unit && (
+          <LessonList
+            lessons={unit.lessons}
+            onEdit={setSelectedLesson}
+            onDelete={handleDeleteLesson}
+          />
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
 
-      {/* Add Lesson Dialog */}
-      <Dialog open={isLessonDialogOpen} onClose={() => setIsLessonDialogOpen(false)}>
-        <DialogTitle>Add New Lesson</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Lesson Name"
-            fullWidth
-            value={newLessonName}
-            onChange={(e) => setNewLessonName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsLessonDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddLesson} variant="contained">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AddLessonDialog
+        open={isLessonDialogOpen}
+        onClose={() => setIsLessonDialogOpen(false)}
+        onAdd={handleAddLesson}
+        lessonName={newLessonName}
+        onLessonNameChange={setNewLessonName}
+      />
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-        <DialogTitle>Delete Lesson</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this lesson?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DeleteLessonDialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={confirmDelete}
+      />
 
-      {/* Lesson Editor Dialog */}
       {selectedLesson && (
         <LessonEditor
           unitId={unitId}
