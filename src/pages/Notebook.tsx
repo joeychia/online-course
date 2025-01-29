@@ -21,12 +21,14 @@ import { convertChinese } from '../utils/chineseConverter';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Course } from '../types';
 import MarkdownViewer from '../components/MarkdownViewer';
+import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 
 interface Note {
   text: string;
   lessonName: string;
   unitName: string;
   updatedAt: string;
+  weekGroup?: string; // Added for weekly grouping
 }
 
 export default function Notebook() {
@@ -35,12 +37,14 @@ export default function Notebook() {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   
-  // State management
+  // Enhanced state management
   const [notes, setNotes] = useState<Note[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [groupedNotes, setGroupedNotes] = useState<{ [key: string]: Note[] }>({});
   
 
   useEffect(() => {
@@ -55,25 +59,70 @@ export default function Notebook() {
     void loadCourses();
   }, []);
 
-  async function loadNotes() {
-    if (!currentUser) return;
-
-    try {
-      let userNotes;
-        userNotes = await getNotesForUserCourse(currentUser.uid, courseId);
-      setNotes(userNotes);
-      setError(null);
-    } catch (err) {
-      setError(t('failedToLoadNotes'));
-      console.error('Error loading notes:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
+    async function loadNotes() {
+      if (!currentUser) return;
+
+      try {
+        const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+        
+        let userNotes = await getNotesForUserCourse(currentUser.uid, courseId, startOfMonth, endOfMonth);
+      
+
+        // Group notes by week
+        const grouped = userNotes.reduce((acc: { [key: string]: Note[] }, note) => {
+          const noteDate = new Date(note.updatedAt);
+          const weekStart = new Date(noteDate);
+          weekStart.setDate(noteDate.getDate() - noteDate.getDay());
+          const weekKey = weekStart.toISOString().split('T')[0];
+          
+          if (!acc[weekKey]) {
+            acc[weekKey] = [];
+          }
+          acc[weekKey].push(note);
+          return acc;
+        }, {});
+
+        setGroupedNotes(grouped);
+        setNotes(userNotes);
+        setError(null);
+      } catch (err) {
+        setError(t('failedToLoadNotes'));
+        console.error('Error loading notes:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     void loadNotes();
-  }, [courseId, currentUser]);
+  }, [courseId, currentUser, currentMonth]);
+
+  const handlePreviousMonth = () => {
+    setCurrentMonth(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() - 1);
+      return newDate;
+    });
+  };
+
+  const isNextMonthDisabled = () => {
+    const nextMonth = new Date(currentMonth);
+    nextMonth.setMonth(currentMonth.getMonth() + 1);
+    const today = new Date();
+    // Compare year and month only
+    return nextMonth.getFullYear() > today.getFullYear() ||
+      (nextMonth.getFullYear() === today.getFullYear() && 
+       nextMonth.getMonth() > today.getMonth());
+  };
+
+  const handleNextMonth = () => {
+    if (!isNextMonthDisabled()) {
+      const nextMonth = new Date(currentMonth);
+      nextMonth.setMonth(currentMonth.getMonth() + 1);
+      setCurrentMonth(nextMonth);
+    }
+  };
 
   const getPlainTextPreview = (markdown: string) => {
     // Remove markdown syntax and get first line
@@ -144,6 +193,44 @@ export default function Notebook() {
   if (notes.length === 0) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" component="h1">
+            {courseId && courses.find(course => course.id === courseId) ? 
+              convertChinese(courses.find(course => course.id === courseId)!.name, language) : 
+              t('myNotes')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton 
+              onClick={handlePreviousMonth} 
+              disabled={loading}
+              data-testid="prev-month-button"
+              sx={{
+                '&.Mui-disabled': {
+                  opacity: 0.5,
+                  color: 'text.disabled'
+                }
+              }}
+            >
+              <ArrowBackIos />
+            </IconButton>
+            <Typography variant="h6">
+              {currentMonth.toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN', { year: 'numeric', month: 'long' })}
+            </Typography>
+            <IconButton 
+              onClick={handleNextMonth} 
+              disabled={loading || isNextMonthDisabled()} 
+              data-testid="next-month-button"
+              sx={{
+                '&.Mui-disabled': {
+                  opacity: 0.5,
+                  color: 'text.disabled'
+                }
+              }}
+            >
+              <ArrowForwardIos />
+            </IconButton>
+          </Box>
+        </Box>
         <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 4 }}>
           {t('noNotesFound')}
         </Typography>
@@ -152,60 +239,108 @@ export default function Notebook() {
   }
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Typography variant="h2" gutterBottom>
-        {courseId && courses.find(course => course.id === courseId) ? convertChinese(courses.find(course => course.id === courseId)!.name, language) : t('myNotes')}
-      </Typography>
-          <Grid container spacing={3}>
-            {notes.map((note, index) => {
-              const hue = Math.random() * 360;
-              const pastelColor = (theme: { palette: { mode: string; }; }) => theme.palette.mode === 'dark'
-                ? `hsl(${hue}, 30%, 25%)` // Darker, more muted colors for dark mode
-                : `hsl(${hue}, 70%, 90%)`; // Light pastel colors for light mode
-              const plainTextPreview = getPlainTextPreview(note.text);
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1">
+          {courseId && courses.find(course => course.id === courseId) ? 
+            convertChinese(courses.find(course => course.id === courseId)!.name, language) : 
+            t('myNotes')}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton 
+            onClick={handlePreviousMonth} 
+            disabled={loading} 
+            aria-label="previous month"
+            sx={{
+              '&.Mui-disabled': {
+                opacity: 0.5,
+                color: 'text.disabled'
+              }
+            }}
+          >
+            <ArrowBackIos />
+          </IconButton>
+          <Typography variant="h6">
+            {currentMonth.toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN', { year: 'numeric', month: 'long' })}
+          </Typography>
+          <IconButton 
+            onClick={handleNextMonth} 
+            disabled={loading || isNextMonthDisabled()} 
+            aria-label="next month"
+            sx={{
+              '&.Mui-disabled': {
+                opacity: 0.5,
+                color: 'text.disabled'
+              }
+            }}
+          >
+            <ArrowForwardIos />
+          </IconButton>
+        </Box>
+      </Box>
 
-              return (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                  <Card
-                    sx={{
-                      height: '100%',
-                      backgroundColor: pastelColor,
-                      color: theme => theme.palette.text.primary,
-                      cursor: 'pointer',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 3,
-                      },
-                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                    }}
-                    onClick={() => setSelectedNote(note)}
-                  >
-                    <CardContent>
-                      <Typography variant="subtitle1" gutterBottom noWrap>
-                        {convertChinese(note.unitName, language)} / {convertChinese(note.lessonName, language)}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 1,
-                          WebkitBoxOrient: 'vertical',
-                          mb: 1
-                        }}
-                      >
-                        {plainTextPreview}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(note.updatedAt).toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN')}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
+      {Object.entries(groupedNotes)
+        .sort(([a], [b]) => b.localeCompare(a))
+        .map(([weekStart, weekNotes]) => (
+          <Box key={weekStart} sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              {new Date(weekStart).toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN', 
+                { month: 'long', day: 'numeric' })} - 
+              {new Date(new Date(weekStart).setDate(new Date(weekStart).getDate() + 6))
+                .toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN', { month: 'long', day: 'numeric' })}
+            </Typography>
+            <Grid container spacing={3}>
+              {weekNotes.map((note, index) => {
+                const hue = Math.random() * 360;
+                const pastelColor = (theme: { palette: { mode: string; }; }) => theme.palette.mode === 'dark'
+                  ? `hsl(${hue}, 30%, 25%)`
+                  : `hsl(${hue}, 70%, 90%)`;
+                const plainTextPreview = getPlainTextPreview(note.text);
+
+                return (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                    <Card
+                      sx={{
+                        height: '100%',
+                        backgroundColor: pastelColor,
+                        cursor: 'pointer',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: 3,
+                        },
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                      }}
+                      onClick={() => setSelectedNote(note)}
+                    >
+                      <CardContent>
+                        <Typography variant="subtitle1" gutterBottom noWrap>
+                          {convertChinese(note.unitName, language)} / {convertChinese(note.lessonName, language)}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            mb: 1
+                          }}
+                        >
+                          {plainTextPreview}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(note.updatedAt).toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN')}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Box>
+        ))}
+
           <Dialog
             open={Boolean(selectedNote)}
             onClose={() => setSelectedNote(null)}

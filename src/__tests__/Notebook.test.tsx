@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, useParams } from 'react-router-dom';
 import Notebook from '../pages/Notebook';
 import { getNotesForUserCourse, getAllCourses } from '../services/dataService';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { FontSizeProvider } from '../contexts/FontSizeContext';
+import { LanguageProvider } from '../contexts/LanguageContext';
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
@@ -84,6 +85,8 @@ const mockNotes = [
 describe('Notebook Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Mock current date to ensure consistent testing
+    vi.setSystemTime(new Date('2024-01-15'));
     // Mock useAuth hook
     vi.mock('../contexts/useAuth', () => ({
       useAuth: () => ({
@@ -94,12 +97,18 @@ describe('Notebook Component', () => {
     vi.mocked(getNotesForUserCourse).mockResolvedValue(mockNotes);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   const renderNotebook = (initialEntries: string[] = ['']) => {
     return render(
       <MemoryRouter initialEntries={initialEntries}>
         <ThemeProvider>
           <FontSizeProvider>
-            <Notebook />
+            <LanguageProvider>
+              <Notebook />
+            </LanguageProvider>
           </FontSizeProvider>
         </ThemeProvider>
       </MemoryRouter>
@@ -140,12 +149,36 @@ describe('Notebook Component', () => {
     });
   });
 
-  it('displays notes when courseId is provided', async () => {
+  it('displays notes grouped by week', async () => {
     vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
     renderNotebook(['/notebook/course1']);
     await waitFor(() => {
       expect(screen.getByText('單元1 / 課時1')).toBeInTheDocument();
       expect(screen.getByText('單元2 / 課時2')).toBeInTheDocument();
+      // Check for week grouping header with Chinese date format
+      expect(screen.getByText((content) => content.includes('12月31日') && content.includes('1月6日'))).toBeInTheDocument();
+    });
+  });
+
+  it('handles month navigation correctly', async () => {
+    vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
+    renderNotebook(['/notebook/course1']);
+    
+    await waitFor(() => {
+      expect(screen.getByText('2024年1月')).toBeInTheDocument();
+    });
+
+    // Test previous month navigation
+    const prevButton = screen.getByRole('button', { name: /previous/i });
+    fireEvent.click(prevButton);
+    
+    await waitFor(() => {
+      expect(getNotesForUserCourse).toHaveBeenCalledWith(
+        mockUser.uid,
+        'course1',
+        expect.any(Date), // December 1st
+        expect.any(Date)  // December 31st
+      );
     });
   });
 

@@ -13,7 +13,8 @@ import {
     QueryDocumentSnapshot,
     addDoc,
     limit,
-    deleteDoc
+    deleteDoc,
+    QueryConstraint
 } from 'firebase/firestore';
 import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile as User, QuizHistory } from '../types';
 import { app } from './firebaseConfig';
@@ -367,14 +368,22 @@ export class FirestoreService {
         } as Grade;
     }
 
-    async getNotesForUserCourse(userId: string, courseId: string): Promise<Note[]> {
+    async getNotesForUserCourse(userId: string, courseId: string, startDate?: Date, endDate?: Date): Promise<Note[]> {
         try {
             const notesRef = collection(db, `users/${userId}/notes`);
-            const q = query(
-                notesRef,
+            let constraints: QueryConstraint[] = [
                 where('courseId', '==', courseId),
                 orderBy('updatedAt', 'desc')
-            );
+            ];
+
+            if (startDate) {
+                constraints.push(where('updatedAt', '>=', startDate.toISOString()));
+            }
+            if (endDate) {
+                constraints.push(where('updatedAt', '<=', endDate.toISOString()));
+            }
+
+            const q = query(notesRef, ...constraints);
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => {
                 const data = doc.data();
