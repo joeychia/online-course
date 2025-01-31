@@ -12,6 +12,7 @@ import {
   TextField,
   Stack,
   Divider,
+  CircularProgress,
 } from '@mui/material';
 
 import { useAuth } from '../contexts/useAuth';
@@ -79,6 +80,14 @@ export default function QuizView({ quiz, onSubmit, onClose, readOnlyAnswers }: Q
   const isComplete = () => {
     return quiz.questions.every((_, index) => answers[index] !== undefined);
   };
+
+  if (!quiz) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 1 }}>

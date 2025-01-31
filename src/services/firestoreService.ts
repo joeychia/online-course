@@ -178,14 +178,22 @@ export class FirestoreService {
     }
 
     // Quiz History operations
-    async getQuizHistoryForUserCourse(userId: string, courseId: string): Promise<QuizHistory[]> {
+    async getQuizHistoryForUserCourse(userId: string, courseId: string, startDate?: Date, endDate?: Date): Promise<QuizHistory[]> {
         const quizHistoryRef = collection(db, `users/${userId}/quizHistory`);
-        const q = query(
-            quizHistoryRef,
+        let constraints: QueryConstraint[] = [
             where('courseId', '==', courseId),
             orderBy('completedAt', 'desc'),
             limit(5)
-        );
+        ];
+
+        if (startDate) {
+            constraints.push(where('completedAt', '>=', startDate.toISOString()));
+        }
+        if (endDate) {
+            constraints.push(where('completedAt', '<=', endDate.toISOString()));
+        }
+
+        const q = query(quizHistoryRef, ...constraints);
         const snapshot = await getDocs(q);
         return snapshot.docs.map((doc): QuizHistory => {
             const data = doc.data();
