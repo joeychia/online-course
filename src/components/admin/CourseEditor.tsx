@@ -21,6 +21,7 @@ import { Course } from '../../types';
 import { getCourse, updateCourse, createUnit, getLessonsIdNameForUnit, getUnit } from '../../services/dataService';
 import { UnitEditor } from '../../components/admin/UnitEditor';
 import { StudentsQuizResults } from './StudentsQuizResults';
+import { DeleteUnitDialog } from './dialogs/DeleteUnitDialog';
 
 export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
   const [course, setCourse] = useState<Course | null>(null);
@@ -28,6 +29,8 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
   const [isUnitDialogOpen, setIsUnitDialogOpen] = useState(false);
   const [newUnitName, setNewUnitName] = useState('');
   const [selectedQuizUnit, setSelectedQuizUnit] = useState<{ unitId: string; lessonId: string } | null>(null);
+  const [deleteUnitDialogOpen, setDeleteUnitDialogOpen] = useState(false);
+  const [unitToDelete, setUnitToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadCourse();
@@ -91,15 +94,23 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
     }
   };
 
-  const handleDeleteUnit = async (unitId: string) => {
-    if (!course || !window.confirm('Are you sure you want to delete this unit?')) return;
+  const handleDeleteUnit = (unitId: string) => {
+    setUnitToDelete(unitId);
+    setDeleteUnitDialogOpen(true);
+  };
+
+  const confirmDeleteUnit = async () => {
+    if (!course || !unitToDelete) return;
 
     try {
-      const updatedUnits = course.units.filter(unit => unit.id !== unitId);
+      const updatedUnits = course.units.filter(unit => unit.id !== unitToDelete);
       await updateCourse(courseId, { units: updatedUnits });
       await loadCourse();
     } catch (error) {
       console.error('Error deleting unit:', error);
+    } finally {
+      setDeleteUnitDialogOpen(false);
+      setUnitToDelete(null);
     }
   };
 
@@ -199,6 +210,12 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
           onClose={() => setSelectedQuizUnit(null)}
         />
       )}
+
+      <DeleteUnitDialog
+        open={deleteUnitDialogOpen}
+        onClose={() => setDeleteUnitDialogOpen(false)}
+        onConfirm={confirmDeleteUnit}
+      />
     </Box>
   );
 };
