@@ -41,7 +41,18 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
   return (
     <Card component={Paper} elevation={2} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardContent sx={{ flexGrow: 1, position: 'relative' }}>
-        <Typography variant="h6" component="h2" gutterBottom>
+        <Typography 
+          variant="h4" 
+          component="h2" 
+          gutterBottom
+          sx={{
+            fontWeight: 800,
+            letterSpacing: '-0.5px',
+            textShadow: '1px 1px 0px rgba(0,0,0,0.05)',
+            fontFamily: '"Segoe UI", "Roboto", "Helvetica", sans-serif',
+            mb: 3
+          }}
+        >
           {course.name}
         </Typography>
         <Box 
@@ -50,7 +61,10 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
             mb: 2,
             maxHeight: expanded ? 'none' : '200px',
             overflow: 'hidden',
-            position: 'relative'
+            position: 'relative',
+            bgcolor: '#f5f5f5',
+            p: 2,
+            borderRadius: 1
           }}
         >
           <MarkdownViewer content={course.description} />
@@ -62,7 +76,7 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
                 left: 0,
                 right: 0,
                 height: '50px',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)',
+                background: 'linear-gradient(180deg, rgba(245,245,245,0) 0%, rgba(245,245,245,1) 100%)',
                 display: 'flex',
                 alignItems: 'flex-end',
                 justifyContent: 'center',
