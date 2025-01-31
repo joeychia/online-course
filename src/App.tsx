@@ -87,6 +87,13 @@ function App() {
                       </Layout>
                     </ProtectedRoute>
                   } />
+                  <Route path="/admin/courses/:courseId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <AdminDashboard />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
                   <Route path="/notebook" element={
                     <ProtectedRoute>
                       <Layout>

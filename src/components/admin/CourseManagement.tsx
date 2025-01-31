@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -16,13 +17,18 @@ import RichTextEditor from '../RichTextEditor';
 import { CourseListItem } from './CourseListItem';
 import { CourseEditor } from './CourseEditor';
 
-export const CourseManagement: React.FC = () => {
+interface CourseManagementProps {
+  initialCourseId?: string;
+}
+
+export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCourseId }) => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [open, setOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [courseName, setCourseName] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(initialCourseId || null);
 
   useEffect(() => {
     loadCourses();
@@ -101,7 +107,10 @@ export const CourseManagement: React.FC = () => {
     <Box p={3}>
       {selectedCourseId ? (
         <>
-          <Button onClick={() => setSelectedCourseId(null)} sx={{ mb: 2 }}>
+          <Button onClick={() => {
+            setSelectedCourseId(null);
+            navigate('/admin');
+          }} sx={{ mb: 2 }}>
             Back to Course List
           </Button>
           <CourseEditor courseId={selectedCourseId} />
@@ -122,7 +131,10 @@ export const CourseManagement: React.FC = () => {
                 course={course}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onSelect={() => setSelectedCourseId(course.id)}
+                onSelect={() => {
+                  setSelectedCourseId(course.id);
+                  navigate(`/admin/courses/${course.id}`);
+                }}
               />
             ))}
           </List>

@@ -2,10 +2,10 @@
 
 ## Product Requirements
 ### For Admin
-- User can create/edit/delete a course - WIP
-- User can create/edit/delete a unit
-- User can create/edit/delete a lesson, which can include video, text, image, quiz
-- User can create/edit/delete a quiz, where each question can include single_choice, free_form
+- User can create/edit/delete a course - done
+- User can create/edit/delete a unit - done
+- User can create/edit/delete a lesson, which can include video, text, image, quiz - done
+- User can create/edit/delete a quiz, where each question can include single_choice, free_form - done
 - User can create/edit/delete a group
 - User can manage members in a group
 - User can view everyone's grade in a course

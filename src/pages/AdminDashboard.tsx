@@ -2,12 +2,13 @@ import React from 'react';
 import { Box, Typography, Container } from '@mui/material';
 import { CourseManagement } from '../components/admin/CourseManagement';
 import { useAuth } from '../contexts/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { getUser } from '../services/dataService';
 import { useState, useEffect } from 'react';
 
 export const AdminDashboard: React.FC = () => {
   const { currentUser } = useAuth();
+  const { courseId } = useParams();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +44,7 @@ export const AdminDashboard: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Admin Dashboard
         </Typography>
-        <CourseManagement />
+        <CourseManagement initialCourseId={courseId} />
       </Box>
     </Container>
   );
