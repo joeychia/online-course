@@ -3,10 +3,6 @@ import { TOOLBAR_HEIGHT } from '../components/NavPanel';
 import { 
   Box, 
   Typography,
-  List,
-  ListItemButton,
-  ListItemText,
-  Card,
   CircularProgress,
   Button,
   Paper,
@@ -299,26 +295,7 @@ export default function CourseView() {
           </Paper>
         )}
 
-        <List>
-          {units.map((unit) => {
-            const lessons = unitLessons[unit.id] || [];
-            
-            return (
-              <Card key={unit.id} sx={{ mb: 2 }}>
-                <ListItemButton onClick={() => {
-                  const firstLesson = lessons[0];
-                  if (firstLesson) {
-                    handleSelectLesson(unit.id, firstLesson.id);
-                  }
-                }}>
-                  <ListItemText
-                    primary={unit.name}
-                  />
-                </ListItemButton>
-              </Card>
-            );
-          })}
-        </List>
+        
       </Box>
 
       {isRegistered && (
