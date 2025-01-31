@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  List,
+  Grid,
   Typography
 } from '@mui/material';
 import { Course } from '../../types';
@@ -124,20 +124,21 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
             </Button>
           </Box>
 
-          <List>
+          <Grid container spacing={3}>
             {courses.map((course) => (
-              <CourseListItem
-                key={course.id}
-                course={course}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onSelect={() => {
-                  setSelectedCourseId(course.id);
-                  navigate(`/admin/courses/${course.id}`);
-                }}
-              />
+              <Grid item xs={12} key={course.id}>
+                <CourseListItem
+                  course={course}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onSelect={() => {
+                    setSelectedCourseId(course.id);
+                    navigate(`/admin/courses/${course.id}`);
+                  }}
+                />
+              </Grid>
             ))}
-          </List>
+          </Grid>
 
           <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
             <DialogTitle>{editingCourse ? 'Edit Course' : 'Create New Course'}</DialogTitle>
