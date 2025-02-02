@@ -199,8 +199,8 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
             endDate={new Date()}
             values={calendarValues}
             showWeekdayLabels={true}
-            weekdayLabels={['日', '一', '二', '三', '四', '五', '六'].map(day => convertChinese(day, language))}
-            monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'].map(month => convertChinese(month, language))}
+            weekdayLabels={['日', '一', '二', '三', '四', '五', '六'].map(day => convertChinese(day, language)) as [string, string, string, string, string, string, string]}
+            monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'].map(month => convertChinese(month, language)) as [string, string, string, string, string, string, string, string, string, string, string, string]}
             classForValue={(value) => {
               if (!value) {
                 return theme.palette.mode === 'dark' ? 'color-empty-dark' : 'color-empty';
