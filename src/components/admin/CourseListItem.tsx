@@ -108,7 +108,8 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
           width: { xs: '100%', sm: 'auto' },
           height: '40px',
           padding: '6px 16px',
-          fontSize: '0.9rem'
+          fontSize: '0.9rem',
+          marginLeft: '0px'
         }
       }}>
         <Button
