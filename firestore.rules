@@ -11,53 +11,53 @@ service cloud.firestore {
     // Units can be read by anyone but only written by admins
     match /units/{unitId} {
       allow read: if true;  // Anyone can read units
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if request.auth != null && isAdmin();
     }
 
     // Lessons can be read by anyone but only written by admins
     match /lessons/{lessonId} {
       allow read: if true;  // Anyone can read lessons
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if request.auth != null && isAdmin();
     }
 
     // Quizzes can be read by anyone but only written by admins
     match /quizzes/{quizId} {
       allow read: if true;  // Anyone can read quizzes
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if request.auth != null && isAdmin();
     }
 
     // Allow users to read and write their own data, notes, and quiz history
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
       
       match /notes/{noteId} {
-        allow read: if request.auth != null && request.auth.uid == userId;
-        allow create: if request.auth != null && request.auth.uid == userId;
-        allow update: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow create: if request.auth != null&& (request.auth.uid == userId || isAdmin());
+        allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
       }
       
       match /quizHistory/{lessonId} {
-        allow read: if request.auth != null && request.auth.uid == userId;
-        allow create: if request.auth != null && request.auth.uid == userId;
-        allow update: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
       }
     }
 
     // Allow users to read and write their own grades
     match /grades/{gradeId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
 
     // Allow users to read and write their quiz history
     match /quizHistory/{historyId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow create: if request.auth != null 
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.keys().hasAll(['userId', 'courseId', 'lessonId', 'answers', 'correct', 'total', 'completedAt']);
     }
 
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.admin == true;
+      return  request.auth.token.admin == true || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.admin == true;
     }
 
     function hasRole(role) {

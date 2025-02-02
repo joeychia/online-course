@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -24,6 +24,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFontSize } from '../contexts/FontSizeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../hooks/useTranslation';
+import { getUser } from '../services/dataService';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,6 +41,24 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        if (currentUser?.uid) {
+          const userProfile = await getUser(currentUser.uid);
+          setIsAdmin(!!userProfile?.roles?.admin);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+    console.log('isAdmin:', isAdmin);
+  }, [currentUser]);
 
   // Only show menu button on course pages
   const showMenuButton = location.pathname.split('/').length > 1 && 
@@ -143,19 +162,36 @@ export default function Layout({ children }: LayoutProps) {
           </Stack>
           <Stack direction="row" spacing={2} alignItems="center">
             {currentUser && (
-              <Button
-                component={RouterLink}
-                to={"/notebook/"+ courseId}
-                color="inherit"
-                sx={{
-                  textDecoration: 'none',
-                  '&:hover': {
-                    color: 'primary.light',
-                  }
-                }}
-              >
-                {t('myNotes')}
-              </Button>
+              <>
+                <Button
+                  component={RouterLink}
+                  to={"/notebook/"+ courseId}
+                  color="inherit"
+                  sx={{
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'primary.light',
+                    }
+                  }}
+                >
+                  {t('myNotes')}
+                </Button>
+                {isAdmin && (
+                  <Button
+                    component={RouterLink}
+                    to="/admin"
+                    color="inherit"
+                    sx={{
+                      textDecoration: 'none',
+                      '&:hover': {
+                        color: 'primary.light',
+                      }
+                    }}
+                  >
+                    Admin
+                  </Button>
+                )}
+              </>
             )}
             <IconButton
               color="inherit"
