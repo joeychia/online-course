@@ -117,9 +117,31 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
         </>
       ) : (
         <>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5">Course Management</Typography>
-            <Button variant="contained" onClick={() => setOpen(true)}>
+          <Box 
+            display="flex" 
+            flexDirection={{ xs: 'column', sm: 'row' }}
+            justifyContent="space-between" 
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+            gap={2}
+            mb={3}
+          >
+            <Typography 
+              variant="h5"
+              sx={{
+                textAlign: { xs: 'center', sm: 'left' },
+                fontSize: { xs: '1.25rem', sm: '1.5rem' }
+              }}
+            >
+              Course Management
+            </Typography>
+            <Button 
+              variant="contained" 
+              onClick={() => setOpen(true)}
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                height: { xs: '48px', sm: '40px' }
+              }}
+            >
               Create New Course
             </Button>
           </Box>

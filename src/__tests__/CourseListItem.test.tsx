@@ -54,7 +54,7 @@ describe('CourseListItem', () => {
       />
     );
 
-    const viewButton = screen.getByText('View Details');
+    const viewButton = screen.getByText('View');
     fireEvent.click(viewButton);
 
     expect(mockOnSelect).toHaveBeenCalled();
@@ -108,7 +108,7 @@ describe('CourseListItem', () => {
     expect(screen.getByTestId('DeleteIcon')).toBeInTheDocument();
 
     // Check button labels
-    expect(screen.getByText('View Details')).toBeInTheDocument();
+    expect(screen.getByText('View')).toBeInTheDocument();
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.getByText('Delete')).toBeInTheDocument();
   });
@@ -125,7 +125,7 @@ describe('CourseListItem', () => {
 
     const buttons = screen.getAllByRole('button');
     buttons.forEach(button => {
-      expect(button).toHaveClass('MuiButton-outlined');
+      expect(button).toHaveClass('MuiButton-contained');
       expect(button).toHaveClass('MuiButton-sizeSmall');
     });
   });

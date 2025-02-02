@@ -39,9 +39,19 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <Container>
-      <Box py={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <Container maxWidth="lg">
+      <Box py={{ xs: 2, sm: 4 }}>
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom
+          sx={{
+            fontSize: { xs: '1.5rem', sm: '2rem' },
+            textAlign: { xs: 'center', sm: 'left' },
+            mb: { xs: 2, sm: 3 },
+            fontWeight: 700
+          }}
+        >
           Admin Dashboard
         </Typography>
         <CourseManagement initialCourseId={courseId} />

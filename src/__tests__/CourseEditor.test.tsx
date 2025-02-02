@@ -42,7 +42,6 @@ const mockCourse: Course = {
 describe('CourseEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(window, 'confirm').mockImplementation(() => true);
     vi.mocked(getCourse).mockResolvedValue(mockCourse);
     vi.mocked(updateCourse).mockResolvedValue();
     vi.mocked(createUnit).mockResolvedValue();
@@ -186,7 +185,7 @@ describe('CourseEditor', () => {
       const deleteButtons = screen.getAllByTestId('DeleteIcon');
       fireEvent.click(deleteButtons[0]);
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(screen.getByText('Delete Unit')).toBeInTheDocument();
     });
 
     it('deletes unit when confirmed', async () => {
@@ -200,13 +199,17 @@ describe('CourseEditor', () => {
       const deleteButtons = screen.getAllByTestId('DeleteIcon');
       fireEvent.click(deleteButtons[0]);
 
-      expect(updateCourse).toHaveBeenCalledWith('course_1', {
-        units: []
+      const confirmButton = screen.getByText('Delete');
+      fireEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(updateCourse).toHaveBeenCalledWith('course_1', {
+          units: []
+        });
       });
     });
 
     it('does not delete unit when canceled', async () => {
-      vi.spyOn(window, 'confirm').mockImplementation(() => false);
       render(<CourseEditor courseId="course_1" />);
 
       // Wait for course data to load and unit to appear
@@ -216,6 +219,9 @@ describe('CourseEditor', () => {
 
       const deleteButtons = screen.getAllByTestId('DeleteIcon');
       fireEvent.click(deleteButtons[0]);
+
+      const cancelButton = screen.getByText('Cancel');
+      fireEvent.click(cancelButton);
 
       expect(updateCourse).not.toHaveBeenCalled();
     });

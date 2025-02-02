@@ -101,12 +101,14 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
         p: 2, 
         pt: 0,
         display: 'flex',
-        justifyContent: 'flex-end',
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: { xs: 'stretch', sm: 'flex-end' },
         gap: 1,
         '& .MuiButton-root': {
-          minWidth: '32px',
-          height: '32px',
-          padding: '0 8px'
+          width: { xs: '100%', sm: 'auto' },
+          height: '40px',
+          padding: '6px 16px',
+          fontSize: '0.9rem'
         }
       }}>
         <Button
