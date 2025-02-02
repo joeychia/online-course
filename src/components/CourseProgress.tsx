@@ -7,6 +7,7 @@ import ReactTooltip from 'react-tooltip';
 import './CourseProgress.css';
 import { formatDate } from '../utils/dateUtils';
 import { useTranslation } from '../hooks/useTranslation';
+import { convertChinese } from '../utils/chineseConverter';
 import { TooltipDataAttrs } from 'react-calendar-heatmap';
 import { useFontSize } from '../contexts/FontSizeContext';
 
@@ -26,7 +27,7 @@ interface CalendarValue extends ReactCalendarHeatmapValue<string> {
 
 export default function CourseProgress({ progress, courseId, units, unitLessons }: CourseProgressProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const theme = useTheme();
   const { fontSize } = useFontSize();
 
@@ -152,7 +153,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
   }
 
   const [lessonId, lessonData] = latestLesson;
-  const formattedDate = formatDate(lessonData.completedAt);
+  const formattedDate = convertChinese(formatDate(lessonData.completedAt), language);
 
   // Find the unit for the latest completed lesson
   const findUnitForLesson = (lessonId: string) => {
@@ -198,8 +199,8 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
             endDate={new Date()}
             values={calendarValues}
             showWeekdayLabels={true}
-            weekdayLabels={['日', '一', '二', '三', '四', '五', '六']}
-            monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']}
+            weekdayLabels={['日', '一', '二', '三', '四', '五', '六'].map(day => convertChinese(day, language))}
+            monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'].map(month => convertChinese(month, language))}
             classForValue={(value) => {
               if (!value) {
                 return theme.palette.mode === 'dark' ? 'color-empty-dark' : 'color-empty';
@@ -214,9 +215,9 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                 } as TooltipDataAttrs;
               }
               const calendarValue = value as CalendarValue;
-              const lessons = calendarValue.lessons.map(l => l.name).join('\n');
+              const lessons = calendarValue.lessons.map(l => convertChinese(l.name, language)).join('\n');
               return {
-                'data-tip': `${new Date(calendarValue.date).toLocaleDateString('zh-TW')}\n${lessons}`,
+                'data-tip': `${new Date(calendarValue.date).toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN')}\n${lessons}`,
                 'data-multiline': true,
                 'style': { fontSize }
               } as TooltipDataAttrs;
@@ -254,7 +255,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                     }
                   }}
                 >
-                  {latestLessonUnit?.name} / {lessonData.lessonName}
+                  {convertChinese(`${latestLessonUnit?.name} / ${lessonData.lessonName}`, language)}
                 </Link>
                 <Typography component="span" sx={{ fontSize, ml: 1 }}>
                   {formattedDate}
@@ -292,7 +293,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                     }
                   }}
                 >
-                  {units.find(u => u.id === nextLesson.unitId)?.name} / {nextLesson.name}
+                  {convertChinese(`${units.find(u => u.id === nextLesson.unitId)?.name} / ${nextLesson.name}`, language)}
                 </Link>
               </Box>
             </Box>
