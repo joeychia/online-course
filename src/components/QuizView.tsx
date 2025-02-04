@@ -78,7 +78,10 @@ export default function QuizView({ quiz, onSubmit, onClose, readOnlyAnswers }: Q
   };
 
   const isComplete = () => {
-    return quiz.questions.every((_, index) => answers[index] !== undefined);
+    return quiz.questions.every((question, index) => {
+      // Only require answers for single_choice questions
+      return question.type === 'free_form' || answers[index] !== undefined;
+    });
   };
 
   if (!quiz) {
