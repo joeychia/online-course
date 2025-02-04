@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { CourseManagement } from '../components/admin/CourseManagement';
 import { ThemeProvider } from '../contexts/ThemeContext';
@@ -57,11 +58,13 @@ const mockCourses: Course[] = [
 describe('CourseManagement', () => {
   const renderWithProviders = (ui: React.ReactElement) => {
     return render(
-      <ThemeProvider>
-        <FontSizeProvider>
-          {ui}
-        </FontSizeProvider>
-      </ThemeProvider>
+      <MemoryRouter>
+        <ThemeProvider>
+          <FontSizeProvider>
+            {ui}
+          </FontSizeProvider>
+        </ThemeProvider>
+      </MemoryRouter>
     );
   };
 
@@ -230,7 +233,7 @@ describe('CourseManagement', () => {
       });
 
       // Click view details
-      const viewButtons = await screen.findAllByText('View Details');
+      const viewButtons = await screen.findAllByText('View');
       fireEvent.click(viewButtons[0]);
 
       // Check if editor is shown
