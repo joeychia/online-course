@@ -63,6 +63,10 @@ export const translations: Translations = {
     'zh-TW': '登出',
     'zh-CN': '登出'
   },
+  help: {
+    'zh-TW': '幫助',
+    'zh-CN': '帮助'
+  },
 
   // Course Progress
   courseProgress: {

@@ -5,6 +5,7 @@ import CourseView from './pages/CourseView';
 import Login from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
 import Notebook from './pages/Notebook';
+import Help from './pages/Help';
 import { useAuth } from './contexts/useAuth';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FontSizeProvider } from './contexts/FontSizeContext';
@@ -53,6 +54,12 @@ function App() {
                   <Route path="/courses" element={
                     <Layout>
                       <CourseList myCourses={window.location.search.includes('myCourses=true')} />
+                    </Layout>
+                  } />
+                  
+                  <Route path="/help" element={
+                    <Layout>
+                      <Help />
                     </Layout>
                   } />
                   

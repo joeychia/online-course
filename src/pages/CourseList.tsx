@@ -156,13 +156,14 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
           action={
             <Button 
               color="inherit" 
-              size="small" 
+              size="large" 
               onClick={handleSignInClick}
             >
               {t('signIn')}
             </Button>
           }
-          sx={{ mb: 3 }}
+          sx={{ mb: 3, fontSize: 'var(--font-size-h6)' }}
+        
         >
           {t('signInMessage')}
         </Alert>

@@ -8,7 +8,6 @@ import {
   Stack,
   IconButton,
   Menu,
-  MenuItem,
   Avatar,
   Button,
   Switch,
@@ -31,7 +30,6 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
   const { isDarkMode, toggleTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
@@ -65,14 +63,6 @@ export default function Layout({ children }: LayoutProps) {
                         location.pathname !== '/login' &&
                         location.pathname !== '/courses';
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleDrawerToggle = () => {
     setIsDrawerOpen(!isDrawerOpen);
     // Propagate drawer state to CourseView
@@ -87,10 +77,6 @@ export default function Layout({ children }: LayoutProps) {
     } catch (error) {
       console.error('Failed to sign out:', error);
     }
-  };
-
-  const handleSignIn = () => {
-    navigate('/login');
   };
 
   const handleSettingsMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -163,6 +149,19 @@ export default function Layout({ children }: LayoutProps) {
           <Stack direction="row" spacing={2} alignItems="center">
             {currentUser && (
               <>
+                              <Button
+                  component={RouterLink}
+                  to="/courses?myCourses=true"
+                  color="inherit"
+                  sx={{
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'primary.light',
+                    }
+                  }}
+                >
+                  {t('myCourses')}
+                </Button>
                 <Button
                   component={RouterLink}
                   to={"/notebook/"+ courseId}
@@ -178,7 +177,7 @@ export default function Layout({ children }: LayoutProps) {
                 </Button>
                 <Button
                   component={RouterLink}
-                  to="/courses?myCourses=true"
+                  to={"/help"}
                   color="inherit"
                   sx={{
                     textDecoration: 'none',
@@ -187,7 +186,7 @@ export default function Layout({ children }: LayoutProps) {
                     }
                   }}
                 >
-                  {t('myCourses')}
+                  {t('help')}
                 </Button>
                 {isAdmin && (
                   <Button
@@ -206,6 +205,7 @@ export default function Layout({ children }: LayoutProps) {
                 )}
               </>
             )}
+
             <IconButton
               color="inherit"
               onClick={handleSettingsMenu}
@@ -219,7 +219,7 @@ export default function Layout({ children }: LayoutProps) {
               onClose={handleSettingsClose}
               onClick={handleSettingsClose}
             >
-              <Box sx={{ p: 2, minWidth: 200 }}>
+              <Box sx={{ p: 2, minWidth: 200 }}>                
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('fontSize')}</Typography>
                 <ToggleButtonGroup
                   value={fontSize}
@@ -265,54 +265,40 @@ export default function Layout({ children }: LayoutProps) {
                     <Typography>{t('simplified')}</Typography>
                   </ToggleButton>
                 </ToggleButtonGroup>
+                {currentUser && (
+                  <>
+                    <Divider sx={{ my: 1.5 }} />
+                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1.5 }}>
+                      <Avatar 
+                        alt={userProfile?.name || currentUser?.email || ''}
+                        src={currentUser?.photoURL?.toString()}
+                        sx={{ width: 32, height: 32 }}
+                      >
+                        {(userProfile?.name || currentUser?.email || '').charAt(0).toUpperCase()}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body1" color="text.primary">
+                          {userProfile?.name || currentUser.email?.split('@')[0]}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {currentUser.email}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                    <Button
+                      fullWidth
+                      onClick={handleSignOut}
+                      color="primary"
+                      variant="outlined"
+                      size="small"
+                    >
+                      {t('signOut')}
+                    </Button>
+                  </>
+                )}
               </Box>
             </Menu>
-            {currentUser ? (
-              <>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <IconButton
-                    onClick={handleMenu}
-                    sx={{ p: 0 }}
-                  >
-                    <Avatar 
-                      alt={userProfile?.name || currentUser?.email || ''}
-                      src={currentUser?.photoURL?.toString()}
-                      sx={{ width: 32, height: 32 }}
-                    >
-                      {(userProfile?.name || currentUser?.email || '').charAt(0).toUpperCase()}
-                    </Avatar>
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleClose}
-                    onClick={handleClose}
-                  >
-                    <MenuItem  sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                      <Typography variant="body1" color="text.primary">
-                        {userProfile?.name || currentUser.email?.split('@')[0]}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {currentUser.email}
-                      </Typography>
-                    </MenuItem>
-                    <MenuItem onClick={handleSignOut}>{t('signOut')}</MenuItem>
-                  </Menu>
-                </Stack>
-              </>
-            ) : (
-              <Button 
-                color="inherit" 
-                onClick={handleSignIn}
-                sx={{ 
-                  '&:hover': {
-                    color: 'primary.light',
-                  }
-                }}
-              >
-                {t('signIn')}
-              </Button>
-            )}
+            
           </Stack>
         </Toolbar>
       </AppBar>
