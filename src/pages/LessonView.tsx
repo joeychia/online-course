@@ -286,7 +286,7 @@ const LessonView: React.FC<LessonViewProps> = ({
   const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';
 
   return (
-    <Box sx={{ flex: 1, height: '100%', p: 3 }}>
+    <Box sx={{ flex: 1, height: '100%', p: 3, mt: 2 }}>
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Typography variant="h4" component="h1">
@@ -445,14 +445,18 @@ const LessonView: React.FC<LessonViewProps> = ({
           bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50'
         }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-            <Typography variant="h6">
+            <Typography variant="h2" sx={{ fontWeight: 'bold' }}>
               {t('personalNotes')}
               {(noteSaved || noteLastUpdated) && (
                 <Typography 
                   component="span" 
                   variant="body2" 
                   color="text.secondary"
-                  sx={{ ml: 1 }}
+                  sx={{ 
+                    ml: { xs: 0, sm: 1 },
+                    display: { xs: 'block', sm: 'inline' },
+                    mt: { xs: 1, sm: 0 }
+                  }}
                 >
                   {t('lastUpdate', { date: noteSaved ? new Date().toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') : new Date(noteLastUpdated!).toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') })}
                 </Typography>
