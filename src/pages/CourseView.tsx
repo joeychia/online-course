@@ -42,7 +42,6 @@ export default function CourseView() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
-  const [nextLessonId, setNextLessonId] = useState<string | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   // Toggle drawer handler
@@ -196,17 +195,6 @@ export default function CourseView() {
         lessonName
       }
     }));
-
-    // Find next lesson
-    if (unitId && unitLessons[unitId]) {
-      const currentLessonIndex = unitLessons[unitId].findIndex(lesson => lesson.id === completedLessonId);
-      if (currentLessonIndex !== -1 && currentLessonIndex < unitLessons[unitId].length - 1) {
-        const nextId = unitLessons[unitId][currentLessonIndex + 1].id;
-        setNextLessonId(nextId);
-      } else {
-        setNextLessonId(null);
-      }
-    }
 
     setCompletedLessons(prev => [...prev, completedLessonId]);
     setShowCompletionDialog(true);
@@ -381,17 +369,6 @@ export default function CourseView() {
           >
             {t('close')}
           </Button>
-          {nextLessonId && (
-            <Button 
-              variant="contained" 
-              onClick={() => {
-                setShowCompletionDialog(false);
-                navigate(`/${courseId}/${unitId}/${nextLessonId}`);
-              }}
-            >
-              {t('nextLesson')}
-            </Button>
-          )}
         </DialogActions>
       </Dialog>
     </>
