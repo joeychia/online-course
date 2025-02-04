@@ -22,7 +22,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Course } from '../types';
-import { getAllCourses } from '../services/dataService';
+import { getAllCourses, getUser } from '../services/dataService';
 import { useAuth } from '../contexts/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
@@ -75,7 +75,7 @@ const CourseCard = ({ course, isAuthenticated, onSignInClick, language }: Course
   );
 };
 
-export default function CourseList() {
+export default function CourseList({ myCourses = false }: { myCourses?: boolean }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,21 +85,33 @@ export default function CourseList() {
   const { t, language } = useTranslation();
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       try {
-        const coursesData = await getAllCourses();
-        setCourses(coursesData);
+        const [coursesData, userProfileData] = await Promise.all([
+          getAllCourses(),
+          currentUser ? getUser(currentUser.uid) : null
+        ]);
+
+        if (myCourses && userProfileData) {
+          // Filter courses based on user's registeredCourses
+          const filteredCourses = coursesData.filter(course => 
+            userProfileData.registeredCourses && userProfileData.registeredCourses[course.id]
+          );
+          setCourses(filteredCourses);
+        } else {
+          setCourses(coursesData);
+        }
         setError(null);
       } catch (err) {
         setError(String(t('failedToLoadCourses')));
-        console.error('Error fetching courses:', err);
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCourses();
-  }, [t]);
+    fetchData();
+  }, [t, myCourses, currentUser]);
 
   const handleSignInClick = () => {
     navigate('/login');

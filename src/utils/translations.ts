@@ -16,8 +16,12 @@ export const translations: Translations = {
   },
   // Layout
   appTitle: {
-    'zh-TW': 'ECC在線課程',
-    'zh-CN': 'ECC在线课程'
+    'zh-TW': '首頁',
+    'zh-CN': '首页'
+  },
+  myCourses: {
+    'zh-TW': '我的課程',
+    'zh-CN': '我的课程'
   },
   fontSize: {
     'zh-TW': '字體大小',

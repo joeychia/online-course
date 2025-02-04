@@ -52,7 +52,7 @@ function App() {
                   
                   <Route path="/courses" element={
                     <Layout>
-                      <CourseList />
+                      <CourseList myCourses={window.location.search.includes('myCourses=true')} />
                     </Layout>
                   } />
                   

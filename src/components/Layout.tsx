@@ -176,6 +176,19 @@ export default function Layout({ children }: LayoutProps) {
                 >
                   {t('myNotes')}
                 </Button>
+                <Button
+                  component={RouterLink}
+                  to="/courses?myCourses=true"
+                  color="inherit"
+                  sx={{
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'primary.light',
+                    }
+                  }}
+                >
+                  {t('myCourses')}
+                </Button>
                 {isAdmin && (
                   <Button
                     component={RouterLink}
