@@ -37,11 +37,11 @@ export async function seedFirestore() {
         console.log('Starting Firestore seeding with Admin SDK...');
         console.log('Using project:', process.env.VITE_FIREBASE_PROJECT_ID);
 
-        // Add courses
-        for (const [id, course] of Object.entries(mockData.courses)) {
-            await db.doc(`courses/${id}`).set(course);
-            console.log(`Added course: ${course.name}`);
-        }
+        // // Add courses
+        // for (const [id, course] of Object.entries(mockData.courses)) {
+        //     await db.doc(`courses/${id}`).set(course);
+        //     console.log(`Added course: ${course.name}`);
+        // }
 
         // Add units
         // for (const [id, unit] of Object.entries(mockData.units)) {
@@ -56,12 +56,12 @@ export async function seedFirestore() {
         // }
 
         // Add quizzes
-        // if (mockData.quizzes) {
-        //     for (const [id, quiz] of Object.entries(mockData.quizzes)) {
-        //         await db.doc(`quizzes/${id}`).set(quiz);
-        //         console.log(`Added quiz: ${id}`);
-        //     }
-        // }
+        if (mockData.quizzes) {
+            for (const [id, quiz] of Object.entries(mockData.quizzes)) {
+                await db.doc(`quizzes/${id}`).set(quiz);
+                console.log(`Added quiz: ${id}`);
+            }
+        }
 
         // Add users (optional, you might want to handle this separately)
         // if (mockData.users) {

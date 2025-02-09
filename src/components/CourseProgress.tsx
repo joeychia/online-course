@@ -10,6 +10,8 @@ import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
 import { TooltipDataAttrs } from 'react-calendar-heatmap';
 import { useFontSize } from '../contexts/FontSizeContext';
+import { getLesson, getLessonsIdNameForUnit } from '../services/dataService';
+import { useEffect, useState } from 'react';
 
 interface CourseProgressProps {
   progress: Record<string, UserProgress>;
@@ -30,6 +32,8 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
   const { t, language } = useTranslation();
   const theme = useTheme();
   const { fontSize } = useFontSize();
+  const [nextLesson, setNextLesson] = useState<{ id: string; name: string; unitName: String; unitId: string } | null>(null);
+  const [latestLessonData, setLatestLessonData] = useState<{ id: string; name: string; unitName: String; unitId: string } | null>(null);
 
   // Find the latest completed lesson
   const latestLesson = Object.entries(progress)
@@ -45,51 +49,93 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
       }
     })[0];
 
-  // Find the next lesson
-  const findNextLesson = () => {
-    if (!latestLesson) {
-      return null;
-    }
+  // Load latest lesson data when latestLesson changes
+  useEffect(() => {
+    async function loadLatestLessonData() {
+      if (!latestLesson) {
+        setLatestLessonData(null);
+        return;
+      }
 
-    const [completedLessonId] = latestLesson;
-    
-    // Find which unit contains the completed lesson
-    for (const unit of units) {
-      const lessons = unitLessons[unit.id] || [];
-      const lessonIndex = lessons.findIndex(lesson => lesson.id === completedLessonId);
+      const [completedLessonId] = latestLesson;
       
-      if (lessonIndex !== -1) {
-        // If there's a next lesson in the same unit
-        if (lessonIndex < lessons.length - 1) {
-          const nextLesson = {
-            id: lessons[lessonIndex + 1].id,
-            name: lessons[lessonIndex + 1].name,
-            unitId: unit.id
-          };
-          return nextLesson;
+      try {
+        const completedLesson = await getLesson(completedLessonId);
+        if (!completedLesson) {
+          setLatestLessonData(null);
+          return;
         }
-        
-        // If we're at the end of this unit, look for the first lesson of the next unit
-        const currentUnitIndex = units.findIndex(u => u.id === unit.id);
-        if (currentUnitIndex !== -1 && currentUnitIndex < units.length - 1) {
-          const nextUnit = units[currentUnitIndex + 1];
-          const nextUnitLessons = unitLessons[nextUnit.id] || [];
-          if (nextUnitLessons.length > 0) {
-            const nextLesson = {
-              id: nextUnitLessons[0].id,
-              name: nextUnitLessons[0].name,
-              unitId: nextUnit.id
-            };
-            return nextLesson;
-          }
+
+        const currentUnitIndex = units.findIndex(u => u.id === completedLesson.unitId);
+        if (currentUnitIndex === -1) {
+          setLatestLessonData(null);
+          return;
         }
-        break;
+
+        setLatestLessonData({
+          id: completedLessonId,
+          name: completedLesson.name,
+          unitName: units[currentUnitIndex].name,
+          unitId: completedLesson.unitId
+        });
+      } catch (error) {
+        console.error('Error loading latest lesson data:', error);
+        setLatestLessonData(null);
       }
     }
-    return null;
-  };
 
-  const nextLesson = findNextLesson();
+    void loadLatestLessonData();
+  }, [units, latestLesson]);
+
+  // Load next lesson data when latestLesson changes
+  useEffect(() => {
+    async function loadNextLesson() {
+      if (!latestLesson || !latestLessonData) {
+        setNextLesson(null);
+        return;
+      }
+
+      try {
+        // Get all lessons in the current unit
+        const currentUnitLessons = await getLessonsIdNameForUnit(latestLessonData.unitId);
+        const lessonIndex = currentUnitLessons.findIndex(lesson => lesson.id === latestLessonData.id);
+        const currentUnitIndex = units.findIndex(u => u.id === latestLessonData.unitId);
+
+        if (lessonIndex !== -1 && lessonIndex < currentUnitLessons.length - 1 && currentUnitIndex !== -1 && currentUnitIndex < units.length - 1) {
+          // If there's a next lesson in the same unit
+          setNextLesson({
+            id: currentUnitLessons[lessonIndex + 1].id,
+            name: currentUnitLessons[lessonIndex + 1].name,
+            unitName: units[currentUnitIndex].name,
+            unitId: latestLessonData.unitId
+          });
+          return;
+        }
+
+        // If we're at the end of this unit, look for the first lesson of the next unit
+        if (currentUnitIndex !== -1 && currentUnitIndex < units.length - 1) {
+          const nextUnit = units[currentUnitIndex + 1];
+          const nextUnitLessons = await getLessonsIdNameForUnit(nextUnit.id);
+          if (nextUnitLessons.length > 0) {
+            setNextLesson({
+              id: nextUnitLessons[0].id,
+              name: nextUnitLessons[0].name,
+              unitName: units[currentUnitIndex + 1].name,
+              unitId: nextUnit.id
+            });
+            return;
+          }
+        }
+        
+        setNextLesson(null);
+      } catch (error) {
+        console.error('Error loading next lesson:', error);
+        setNextLesson(null);
+      }
+    }
+
+    void loadNextLesson();
+  }, [units, latestLesson, latestLessonData]);
 
   // Prepare calendar data
   const calendarData = Object.entries(progress)
@@ -155,21 +201,8 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
   const [lessonId, lessonData] = latestLesson;
   const formattedDate = convertChinese(formatDate(lessonData.completedAt), language);
 
-  // Find the unit for the latest completed lesson
-  const findUnitForLesson = (lessonId: string) => {
-    for (const unit of units) {
-      const lessons = unitLessons[unit.id] || [];
-      if (lessons.some(lesson => lesson.id === lessonId)) {
-        return unit;
-      }
-    }
-    return null;
-  };
-
-  const latestLessonUnit = findUnitForLesson(lessonId);
-
   const handleLatestLessonClick = () => {
-    navigate(`/${courseId}/${latestLessonUnit?.id || ''}/${lessonId}`);
+    navigate(`/${courseId}/${lessonId}`);
   };
 
   return (
@@ -255,7 +288,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                     }
                   }}
                 >
-                  {convertChinese(`${latestLessonUnit?.name} / ${lessonData.lessonName}`, language)}
+                  {convertChinese(latestLessonData?.unitName+" / "+latestLessonData?.name, language)}
                 </Link>
                 <Typography component="span" sx={{ fontSize, ml: 1 }}>
                   {formattedDate}
@@ -293,7 +326,7 @@ export default function CourseProgress({ progress, courseId, units, unitLessons 
                     }
                   }}
                 >
-                  {convertChinese(`${units.find(u => u.id === nextLesson.unitId)?.name} / ${nextLesson.name}`, language)}
+                  {convertChinese(`${nextLesson.unitName+" / "+nextLesson.name}`, language)}
                 </Link>
               </Box>
             </Box>

@@ -105,10 +105,8 @@ export default function CourseView() {
 
     if (unitId) {
       loadUnitLessons(unitId);
-    } else {
-      units.forEach(unit => loadUnitLessons(unit.id));
-    }
-  }, [unitId, unitLessons, units]);
+    } 
+  }, [unitId]);
 
   // Load selected lesson
   useEffect(() => {
