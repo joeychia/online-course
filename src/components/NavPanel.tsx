@@ -91,28 +91,32 @@ export default function NavPanel({
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
-  // Load lessons for each unit
+  // Load lessons for selected unit only
   useEffect(() => {
-    async function loadLessons(unit: { id: string; name: string }) {
-      if (!unitLessons[unit.id] && !loading[unit.id]) {
+    async function loadLessonsName(unitId: string) {
+      if (!unitLessons[unitId] && !loading[unitId]) {
+        console.log(`[NavPanel] Starting to load lessons for unit ${unitId}`);
         try {
-          setLoading(prev => ({ ...prev, [unit.id]: true }));
-          const lessons = await getLessonsIdNameForUnit(unit.id);
-          setUnitLessons(prev => ({ ...prev, [unit.id]: lessons }));
+          setLoading(prev => ({ ...prev, [unitId]: true }));
+          const lessons = await getLessonsIdNameForUnit(unitId);
+          console.log(`[NavPanel] Successfully loaded ${lessons.length} lessons for unit ${unitId}:`, lessons.map(l => l.name));
+          setUnitLessons(prev => ({ ...prev, [unitId]: lessons }));
         } catch (err) {
-          console.error(`Error loading lessons for unit ${unit.id}:`, err);
+          console.error(`[NavPanel] Error loading lessons for unit ${unitId}:`, err);
         } finally {
-          setLoading(prev => ({ ...prev, [unit.id]: false }));
+          setLoading(prev => ({ ...prev, [unitId]: false }));
+          console.log(`[NavPanel] Finished loading attempt for unit ${unitId}`);
         }
       }
     }
 
-    units.forEach(unit => {
-      if (expandedUnits[unit.id]) {
-        loadLessons(unit);
+    // Load lessons for all expanded units
+    Object.entries(expandedUnits).forEach(([unitId, isExpanded]) => {
+      if (isExpanded) {
+        loadLessonsName(unitId);
       }
     });
-  }, [units, expandedUnits, loading, unitLessons]);
+  }, [expandedUnits]); // Removed loading from dependencies
 
   const toggleUnit = (unitId: string) => {
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));

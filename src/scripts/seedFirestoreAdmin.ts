@@ -22,7 +22,7 @@ const serviceAccount = JSON.parse(
 
 // Read mock data
 const mockData = JSON.parse(
-    readFileSync(join(process.cwd(), 'src/data/mock/mockData.json'), 'utf-8')
+    readFileSync(join(process.cwd(), 'src/data/lessonData.json'), 'utf-8')
 ) as MockData;
 
 // Initialize Firebase Admin
@@ -44,24 +44,24 @@ export async function seedFirestore() {
         }
 
         // Add units
-        for (const [id, unit] of Object.entries(mockData.units)) {
-            await db.doc(`units/${id}`).set(unit);
-            console.log(`Added unit: ${unit.name}`);
-        }
+        // for (const [id, unit] of Object.entries(mockData.units)) {
+        //     await db.doc(`units/${id}`).set(unit);
+        //     console.log(`Added unit: ${unit.name}`);
+        // }
 
-        // Add lessons
-        for (const [id, lesson] of Object.entries(mockData.lessons)) {
-            await db.doc(`lessons/${id}`).set(lesson);
-            console.log(`Added lesson: ${lesson.name}`);
-        }
+        // //Add lessons
+        // for (const [id, lesson] of Object.entries(mockData.lessons)) {
+        //     await db.doc(`lessons/${id}`).set(lesson);
+        //     console.log(`Added lesson: ${lesson.name}`);
+        // }
 
         // Add quizzes
-        if (mockData.quizzes) {
-            for (const [id, quiz] of Object.entries(mockData.quizzes)) {
-                await db.doc(`quizzes/${id}`).set(quiz);
-                console.log(`Added quiz: ${id}`);
-            }
-        }
+        // if (mockData.quizzes) {
+        //     for (const [id, quiz] of Object.entries(mockData.quizzes)) {
+        //         await db.doc(`quizzes/${id}`).set(quiz);
+        //         console.log(`Added quiz: ${id}`);
+        //     }
+        // }
 
         // Add users (optional, you might want to handle this separately)
         // if (mockData.users) {
