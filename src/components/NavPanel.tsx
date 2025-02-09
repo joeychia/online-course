@@ -18,7 +18,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
 import { Course } from '../types';
-import { getLessonsIdNameForUnit } from '../services/dataService';
+import { getLesson, getLessonsIdNameForUnit } from '../services/dataService';
 import { convertChinese } from '../utils/chineseConverter';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -90,6 +90,73 @@ export default function NavPanel({
   );
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+  const [nextLessonId, setNextLessonId] = useState<string | null>(null);
+  const [nextUnitId, setNextUnitId] = useState<string | null>(null);
+    // Find the latest completed lesson
+    const latestLesson = Object.entries(progress)
+    .filter(([_, data]) => data.completed && data.completedAt)
+    .sort((a, b) => {
+      try {
+        const dateA = new Date(a[1].completedAt);
+        const dateB = new Date(b[1].completedAt);
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0;
+        return dateB.getTime() - dateA.getTime();
+      } catch {
+        return 0;
+      }
+    })[0];
+    
+  // Load next lesson when selectedLessonId changes
+  useEffect(() => {
+    async function loadNextLesson() {
+      if (!latestLesson) return;
+
+      try {
+        const [completedLessonId] = latestLesson;
+        const lesson = await getLesson(completedLessonId);
+        if (!lesson) return;
+
+        // Get all lessons in the current unit
+        const currentUnitLessons = await getLessonsIdNameForUnit(lesson.unitId);
+        const lessonIndex = currentUnitLessons.findIndex(l => l.id === completedLessonId);
+        const currentUnitIndex = units.findIndex(u => u.id === lesson.unitId);
+
+        if (lessonIndex !== -1 && lessonIndex < currentUnitLessons.length - 1) {
+          // Next lesson is in the same unit
+          setNextLessonId(currentUnitLessons[lessonIndex + 1].id);
+          setNextUnitId(lesson.unitId);
+        } else if (currentUnitIndex !== -1 && currentUnitIndex < units.length - 1) {
+          // Look for first lesson in next unit
+          const nextUnit = units[currentUnitIndex + 1];
+          const nextUnitLessons = await getLessonsIdNameForUnit(nextUnit.id);
+          if (nextUnitLessons.length > 0) {
+            setNextLessonId(nextUnitLessons[0].id);
+            setNextUnitId(nextUnit.id);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading next lesson:', error);
+      }
+    }
+
+    void loadNextLesson();
+  }, [latestLesson, units]); // Updated dependencies to use latestLesson
+
+  // Expand unit and scroll to next lesson when it's determined
+  useEffect(() => {
+    if (nextUnitId) {
+      // Expand the unit containing the next lesson
+      setExpandedUnits(prev => ({ ...prev, [nextUnitId]: true }));
+
+      // Scroll the unit into view after a short delay to ensure the expansion is complete
+      setTimeout(() => {
+        const unitElement = document.querySelector(`[data-testid="unit-button-${nextUnitId}"]`);
+        if (unitElement) {
+          unitElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    }
+  }, [nextUnitId, nextLessonId]);
 
   // Load lessons for selected unit only
   useEffect(() => {
