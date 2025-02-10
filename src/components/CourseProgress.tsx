@@ -85,7 +85,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
     }
 
     void loadLatestLessonData();
-  }, [units, latestLesson]);
+  }, []);
 
   // Load next lesson data when latestLesson changes
   useEffect(() => {
@@ -135,7 +135,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
     }
 
     void loadNextLesson();
-  }, [units, latestLesson, latestLessonData]);
+  }, [latestLessonData]);
 
   // Prepare calendar data
   const calendarData = Object.entries(progress)
