@@ -27,7 +27,7 @@ interface CalendarValue extends ReactCalendarHeatmapValue<string> {
   lessonId: string;
 }
 
-export default function CourseProgress({ progress, courseId, units, unitLessons }: CourseProgressProps) {
+export default function CourseProgress({ progress, courseId, units }: CourseProgressProps) {
   const navigate = useNavigate();
   const { t, language } = useTranslation();
   const theme = useTheme();

@@ -62,7 +62,7 @@ export const TOOLBAR_HEIGHT = 56;
 interface NavPanelProps {
   course: Course;
   units: Array<{ id: string; name: string }>;
-  progress: { [key: string]: { completed: boolean } };
+  progress: { [key: string]: { completed: boolean; completedAt: string } };
   selectedUnitId?: string;
   selectedLessonId?: string;
   onSelectLesson?: (unitId: string, lessonId: string) => void;

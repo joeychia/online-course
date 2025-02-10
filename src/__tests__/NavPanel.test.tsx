@@ -52,10 +52,10 @@ const mockLessonsUnit2 = [
 ];
 
 const mockProgress = {
-  'u1l1': { completed: true },
-  'u1l2': { completed: false },
-  'u2l1': { completed: true },
-  'u2l2': { completed: false }
+  'u1l1': { completed: true, completedAt: '2024-01-01T10:00:00Z' },
+  'u1l2': { completed: false, completedAt: '2024-01-02T10:00:00Z'  },
+  'u2l1': { completed: true, completedAt: '2024-01-03T10:00:00Z'  },
+  'u2l2': { completed: false, completedAt: '2024-01-04T10:00:00Z'  }
 };
 
 const mockGetLessons = vi.mocked(getLessonsIdNameForUnit);
