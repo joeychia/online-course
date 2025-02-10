@@ -49,7 +49,9 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
       },
       '& .toastui-editor-contents': {
         color: theme => theme.palette.text.primary,
-        fontSize: fontSize,
+        '& h1, & h2, & h3, & h4, & h5, & h6, & p': {
+          color: theme => theme.palette.text.primary,
+        }
       },
       '& .toastui-editor-ww-container': {
         backgroundColor: theme => theme.palette.background.paper,
@@ -66,10 +68,8 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
         useCommandShortcut={true}
         onChange={handleChange}
         toolbarItems={[
-          ['heading', 'bold', 'italic', 'strike'],
-          ['hr', 'quote'],
+          ['heading', 'bold'],
           ['ul', 'ol', 'task'],
-          ['table', 'image', 'link'],
           ['scrollSync'],
         ]}
         theme={isDarkMode ? 'dark' : 'light'}
