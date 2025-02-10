@@ -99,7 +99,6 @@ export default function Layout({ children }: LayoutProps) {
   const handleThemeChange = () => {
     toggleTheme();
   };
-  const courseId = location.pathname.split('/')[1];
   return (
     <Box sx={{ 
       display: 'flex', 
@@ -164,7 +163,7 @@ export default function Layout({ children }: LayoutProps) {
                 </Button>
                 <Button
                   component={RouterLink}
-                  to={"/notebook/"+ courseId}
+                  to={"/notebook/"}
                   color="inherit"
                   sx={{
                     textDecoration: 'none',
