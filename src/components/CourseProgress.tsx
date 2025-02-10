@@ -174,12 +174,6 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - 5); // Show last 6 months
 
-  const handleLessonClick = (value: CalendarValue | undefined) => {
-    if (value) {
-      navigate(`/${courseId}/${value.lessonId}`);
-    }
-  };
-
   if (!latestLesson) {
     return (
       <Paper sx={{
@@ -255,7 +249,6 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
                 'style': { fontSize }
               } as TooltipDataAttrs;
             }}
-            onClick={(value) => handleLessonClick(value as CalendarValue)}
           />
           <ReactTooltip multiline={true} />
         </Box>
@@ -290,7 +283,15 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
                 >
                   {convertChinese(latestLessonData?.unitName+" / "+latestLessonData?.name, language)}
                 </Link>
-                <Typography component="span" sx={{ fontSize, ml: 1 }}>
+                <Typography 
+                  component="div" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontSize,
+                    display: 'block',
+                    mt: 1
+                  }}
+                >
                   {formattedDate}
                 </Typography>
               </Box>
@@ -304,7 +305,13 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
               bgcolor: theme.palette.mode === 'dark' ? 'primary.900' : 'primary.50', 
               borderRadius: 1,
               border: 1,
-              borderColor: theme.palette.mode === 'dark' ? 'primary.800' : 'primary.100'
+              borderColor: theme.palette.mode === 'dark' ? 'primary.800' : 'primary.100',
+              boxShadow: 2,  // Added shadow
+              transition: 'transform 0.2s, box-shadow 0.2s',  // Added transition
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 4,
+              }
             }}>
               <Typography variant="h6" color="primary" gutterBottom sx={{ fontSize: `calc(${fontSize}px * 1.25)` }}>
                 {t('nextUp')}
