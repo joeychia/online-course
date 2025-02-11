@@ -18,6 +18,10 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SchoolIcon from '@mui/icons-material/School';
+import NotesIcon from '@mui/icons-material/Notes';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../contexts/useAuth';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSize } from '../contexts/FontSizeContext';
@@ -61,6 +65,9 @@ export default function Layout({ children }: LayoutProps) {
   // Only show menu button on course pages
   const showMenuButton = location.pathname.split('/').length > 1 && 
                         location.pathname !== '/login' &&
+                        location.pathname !== '/notebook' &&
+                        location.pathname !== '/admin' &&
+                        location.pathname !== '/help' &&
                         location.pathname !== '/courses';
 
   const handleDrawerToggle = () => {
@@ -152,6 +159,7 @@ export default function Layout({ children }: LayoutProps) {
                   component={RouterLink}
                   to="/courses?myCourses=true"
                   color="inherit"
+                  startIcon={<SchoolIcon />}
                   sx={{
                     textDecoration: 'none',
                     '&:hover': {
@@ -163,8 +171,9 @@ export default function Layout({ children }: LayoutProps) {
                 </Button>
                 <Button
                   component={RouterLink}
-                  to={"/notebook/"}
+                  to={"/notebook"}
                   color="inherit"
+                  startIcon={<NotesIcon />}
                   sx={{
                     textDecoration: 'none',
                     '&:hover': {
@@ -178,6 +187,7 @@ export default function Layout({ children }: LayoutProps) {
                   component={RouterLink}
                   to={"/help"}
                   color="inherit"
+                  startIcon={<HelpOutlineIcon />}
                   sx={{
                     textDecoration: 'none',
                     '&:hover': {
@@ -192,6 +202,7 @@ export default function Layout({ children }: LayoutProps) {
                     component={RouterLink}
                     to="/admin"
                     color="inherit"
+                    startIcon={<AdminPanelSettingsIcon />}
                     sx={{
                       textDecoration: 'none',
                       '&:hover': {
@@ -202,6 +213,7 @@ export default function Layout({ children }: LayoutProps) {
                     Admin
                   </Button>
                 )}
+
               </>
             )}
 
