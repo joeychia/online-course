@@ -3,7 +3,6 @@ import { Editor } from '@toast-ui/react-editor';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { useTheme } from '../contexts/ThemeContext';
 import { Box } from '@mui/material';
-import { useFontSize } from '../contexts/FontSizeContext';
 
 interface RichTextEditorProps {
   value: string;
@@ -14,7 +13,6 @@ interface RichTextEditorProps {
 const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: RichTextEditorProps) => {
   const editorRef = useRef<Editor>(null);
   const { isDarkMode } = useTheme();
-  const { fontSize } = useFontSize();
 
   useEffect(() => {
     // Update editor content when value prop changes
