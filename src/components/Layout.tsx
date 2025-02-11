@@ -65,6 +65,7 @@ export default function Layout({ children }: LayoutProps) {
   // Only show menu button on course pages
   const showMenuButton = location.pathname.split('/').length > 1 && 
                         location.pathname !== '/login' &&
+                        location.pathname !== '/' &&
                         location.pathname !== '/notebook' &&
                         location.pathname !== '/admin' &&
                         location.pathname !== '/help' &&

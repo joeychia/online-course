@@ -49,10 +49,10 @@ export const translations: Translations = {
   },
   traditional: {
     'zh-TW': '繁體',
-    'zh-CN': '繁体'
+    'zh-CN': '繁體'
   },
   simplified: {
-    'zh-TW': '簡體',
+    'zh-TW': '简体',
     'zh-CN': '简体'
   },
   signIn: {
@@ -97,7 +97,10 @@ export const translations: Translations = {
     'zh-TW': '下一課',
     'zh-CN': '下一课'
   },
-
+  selectCourse: {
+    'zh-TW': '選擇課程',
+    'zh-CN': '选择课程'
+  },
   // Course List
   availableCourses: {
     'zh-TW': '可選課程',
