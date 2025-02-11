@@ -167,8 +167,8 @@ export const translations: Translations = {
 
   // Course View
   courseNotFound: {
-    'zh-TW': '找不到課程',
-    'zh-CN': '找不到课程'
+    'zh-TW': '正在載入課程...',
+    'zh-CN': '正在载入课程...'
   },
   registerCourseTitle: {
     'zh-TW': '註冊課程',

@@ -285,7 +285,7 @@ export default function CourseView() {
       </Box>
 
       {isRegistered && (
-        <Box sx={{ mt: 4, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ my: 6, pt: 2, borderTop: 1, borderColor: 'divider' }}>
           <Button
             variant="text"
             color="inherit"

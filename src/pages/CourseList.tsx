@@ -91,7 +91,6 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
           getAllCourses(),
           currentUser ? getUser(currentUser.uid) : null
         ]);
-
         if (myCourses && userProfileData) {
           // Filter courses based on user's registeredCourses
           const filteredCourses = coursesData.filter(course => 
@@ -111,7 +110,7 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
     };
 
     fetchData();
-  }, [t, myCourses, currentUser]);
+  }, [myCourses, currentUser]);
 
   const handleSignInClick = () => {
     navigate('/login');
