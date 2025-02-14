@@ -31,6 +31,9 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
 
   return (
     <Box sx={{
+      '& .toastui-editor-defaultUI button': {
+        backgroundColor: '#f7f9fc',
+      },
       '& .toastui-editor-defaultUI': {
         backgroundColor: theme => theme.palette.background.paper,
         border: theme => `1px solid ${theme.palette.divider}`,
@@ -41,6 +44,9 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
       },
       '& .toastui-editor-defaultUI-toolbar, .toastui-editor-popup-add-heading': {
         backgroundColor: theme => theme.palette.background.paper,
+      },
+      '& .toastui-editor-popup-add-heading': {
+        marginLeft: 0
       },
       '& .toastui-editor-main': {
         color: theme => theme.palette.text.primary,
@@ -78,4 +84,4 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
   );
 };
 
-export default RichTextEditor; 
+export default RichTextEditor;
