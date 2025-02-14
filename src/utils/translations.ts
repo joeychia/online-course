@@ -358,4 +358,8 @@ export const translations: Translations = {
     'zh-TW': '管理員',
     'zh-CN': '管理员'
   },
+  quickJump: {
+    'zh-TW': '快速跳轉',
+    'zh-CN': '快速跳转'
+  },
 };
