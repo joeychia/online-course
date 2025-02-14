@@ -17,9 +17,9 @@ import {
   Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SchoolIcon from '@mui/icons-material/School';
-import NotesIcon from '@mui/icons-material/Notes';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../contexts/useAuth';
@@ -28,10 +28,26 @@ import { useFontSize } from '../contexts/FontSizeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../hooks/useTranslation';
 import { getUser } from '../services/dataService';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
+
+const menuButtonStyles = {
+  textDecoration: 'none',
+  display: 'flex',
+  flexDirection: { xs: 'column', sm: 'row' },
+  alignItems: 'center',
+  gap: { xs: 0.5, sm: 1.5 },
+  minWidth: { xs: 'auto', sm: 'auto' },
+  padding: { xs: '4px 8px', sm: '8px 16px' },
+  fontSize: { xs: 'inherit', sm: '1.1rem' },
+  '&:hover': {
+    color: 'primary.light',
+  },
+  whiteSpace: 'nowrap'
+};
 
 export default function Layout({ children }: LayoutProps) {
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
@@ -132,49 +148,64 @@ export default function Layout({ children }: LayoutProps) {
           sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
-            px: 2,
+            px: { xs: 1, sm: 2 },
             height: 56,
-            minHeight: 56
+            minHeight: 56,
+            overflowX: 'auto',
+            '&::-webkit-scrollbar': {
+              display: 'none'
+            },
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none'
           }}
         >
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 'fit-content' }}>
             {showMenuButton && (
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
                 edge="start"
                 onClick={handleDrawerToggle}
-                sx={{ mr: 2 }}
+                sx={{ mr: { xs: 0.5, sm: 2 } }}
               >
                 <MenuIcon />
               </IconButton>
             )}
-            <Typography variant="h6" component={RouterLink} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
-              {t('appTitle')}
-            </Typography>
+            <Button
+              component={RouterLink}
+              to="/"
+              color="inherit"
+              startIcon={null}
+              sx={menuButtonStyles}
+            >
+              <HomeIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
+              <span>{t('appTitle')}</span>
+            </Button>
           </Stack>
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack 
+            direction="row" 
+            spacing={{ xs: 0.5, sm: 2 }} 
+            alignItems="center"
+            sx={{ 
+              minWidth: 'fit-content',
+              overflowX: 'auto',
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              },
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none'
+            }}
+          >
             {currentUser && (
               <>
-                              <Button
+                <Button
                   component={RouterLink}
                   to="/courses?myCourses=true"
                   color="inherit"
                   startIcon={null}
-                  sx={{
-                    textDecoration: 'none',
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    alignItems: 'center',
-                    gap: { xs: 0.5, sm: 1 },
-                    minWidth: { xs: 'auto', sm: 'auto' },
-                    padding: { xs: '4px 8px', sm: '6px 16px' },
-                    '&:hover': {
-                      color: 'primary.light',
-                    }
-                  }}
+                  sx={menuButtonStyles}
                 >
-                  <SchoolIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+                  <SchoolIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
                   <span>{t('myCourses')}</span>
                 </Button>
                 <Button
@@ -182,20 +213,9 @@ export default function Layout({ children }: LayoutProps) {
                   to={"/notebook"}
                   color="inherit"
                   startIcon={null}
-                  sx={{
-                    textDecoration: 'none',
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    alignItems: 'center',
-                    gap: { xs: 0.5, sm: 1 },
-                    minWidth: { xs: 'auto', sm: 'auto' },
-                    padding: { xs: '4px 8px', sm: '6px 16px' },
-                    '&:hover': {
-                      color: 'primary.light',
-                    }
-                  }}
+                  sx={menuButtonStyles}
                 >
-                  <NotesIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+                  <MenuBookIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
                   <span>{t('myNotes')}</span>
                 </Button>
                 <Button
@@ -203,20 +223,9 @@ export default function Layout({ children }: LayoutProps) {
                   to={"/help"}
                   color="inherit"
                   startIcon={null}
-                  sx={{
-                    textDecoration: 'none',
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    alignItems: 'center',
-                    gap: { xs: 0.5, sm: 1 },
-                    minWidth: { xs: 'auto', sm: 'auto' },
-                    padding: { xs: '4px 8px', sm: '6px 16px' },
-                    '&:hover': {
-                      color: 'primary.light',
-                    }
-                  }}
+                  sx={menuButtonStyles}
                 >
-                  <HelpOutlineIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+                  <HelpOutlineIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
                   <span>{t('help')}</span>
                 </Button>
                 {isAdmin && (
@@ -225,34 +234,24 @@ export default function Layout({ children }: LayoutProps) {
                     to="/admin"
                     color="inherit"
                     startIcon={null}
-                    sx={{
-                      textDecoration: 'none',
-                      display: 'flex',
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      alignItems: 'center',
-                      gap: { xs: 0.5, sm: 1 },
-                      minWidth: { xs: 'auto', sm: 'auto' },
-                      padding: { xs: '4px 8px', sm: '6px 16px' },
-                      '&:hover': {
-                        color: 'primary.light',
-                      }
-                    }}
+                    sx={menuButtonStyles}
                   >
-                    <AdminPanelSettingsIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
-                    <span>Admin</span>
+                    <AdminPanelSettingsIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
+                    <span>{t('admin')}</span>
                   </Button>
                 )}
-
               </>
             )}
 
-            <IconButton
+            <Button
               color="inherit"
               onClick={handleSettingsMenu}
               aria-label="settings"
+              sx={menuButtonStyles}
             >
-              <SettingsIcon />
-            </IconButton>
+              <SettingsIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
+              <span>{t('settings')}</span>
+            </Button>
             <Menu
               anchorEl={settingsAnchorEl}
               open={Boolean(settingsAnchorEl)}

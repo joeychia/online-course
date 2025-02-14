@@ -341,5 +341,13 @@ export const translations: Translations = {
   goToHome: {
     'zh-TW': '返回首頁',
     'zh-CN': '返回首页'
-  }
+  },
+  settings: {
+    'zh-TW': '設定',
+    'zh-CN': '设置'
+  },
+  admin: {
+    'zh-TW': '管理員',
+    'zh-CN': '管理员'
+  },
 };
