@@ -337,6 +337,10 @@ const LessonView: React.FC<LessonViewProps> = ({
             </Box>
         </>
       )}
+      {/* Lesson Content */}
+      <Box sx={{ mb: 4 }}>
+        <MarkdownViewer content={convertChinese(encodedContent, language)} />
+      </Box>
             {/* Quiz Section */}
             {quiz && (
         <Paper sx={{ 
@@ -385,10 +389,7 @@ const LessonView: React.FC<LessonViewProps> = ({
           </Stack>
         </Paper>
       )}
-      {/* Bible Reading Content */}
-      <Box sx={{ mb: 4 }}>
-        <MarkdownViewer content={convertChinese(encodedContent, language)} />
-      </Box>
+
 
       {/* Quiz Reminder Dialog */}
       <Dialog
@@ -499,7 +500,7 @@ const LessonView: React.FC<LessonViewProps> = ({
           />
           
         </Paper>
-      ) : (
+      ) : ( !quiz && 
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Button
             variant="contained"
