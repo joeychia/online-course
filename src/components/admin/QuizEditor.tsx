@@ -152,6 +152,11 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
   useEffect(() => {
     const loadQuiz = async () => {
       if (!quizId) {
+        // Create a new empty quiz when no quizId is provided
+        setSelectedQuiz({
+          id: `quiz_${Date.now()}`,
+          questions: []
+        });
         setLoading(false);
         return;
       }
