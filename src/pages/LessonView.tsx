@@ -77,6 +77,7 @@ interface LessonViewProps {
   lesson: Lesson;
   onComplete: (lessonId: string) => Promise<void>;
   isCompleted: boolean;
+  enableNote?: boolean;
 }
 
 const LessonView: React.FC<LessonViewProps> = ({ 
@@ -84,6 +85,7 @@ const LessonView: React.FC<LessonViewProps> = ({
   lesson: initialLesson,
   onComplete,
   isCompleted,
+  enableNote = true,
 }) => {
   const { lessonId } = useParams<{ lessonId: string }>();
   const [lesson, setLesson] = useState<ExtendedLesson>({ ...initialLesson, courseId });
@@ -193,7 +195,9 @@ const LessonView: React.FC<LessonViewProps> = ({
         console.error('Error loading note:', err);
       }
     }
-    void loadNote();
+    if (enableNote) {
+      void loadNote();
+    }
   }, [lesson?.id, currentUser, lesson]);
 
   const handleSaveNote = async (): Promise<void> => {
@@ -438,7 +442,8 @@ const LessonView: React.FC<LessonViewProps> = ({
         </DialogContent>
       </Dialog>
       
-      {/* Notes Section */}
+      {/* Notes Section or Completion Button */}
+      {enableNote ? (
         <Paper sx={{ 
           p: 3, 
           mb: 4, 
@@ -492,6 +497,20 @@ const LessonView: React.FC<LessonViewProps> = ({
             </Typography>
           )}
         </Paper>
+      ) : (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => onComplete(lesson.id)}
+            startIcon={<CheckCircleIcon />}
+            disabled={isCompleted}
+          >
+            {isCompleted ? t('lessonCompleted') : t('markAsComplete')}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }

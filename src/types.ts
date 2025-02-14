@@ -5,6 +5,7 @@ export interface Course {
   settings: {
     unlockLessonIndex: number;
     token?: string;
+    enableNote?: boolean;
   };
   units: Array<{
     id: string;

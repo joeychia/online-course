@@ -210,6 +210,14 @@ export const translations: Translations = {
     'zh-TW': '下一課',
     'zh-CN': '下一课'
   },
+  markAsComplete: {
+    'zh-TW': '標記為完成',
+    'zh-CN': '标记为完成'
+  },
+  lessonCompleted: {
+    'zh-TW': '課程已完成',
+    'zh-CN': '课程已完成'
+  },
 
   // Login
   createAccount: {
