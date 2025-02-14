@@ -449,7 +449,13 @@ const LessonView: React.FC<LessonViewProps> = ({
           mb: 4, 
           bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50'
         }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          {!note && (
+            <Typography color="warning.main" sx={{ mb: 2 }}>
+              {t('mustWriteNote')}
+            </Typography>
+          )}
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+
             <Typography variant="h2" sx={{ fontWeight: 'bold' }}>
               {t('personalNotes')}
               {(noteSaved || noteLastUpdated) && (
@@ -491,11 +497,7 @@ const LessonView: React.FC<LessonViewProps> = ({
             onChange={setNote}
             placeholder={t('writeNotesHere')}
           />
-          {!note && (
-            <Typography color="warning.main" sx={{ mt: 2 }}>
-              {t('mustWriteNote')}
-            </Typography>
-          )}
+          
         </Paper>
       ) : (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
