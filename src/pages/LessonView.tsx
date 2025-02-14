@@ -366,7 +366,7 @@ const LessonView: React.FC<LessonViewProps> = ({
                     setQuizOpen(true);
                   }}
                 >
-                  {t('previousScore', {
+                  {quizHistory.total ===0 ? t('previousTest', {date: new Date(quizHistory.completedAt).toLocaleDateString('zh-TW')})  : t('previousScore', {
                     score: quizHistory.correct,
                     total: quizHistory.total,
                     date: new Date(quizHistory.completedAt).toLocaleDateString('zh-TW')

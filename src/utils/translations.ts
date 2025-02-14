@@ -156,6 +156,10 @@ export const translations: Translations = {
     'zh-TW': '上次成績：{{score}}/{{total}} 於 {{date}}',
     'zh-CN': '上次成绩：{{score}}/{{total}} 于 {{date}}'
   },
+  previousTest: {
+    'zh-TW': '上次測驗：於 {{date}}',
+    'zh-CN': '上次测验：于 {{date}}'
+  },
   retakeQuiz: {
     'zh-TW': '重新測驗',
     'zh-CN': '重新测验'
@@ -311,8 +315,8 @@ export const translations: Translations = {
     'zh-CN': '提交'
   },
   weeklyQuiz: {
-    'zh-TW': '本週測驗',
-    'zh-CN': '本周测验'
+    'zh-TW': '測驗',
+    'zh-CN': '测验'
   },
   quizReminder: {
     'zh-TW': '測驗提醒',

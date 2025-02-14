@@ -154,7 +154,7 @@ export default function QuizView({ quiz, onSubmit, onClose, readOnlyAnswers }: Q
             </FormControl>
           ))}
           
-          {submitted && score && (
+          {submitted && score && score.total > 0 && (
             <>
               <Divider />
               <Box sx={{ textAlign: 'center' }}>
