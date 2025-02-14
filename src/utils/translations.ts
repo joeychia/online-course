@@ -182,6 +182,10 @@ export const translations: Translations = {
     'zh-TW': '立即註冊',
     'zh-CN': '立即注册'
   },
+  registerCourse: {
+    'zh-TW': '註冊課程',
+    'zh-CN': '注册课程'
+  },
   dropCourse: {
     'zh-TW': '退出課程',
     'zh-CN': '退出课程'
@@ -314,4 +318,28 @@ export const translations: Translations = {
     'zh-TW': '最後更新：{{date}}',
     'zh-CN': '最后更新：{{date}}'
   },
+  courseToken: {
+    'zh-TW': '課程邀請碼',
+    'zh-CN': '课程邀请码'
+  },
+  invalidToken: {
+    'zh-TW': '密碼錯誤',
+    'zh-CN': '密码错误'
+  },
+  cancel: {
+    'zh-TW': '取消',
+    'zh-CN': '取消'
+  },
+  accessDenied: {
+    'zh-TW': '無法訪問課程',
+    'zh-CN': '无法访问课程'
+  },
+  pleaseRegisterFromHome: {
+    'zh-TW': '請從首頁註冊課程以訪問課程內容',
+    'zh-CN': '请从首页注册课程以访问课程内容'
+  },
+  goToHome: {
+    'zh-TW': '返回首頁',
+    'zh-CN': '返回首页'
+  }
 };

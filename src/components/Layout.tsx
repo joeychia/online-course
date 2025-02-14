@@ -160,58 +160,86 @@ export default function Layout({ children }: LayoutProps) {
                   component={RouterLink}
                   to="/courses?myCourses=true"
                   color="inherit"
-                  startIcon={<SchoolIcon />}
+                  startIcon={null}
                   sx={{
                     textDecoration: 'none',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: 'center',
+                    gap: { xs: 0.5, sm: 1 },
+                    minWidth: { xs: 'auto', sm: 'auto' },
+                    padding: { xs: '4px 8px', sm: '6px 16px' },
                     '&:hover': {
                       color: 'primary.light',
                     }
                   }}
                 >
-                  {t('myCourses')}
+                  <SchoolIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+                  <span>{t('myCourses')}</span>
                 </Button>
                 <Button
                   component={RouterLink}
                   to={"/notebook"}
                   color="inherit"
-                  startIcon={<NotesIcon />}
+                  startIcon={null}
                   sx={{
                     textDecoration: 'none',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: 'center',
+                    gap: { xs: 0.5, sm: 1 },
+                    minWidth: { xs: 'auto', sm: 'auto' },
+                    padding: { xs: '4px 8px', sm: '6px 16px' },
                     '&:hover': {
                       color: 'primary.light',
                     }
                   }}
                 >
-                  {t('myNotes')}
+                  <NotesIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+                  <span>{t('myNotes')}</span>
                 </Button>
                 <Button
                   component={RouterLink}
                   to={"/help"}
                   color="inherit"
-                  startIcon={<HelpOutlineIcon />}
+                  startIcon={null}
                   sx={{
                     textDecoration: 'none',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: 'center',
+                    gap: { xs: 0.5, sm: 1 },
+                    minWidth: { xs: 'auto', sm: 'auto' },
+                    padding: { xs: '4px 8px', sm: '6px 16px' },
                     '&:hover': {
                       color: 'primary.light',
                     }
                   }}
                 >
-                  {t('help')}
+                  <HelpOutlineIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+                  <span>{t('help')}</span>
                 </Button>
                 {isAdmin && (
                   <Button
                     component={RouterLink}
                     to="/admin"
                     color="inherit"
-                    startIcon={<AdminPanelSettingsIcon />}
+                    startIcon={null}
                     sx={{
                       textDecoration: 'none',
+                      display: 'flex',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      alignItems: 'center',
+                      gap: { xs: 0.5, sm: 1 },
+                      minWidth: { xs: 'auto', sm: 'auto' },
+                      padding: { xs: '4px 8px', sm: '6px 16px' },
                       '&:hover': {
                         color: 'primary.light',
                       }
                     }}
                   >
-                    Admin
+                    <AdminPanelSettingsIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+                    <span>Admin</span>
                   </Button>
                 )}
 

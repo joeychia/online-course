@@ -198,23 +198,6 @@ export default function CourseView() {
     setShowCompletionDialog(true);
   };
 
-  const handleRegisterCourse = async () => {
-    if (!currentUser || !courseId || !course) return;
-    
-    try {
-      await firestoreService.registerCourse(currentUser.uid, courseId);
-      setIsRegistered(true);
-
-      // Track course registration
-      analyticsService.trackCourseRegistration({
-        courseId: course.id,
-        courseName: course.name
-      });
-    } catch (err) {
-      console.error('Error registering for course:', err);
-    }
-  };
-
   const handleDropCourse = async () => {
     if (!currentUser || !courseId || !course) return;
     
@@ -254,53 +237,46 @@ export default function CourseView() {
         </Typography>
 
         {isRegistered ? (
-          <CourseProgress 
-            progress={userProgress} 
-            courseId={courseId}
-            units={units}
-            unitLessons={unitLessons}
-          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Box sx={{ flex: 1 }}>
+              <CourseProgress 
+                progress={userProgress} 
+                courseId={courseId}
+                units={units}
+                unitLessons={unitLessons}
+              />
+            </Box>
+            <Box sx={{ mt: 'auto', m:1, textAlign: 'left' }}>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleDropCourse}
+              >
+                {t('dropCourse')}
+              </Button>
+            </Box>
+          </Box>
         ) : (
-          <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
+          <Paper sx={{ p: 3, mb: 3, bgcolor: 'error.light' }}>
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" gutterBottom>
-                {t('registerCourseTitle')}
+              <Typography variant="h6" gutterBottom color="error.contrastText">
+                {t('accessDenied')}
               </Typography>
-              <Typography color="text.secondary" paragraph>
-                {t('registerCourseDescription')}
+              <Typography color="error.contrastText" paragraph>
+                {t('pleaseRegisterFromHome')}
               </Typography>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleRegisterCourse}
+                onClick={() => navigate('/')}
                 sx={{ mt: 2 }}
               >
-                {t('registerNow')}
+                {t('goToHome')}
               </Button>
             </Box>
           </Paper>
         )}
-
-        
       </Box>
-
-      {isRegistered && (
-        <Box sx={{ my: 6, pt: 2, borderTop: 1, borderColor: 'divider' }}>
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={handleDropCourse}
-            sx={{ 
-              color: 'text.secondary',
-              '&:hover': {
-                color: 'error.main',
-              }
-            }}
-          >
-            {t('dropCourse')}
-          </Button>
-        </Box>
-      )}
     </Box>
   );
 

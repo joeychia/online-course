@@ -4,6 +4,7 @@ export interface Course {
   description: string;
   settings: {
     unlockLessonIndex: number;
+    token?: string;
   };
   units: Array<{
     id: string;

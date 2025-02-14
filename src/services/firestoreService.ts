@@ -33,7 +33,7 @@ export class FirestoreService {
                 name: data.name as string,
                 description: data.description as string,
                 units: data.units as Array<{ id: string; name: string; lessons: Array<{ id: string; name: string }> }>,
-                settings: data.settings as { unlockLessonIndex: number },
+                settings: data.settings as { unlockLessonIndex: number; token: string },
                 groupIds: data.groupIds as Record<string, boolean>,
                 isPublic: data.isPublic as boolean | undefined
             };
@@ -50,7 +50,7 @@ export class FirestoreService {
             name: data.name as string,
             description: data.description as string,
             units: data.units as Array<{ id: string; name: string; lessons: Array<{ id: string; name: string }> }>,
-            settings: data.settings as { unlockLessonIndex: number },
+            settings: data.settings as { unlockLessonIndex: number; token: string },
             groupIds: data.groupIds as Record<string, boolean>,
             isPublic: data.isPublic as boolean | undefined
         };

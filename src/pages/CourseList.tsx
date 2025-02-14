@@ -17,6 +17,8 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import CloseIcon from '@mui/icons-material/Close';
@@ -27,6 +29,7 @@ import { useAuth } from '../contexts/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
 import MarkdownViewer from '../components/MarkdownViewer';
+import { firestoreService } from '../services/firestoreService';
 
 interface CourseCardProps {
   course: Course;
@@ -80,6 +83,11 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
+  const [tokenError, setTokenError] = useState(false);
+  const [courseToRegister, setCourseToRegister] = useState<Course | null>(null);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { t, language } = useTranslation();
@@ -100,6 +108,7 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
         } else {
           setCourses(coursesData);
         }
+        setUserProfile(userProfileData);
         setError(null);
       } catch (err) {
         setError(String(t('failedToLoadCourses')));
@@ -119,6 +128,55 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
   const handleDescriptionClick = (event: React.MouseEvent, course: Course) => {
     event.stopPropagation();
     setSelectedCourse(course);
+  };
+
+  const handleRegisterCourse = async (course: Course) => {
+    try {
+      if (!currentUser) return;
+
+      if (course.settings?.token) {
+        setCourseToRegister(course);
+        setTokenDialogOpen(true);
+        return;
+      }
+      
+      // Update user's registered courses in Firestore
+      const updatedProfile = {
+        ...userProfile,
+        registeredCourses: {
+          ...(userProfile?.registeredCourses || {}),
+          [course.id]: true
+        }
+      };
+      
+      await firestoreService.registerCourse(currentUser.uid, course.id);
+      setUserProfile(updatedProfile);
+      navigate(`/${course.id}`);
+    } catch (err) {
+      console.error('Error registering for course:', err);
+    }
+  };
+
+  const handleTokenSubmit = async () => {
+    if (!courseToRegister || !currentUser) return;
+
+    if (courseToRegister.settings?.token === tokenInput) {
+      // Token is correct, proceed with registration
+      try {
+        await firestoreService.registerCourse(currentUser.uid, courseToRegister.id);
+        const updatedProfile = await getUser(currentUser.uid);
+        setUserProfile(updatedProfile);
+        setTokenDialogOpen(false);
+        setTokenInput('');
+        setTokenError(false);
+        setCourseToRegister(null);
+        navigate(`/${courseToRegister.id}`);
+      } catch (err) {
+        console.error('Error registering for course:', err);
+      }
+    } else {
+      setTokenError(true);
+    }
   };
 
   if (loading) {
@@ -162,7 +220,6 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
             </Button>
           }
           sx={{ mb: 3, fontSize: 'var(--font-size-h6)' }}
-        
         >
           {t('signInMessage')}
         </Alert>
@@ -173,54 +230,59 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
       </Typography>
 
       <Grid container spacing={3}>
-        {courses.map((course) => (
-          <Grid item xs={12} sm={6} md={4} key={course.id}>
-            <Card 
-              sx={{ 
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                cursor: 'pointer',
-                '&:hover': {
-                  boxShadow: 6,
-                },
-              }}
-            >
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
-                  <Typography 
-                    variant="h6" 
-                    component="h2"
-                    sx={{ 
-                      flexGrow: 1,
-                      fontSize: 'var(--font-size-h6)',
-                    }}
-                  >
-                    {convertChinese(course.name, language)}
-                  </Typography>
+        {courses.map((course) => {
+          const isRegistered = userProfile?.registeredCourses?.[course.id];
+          
+          return (
+            <Grid item xs={12} sm={6} md={4} key={course.id}>
+              <Card 
+                sx={{ 
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography 
+                      variant="h6" 
+                      component="h2"
+                      sx={{ 
+                        flexGrow: 1,
+                        fontSize: 'var(--font-size-h6)',
+                      }}
+                    >
+                      {convertChinese(course.name, language)}
+                    </Typography>
+                  </Box>
                  
-                </Box>
-               
-                <Stack direction="row" spacing={2} justifyContent="space-between">
-                  <Button
-                    startIcon={<DescriptionIcon />}
-                    onClick={(e) => handleDescriptionClick(e, course)}
-                    size="small"
-                  >
-                    {t('viewDescription')}
-                  </Button>
-                  {currentUser && <Button
-                    onClick={() => navigate(`/${course.id}`)}
-                    size="small"
-                    variant="contained"
-                  >
-                    {t('enterCourse')}
-                  </Button>}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                  <Stack direction="row" spacing={2} justifyContent="space-between">
+                    <Button
+                      startIcon={<DescriptionIcon />}
+                      onClick={(e) => handleDescriptionClick(e, course)}
+                      size="small"
+                    >
+                      {t('viewDescription')}
+                    </Button>
+                    {currentUser && (
+                      <Button
+                        onClick={() => isRegistered ? navigate(`/${course.id}`) : handleRegisterCourse(course)}
+                        size="small"
+                        variant="contained"
+                      >
+                        {isRegistered ? t('enterCourse') : t('registerCourse')}
+                      </Button>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
 
       <Dialog
@@ -253,6 +315,52 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
             </DialogContent>
           </>
         )}
+      </Dialog>
+
+      <Dialog
+        open={tokenDialogOpen}
+        onClose={() => {
+          setTokenDialogOpen(false);
+          setTokenInput('');
+          setTokenError(false);
+          setCourseToRegister(null);
+        }}
+      >
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              autoFocus
+              fullWidth
+              label={t('courseToken')}
+              value={tokenInput}
+              onChange={(e) => {
+                setTokenInput(e.target.value);
+                setTokenError(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && tokenInput) {
+                  handleTokenSubmit();
+                }
+              }}
+              error={tokenError}
+              helperText={tokenError ? t('invalidToken') : ''}
+              type="text"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setTokenDialogOpen(false);
+            setTokenInput('');
+            setTokenError(false);
+            setCourseToRegister(null);
+          }}>
+            {t('cancel')}
+          </Button>
+          <Button onClick={handleTokenSubmit} variant="contained" disabled={!tokenInput}>
+            {t('submit')}
+          </Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );
