@@ -7,11 +7,15 @@ import {
   Button,
   TextField,
   Box,
-  Typography
+  Typography,
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import SaveIcon from '@mui/icons-material/Save';
 import { Unit } from '../../types';
-import { getUnit, updateUnit, createLesson } from '../../services/dataService';
+import { getUnit, updateUnit, createLesson, getCourse, updateCourse } from '../../services/dataService';
 import { LessonEditor } from './LessonEditor';
 import { AddLessonDialog } from './dialogs/AddLessonDialog';
 import { DeleteLessonDialog } from './dialogs/DeleteLessonDialog';
@@ -31,7 +35,10 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
 }) => {
   const [unit, setUnit] = useState<Unit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [localName, setLocalName] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
   const [newLessonName, setNewLessonName] = useState('');
@@ -56,6 +63,34 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
       console.error('Error loading unit:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!unit || localName.trim() === '') return;
+    
+    setIsSaving(true);
+    try {
+      // Update unit document
+      await updateUnit(unitId, { name: localName });
+
+      // Get and update parent course
+      const course = await getCourse(unit.courseId);
+      if (course) {
+        const updatedUnits = course.units.map((u: { id: string; name: string; lessons: Array<{ id: string; name: string }> }) => 
+          u.id === unitId ? { ...u, name: localName, lessons: u.lessons } : u
+        );
+        await updateCourse(unit.courseId, { units: updatedUnits });
+      }
+
+      setShowSuccess(true);
+      onSave(); // Call onSave to update parent
+      await loadUnit(); // Refresh local state
+    } catch (error) {
+      console.error('Error updating unit name:', error);
+      setShowError(true);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -114,22 +149,31 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
     <Dialog open={true} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Edit Unit: {isLoading ? 'Loading...' : unit?.name}</DialogTitle>
       <DialogContent>
-        <Box mb={3}>
-          <TextField
-            label="Unit Name"
-            fullWidth
-            value={localName}
-            disabled={isLoading}
-            onChange={(e) => setLocalName(e.target.value)}
-            onBlur={async () => {
-              try {
-                await updateUnit(unitId, { name: localName });
-                await loadUnit();
-              } catch (error) {
-                console.error('Error updating unit name:', error);
-              }
-            }}
-          />
+        <Box mt={1} mb={3}>
+          <Box display="flex" gap={2} alignItems="center">
+            <TextField
+              label="Unit Name"
+              fullWidth
+              size="small"
+              value={localName}
+              disabled={isLoading || isSaving}
+              onChange={(e) => setLocalName(e.target.value)}
+              onBlur={async () => {
+                if (unit && localName !== unit.name) {
+                  await handleSave();
+                }
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+              onClick={handleSave}
+              disabled={isLoading || isSaving || !unit || localName === unit?.name}
+            >
+              Save
+            </Button>
+          </Box>
         </Box>
 
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -178,6 +222,28 @@ export const UnitEditor: React.FC<UnitEditorProps> = ({
           onSave={loadUnit}
         />
       )}
+
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setShowSuccess(false)}>
+          Unit name saved successfully
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={showError}
+        autoHideDuration={3000}
+        onClose={() => setShowError(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setShowError(false)}>
+          Error saving unit name. Please try again.
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 };
