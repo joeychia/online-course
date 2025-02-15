@@ -189,21 +189,19 @@ export default function NavPanel({
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
   };
 
-  const isLessonAccessible = (lessonIndex: number, unitLessons: Array<{ id: string }>) => {
-
-    // If course has unlockLessonIndex, only that lesson is accessible in each unit
+  const isLessonAccessible = (lessonIndex: number, previousLessonId: string | null) => {
+    // If course has unlockLessonIndex, make that lesson accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
       if(lessonIndex === course.settings.unlockLessonIndex) {
         return true;
       }
     }
+    // If it's the first lesson, it's always accessible
+    if (lessonIndex === 1 && previousLessonId === null) {
+      return true;
+    }
 
-    // Otherwise use the default progression logic:
-    // First lesson of each unit is always accessible
-    if (lessonIndex === 1) return true;
-
-    // Other lessons require previous lesson to be completed
-    const previousLessonId = unitLessons[lessonIndex - 2]?.id;
+    // For other lessons, require previous lesson to be completed
     return previousLessonId ? progress[previousLessonId]?.completed : false;
   };
 
@@ -220,7 +218,7 @@ export default function NavPanel({
       onToggle();
     }
   };
-
+  let previousLessonId: string|null = null;
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
@@ -256,7 +254,6 @@ export default function NavPanel({
       <List sx={{ flex: 1, overflow: 'auto' }}>
         {units.map((unit) => {
           const lessons = unitLessons[unit.id] || [];
-
           return (
             <Box key={unit.id}>
               <StyledUnitListItem 
@@ -278,8 +275,9 @@ export default function NavPanel({
                     </Box>
                   ) : (
                     lessons.map((lesson, index) => {
-                      const isAccessible = isLessonAccessible(index + 1, lessons);
+                      const isAccessible = isLessonAccessible(index + 1, previousLessonId);
                       const isCompleted = progress[lesson.id]?.completed;
+                      previousLessonId = lesson.id;
 
                       return (
                         <StyledListItem

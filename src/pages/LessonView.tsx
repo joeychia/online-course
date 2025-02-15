@@ -265,6 +265,9 @@ const LessonView: React.FC<LessonViewProps> = ({
         });
         await saveQuizHistory(quiz.id, currentUser.uid, lesson.courseId, lesson.id, answers, correct, total);
         setQuizComplete(true);
+        setQuizOpen(false);
+        // complete the lesson
+        onComplete(lesson.id);
     } catch (err) {
       console.error('Error submitting quiz:', err);
     }
