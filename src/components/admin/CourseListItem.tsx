@@ -127,7 +127,7 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
           onClick={() => onEdit(course)}
           variant="contained"
           size="small"
-          color="secondary"
+          color="primary"
           title="Edit Course"
         >
           Edit
