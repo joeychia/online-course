@@ -25,6 +25,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Course } from '../../types';
 import { 
   getCourse, 
@@ -93,6 +95,7 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
     setIsSaving(true);
     try {
       const newUnitId = `unit_${Date.now()}`;
+      const newOrder = course.units.length;
       
       // Create the unit document in Firestore
       await createUnit(newUnitId, {
@@ -100,14 +103,16 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
         name: newUnitName,
         description: '',
         lessons: [],
-        courseId
+        courseId,
+        order: newOrder
       });
 
       // Update the course's units array
       const newUnit = {
         id: newUnitId,
         name: newUnitName,
-        lessons: []
+        lessons: [],
+        order: newOrder
       };
       const updatedUnits = [...(course.units || []), newUnit];
       await updateCourse(courseId, { units: updatedUnits });
@@ -175,19 +180,23 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
     try {
       const newLessonId = `lesson_${Date.now()}`;
       
+      const unit = course.units.find(u => u.id === selectedUnitForLesson);
+      const newOrder = unit?.lessons?.length || 0;
+
       await createLesson(newLessonId, {
         id: newLessonId,
         name: newLessonName,
         content: '',
         unitId: selectedUnitForLesson,
-        quizId: null
+        quizId: null,
+        order: newOrder
       });
 
-      const unit = course.units.find(u => u.id === selectedUnitForLesson);
       if (unit) {
         const newLesson = {
           id: newLessonId,
-          name: newLessonName
+          name: newLessonName,
+          order: newOrder
         };
         const updatedLessons = [...unit.lessons, newLesson];
         await updateUnit(selectedUnitForLesson, { lessons: updatedLessons });
@@ -213,13 +222,72 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
     try {
       const unit = course.units.find(u => u.id === unitId);
       if (unit) {
-        const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonId);
+        const updatedLessons = unit.lessons.filter(lesson => lesson.id !== lessonId)
+          .map((lesson, index) => ({ ...lesson, order: index }));
         await updateUnit(unitId, { lessons: updatedLessons });
         await loadCourse();
         setShowSuccess(true);
       }
     } catch (error) {
       console.error('Error deleting lesson:', error);
+      setShowError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const onDragEnd = async (result: DropResult) => {
+    if (!result.destination || !course) return;
+
+    const { source, destination, type } = result;
+    if (source.index === destination.index && source.droppableId === destination.droppableId) return;
+
+    setIsSaving(true);
+    try {
+      if (type === 'unit') {
+        const newUnits = Array.from(course.units);
+        const [removed] = newUnits.splice(source.index, 1);
+        newUnits.splice(destination.index, 0, removed);
+
+        // Update order for all affected units
+        const updatedUnits = newUnits.map((unit, index) => ({
+          ...unit,
+          order: index
+        }));
+
+        // Update course with new unit order
+        await updateCourse(courseId, { units: updatedUnits });
+        
+        // Update individual unit documents
+        await Promise.all(
+          updatedUnits.map(unit => 
+            updateUnit(unit.id, { order: unit.order })
+          )
+        );
+      } else if (type === 'lesson') {
+        const unitId = source.droppableId;
+        const unit = course.units.find(u => u.id === unitId);
+        
+        if (unit) {
+          const newLessons = Array.from(unit.lessons);
+          const [removed] = newLessons.splice(source.index, 1);
+          newLessons.splice(destination.index, 0, removed);
+
+          // Update order for all affected lessons
+          const updatedLessons = newLessons.map((lesson, index) => ({
+            ...lesson,
+            order: index
+          }));
+
+          // Update unit with new lesson order
+          await updateUnit(unitId, { lessons: updatedLessons });
+        }
+      }
+
+      await loadCourse();
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Error reordering:', error);
       setShowError(true);
     } finally {
       setIsSaving(false);
@@ -263,134 +331,198 @@ export const CourseEditor: React.FC<{ courseId: string }> = ({ courseId }) => {
         </Box>
       </Box>
 
-      {course?.units?.map((unit) => (
-        <Accordion 
-          key={unit.id} 
-          sx={{ mb: 1 }}
-          expanded={expandedUnits.includes(unit.id)}
-          onChange={(_, isExpanded) => {
-            setExpandedUnits(prev => 
-              isExpanded 
-                ? [...prev, unit.id]
-                : prev.filter(id => id !== unit.id)
-            );
-          }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: 2 }}>
-              {editingUnitId === unit.id ? (
-                <TextField
-                  size="small"
-                  value={editingUnitName}
-                  onChange={(e) => setEditingUnitName(e.target.value)}
-                  onBlur={() => handleSaveUnitName(unit.id)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveUnitName(unit.id);
-                    }
-                  }}
-                  autoFocus
-                  sx={{ flexGrow: 1 }}
-                />
-              ) : (
-                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{unit.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ({unit.lessons?.length || 0} {unit.lessons?.length === 1 ? 'lesson' : 'lessons'})
-                  </Typography>
-                </Box>
-              )}
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton 
-                  size="small" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingUnitId(unit.id);
-                    setEditingUnitName(unit.name);
-                  }}
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton 
-                  size="small" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteUnit(unit.id);
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-                <Tooltip title="View Quiz Results">
-                  <IconButton
-                    size="small"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        const lessons = await getLessonsIdNameForUnit(unit.id);
-                        if (lessons && lessons.length > 0) {
-                          const lastLesson = lessons[lessons.length - 1];
-                          setSelectedQuizUnit({ unitId: unit.id, lessonId: lastLesson.id });
-                        }
-                      } catch (error) {
-                        console.error('Error loading lessons for quiz results:', error);
-                      }
-                    }}
-                  >
-                    <AssessmentIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box mb={2}>
-              <Button
-                startIcon={<AddIcon />}
-                variant="outlined"
-                size="small"
-                onClick={() => {
-                  setSelectedUnitForLesson(unit.id);
-                  setIsLessonDialogOpen(true);
-                }}
-                disabled={isSaving}
-              >
-                Add Lesson
-              </Button>
-            </Box>
-            <List>
-              {unit.lessons?.map((lesson) => (
-                <ListItem
-                  key={lesson.id}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid #eee'
-                  }}
-                >
-                  <Typography>{lesson.name}</Typography>
-                  <Box>
-                    <IconButton 
-                      size="small"
-                      onClick={() => {
-                        setSelectedLesson(lesson.id);
-                        setSelectedUnitForLesson(unit.id);
-                      }}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="units" type="unit">
+          {(droppableProvided) => (
+            <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
+              {course?.units?.sort((a, b) => a.order - b.order).map((unit, index) => (
+                <Draggable key={unit.id} draggableId={unit.id} index={index}>
+                  {(draggableProvided, snapshot) => (
+                    <div
+                      ref={draggableProvided.innerRef}
+                      {...draggableProvided.draggableProps}
                     >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton 
-                      size="small"
-                      onClick={() => handleDeleteLesson(unit.id, lesson.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </ListItem>
+                      <Accordion 
+                        sx={{ 
+                          mb: 1,
+                          transition: 'box-shadow 0.2s',
+                          ...(snapshot.isDragging && {
+                            boxShadow: '0 5px 10px rgba(0,0,0,0.2) !important'
+                          })
+                        }}
+                        expanded={expandedUnits.includes(unit.id)}
+                        onChange={(_, isExpanded) => {
+                          setExpandedUnits(prev => 
+                            isExpanded 
+                              ? [...prev, unit.id]
+                              : prev.filter(id => id !== unit.id)
+                          );
+                        }}
+                      >
+                        <AccordionSummary 
+                          expandIcon={<ExpandMoreIcon />}
+                          {...draggableProvided.dragHandleProps}
+                          sx={{
+                            '& .MuiAccordionSummary-content': {
+                              alignItems: 'center'
+                            }
+                          }}
+                        >
+                          <DragIndicatorIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                          <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: 2 }}>
+                            {editingUnitId === unit.id ? (
+                              <TextField
+                                size="small"
+                                value={editingUnitName}
+                                onChange={(e) => setEditingUnitName(e.target.value)}
+                                onBlur={() => handleSaveUnitName(unit.id)}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleSaveUnitName(unit.id);
+                                  }
+                                }}
+                                autoFocus
+                                sx={{ flexGrow: 1 }}
+                              />
+                            ) : (
+                              <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography>{unit.name}</Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  ({unit.lessons?.length || 0} {unit.lessons?.length === 1 ? 'lesson' : 'lessons'})
+                                </Typography>
+                              </Box>
+                            )}
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                              <IconButton 
+                                size="small" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingUnitId(unit.id);
+                                  setEditingUnitName(unit.name);
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton 
+                                size="small" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteUnit(unit.id);
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                              <Tooltip title="View Quiz Results">
+                                <IconButton
+                                  size="small"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const lessons = await getLessonsIdNameForUnit(unit.id);
+                                      if (lessons && lessons.length > 0) {
+                                        const lastLesson = lessons[lessons.length - 1];
+                                        setSelectedQuizUnit({ unitId: unit.id, lessonId: lastLesson.id });
+                                      }
+                                    } catch (error) {
+                                      console.error('Error loading lessons for quiz results:', error);
+                                    }
+                                  }}
+                                >
+                                  <AssessmentIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Box mb={2}>
+                            <Button
+                              startIcon={<AddIcon />}
+                              variant="outlined"
+                              size="small"
+                              onClick={() => {
+                                setSelectedUnitForLesson(unit.id);
+                                setIsLessonDialogOpen(true);
+                              }}
+                              disabled={isSaving}
+                            >
+                              Add Lesson
+                            </Button>
+                          </Box>
+                          <Droppable droppableId={unit.id} type="lesson">
+                            {(lessonDroppableProvided) => (
+                              <List
+                                ref={lessonDroppableProvided.innerRef}
+                                {...lessonDroppableProvided.droppableProps}
+                              >
+                                {unit.lessons?.sort((a, b) => a.order - b.order).map((lesson, lessonIndex) => (
+                                  <Draggable
+                                    key={lesson.id}
+                                    draggableId={lesson.id}
+                                    index={lessonIndex}
+                                  >
+                                    {(lessonDraggableProvided, lessonSnapshot) => (
+                                      <ListItem
+                                        ref={lessonDraggableProvided.innerRef}
+                                        {...lessonDraggableProvided.draggableProps}
+                                        sx={{
+                                          display: 'flex',
+                                          justifyContent: 'space-between',
+                                          borderBottom: '1px solid #eee',
+                                          bgcolor: lessonSnapshot.isDragging ? 'action.hover' : 'transparent',
+                                          '& .dragHandle': {
+                                            visibility: 'hidden'
+                                          },
+                                          '&:hover .dragHandle': {
+                                            visibility: 'visible'
+                                          }
+                                        }}
+                                      >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                          <Box
+                                            {...lessonDraggableProvided.dragHandleProps}
+                                            className="dragHandle"
+                                          >
+                                            <DragIndicatorIcon sx={{ color: 'text.secondary' }} />
+                                          </Box>
+                                          <Typography>{lesson.name}</Typography>
+                                        </Box>
+                                        <Box>
+                                          <IconButton 
+                                            size="small"
+                                            onClick={() => {
+                                              setSelectedLesson(lesson.id);
+                                              setSelectedUnitForLesson(unit.id);
+                                            }}
+                                          >
+                                            <EditIcon />
+                                          </IconButton>
+                                          <IconButton 
+                                            size="small"
+                                            onClick={() => handleDeleteLesson(unit.id, lesson.id)}
+                                          >
+                                            <DeleteIcon />
+                                          </IconButton>
+                                        </Box>
+                                      </ListItem>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {lessonDroppableProvided.placeholder}
+                              </List>
+                            )}
+                          </Droppable>
+                        </AccordionDetails>
+                      </Accordion>
+                    </div>
+                  )}
+                </Draggable>
               ))}
-            </List>
-          </AccordionDetails>
-        </Accordion>
-      ))}
+              {droppableProvided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {/* Dialogs */}
       <Dialog open={isUnitDialogOpen} onClose={() => setIsUnitDialogOpen(false)}>

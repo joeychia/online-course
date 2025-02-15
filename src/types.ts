@@ -10,9 +10,11 @@ export interface Course {
   units: Array<{
     id: string;
     name: string;
+    order: number;
     lessons: Array<{
       id: string;
       name: string;
+      order: number;
     }>;
   }>;
   groupIds: Record<string, boolean>;
@@ -24,9 +26,11 @@ export interface Unit {
   courseId: string;
   name: string;
   description: string;
+  order: number;
   lessons: Array<{
     id: string;
     name: string;
+    order: number;
   }>;
 }
 
@@ -35,6 +39,7 @@ export interface Lesson {
   unitId: string;
   name: string;
   content: string;
+  order: number;
   "video-title"?: string;
   "video-url"?: string;
   quizId: string | null;

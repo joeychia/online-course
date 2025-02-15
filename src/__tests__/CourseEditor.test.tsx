@@ -22,6 +22,7 @@ const mockCourse: Course = {
     {
       id: 'unit_1',
       name: 'Unit 1',
+      order: 0,
       lessons: []
     }
   ],
@@ -41,6 +42,7 @@ describe('CourseEditor', () => {
       name: 'Unit 1',
       courseId: 'course_1',
       description: 'Test Unit Description',
+      order: 0,
       lessons: []
     });
   });
@@ -125,7 +127,8 @@ describe('CourseEditor', () => {
           name: 'New Unit',
           description: '',
           lessons: [],
-          courseId: 'course_1'
+          courseId: 'course_1',
+          order: expect.any(Number)
         })
       );
 
@@ -134,7 +137,8 @@ describe('CourseEditor', () => {
         units: expect.arrayContaining([
           expect.objectContaining({
             name: 'New Unit',
-            lessons: []
+            lessons: [],
+            order: expect.any(Number)
           })
         ])
       });
@@ -260,6 +264,22 @@ describe('CourseEditor', () => {
       // Click again to collapse
       await user.click(screen.getByText('Collapse All'));
       expect(screen.getByText('Expand All')).toBeInTheDocument();
+    });
+  });
+
+  describe('Drag and Drop functionality', () => {
+    it('reorders units when dragged', async () => {
+      const user = userEvent.setup();
+      render(<CourseEditor courseId="course_1" />);
+
+      // TODO: Implement drag and drop test
+    });
+
+    it('updates backend after unit reordering', async () => {
+      const user = userEvent.setup();
+      render(<CourseEditor courseId="course_1" />);
+
+      // TODO: Implement reordering persistence test
     });
   });
 });
