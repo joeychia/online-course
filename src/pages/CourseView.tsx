@@ -37,7 +37,7 @@ export default function CourseView() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(window.innerWidth >= 600);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
