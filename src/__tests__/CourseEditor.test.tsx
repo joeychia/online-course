@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourseEditor } from '../components/admin/CourseEditor';
-import { getCourse, updateCourse, createUnit, getUnit } from '../services/dataService';
+import { getCourse, updateCourse, createUnit, getUnit, updateUnit } from '../services/dataService';
 import type { Course } from '../types';
 
 // Mock services
@@ -10,17 +10,8 @@ vi.mock('../services/dataService', () => ({
   getCourse: vi.fn(),
   updateCourse: vi.fn(),
   createUnit: vi.fn(),
-  getUnit: vi.fn()
-}));
-
-// Mock UnitEditor component
-vi.mock('../components/admin/UnitEditor', () => ({
-  UnitEditor: ({ onClose, onSave }: { onClose: () => void; onSave: () => void }) => (
-    <div data-testid="unit-editor">
-      <button onClick={onClose}>Close</button>
-      <button onClick={onSave}>Save</button>
-    </div>
-  )
+  getUnit: vi.fn(),
+  updateUnit: vi.fn()
 }));
 
 const mockCourse: Course = {
@@ -59,9 +50,9 @@ describe('CourseEditor', () => {
 
     expect(getCourse).toHaveBeenCalledWith('course_1');
     await waitFor(() => {
-      // Find the Typography element containing "Unit 1"
-      const unitElement = screen.getByRole('heading', { name: 'Unit 1' });
-      expect(unitElement).toBeInTheDocument();
+      expect(screen.getByText('Test Course')).toBeInTheDocument();
+      expect(screen.getByText('Unit 1')).toBeInTheDocument();
+      expect(screen.getByText('(0 lessons)')).toBeInTheDocument();
     });
   });
 
@@ -69,7 +60,8 @@ describe('CourseEditor', () => {
     vi.mocked(getCourse).mockImplementation(() => new Promise(() => {}));
     render(<CourseEditor courseId="course_1" />);
 
-    expect(screen.queryByRole('heading', { name: 'Unit 1' })).not.toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.queryByText('Unit 1')).not.toBeInTheDocument();
   });
 
   it('handles error when loading course fails', async () => {
@@ -83,7 +75,7 @@ describe('CourseEditor', () => {
       expect(consoleError).toHaveBeenCalledWith('Error loading course:', error);
     });
 
-    expect(screen.queryByRole('heading', { name: 'Unit 1' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Unit 1')).not.toBeInTheDocument();
     consoleError.mockRestore();
   });
 
@@ -179,7 +171,7 @@ describe('CourseEditor', () => {
 
       // Wait for course data to load and unit to appear
       await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+        expect(screen.getByText('Unit 1')).toBeInTheDocument();
       });
 
       const deleteButtons = screen.getAllByTestId('DeleteIcon');
@@ -193,7 +185,7 @@ describe('CourseEditor', () => {
 
       // Wait for course data to load and unit to appear
       await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+        expect(screen.getByText('Unit 1')).toBeInTheDocument();
       });
 
       const deleteButtons = screen.getAllByTestId('DeleteIcon');
@@ -214,7 +206,7 @@ describe('CourseEditor', () => {
 
       // Wait for course data to load and unit to appear
       await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+        expect(screen.getByText('Unit 1')).toBeInTheDocument();
       });
 
       const deleteButtons = screen.getAllByTestId('DeleteIcon');
@@ -227,60 +219,47 @@ describe('CourseEditor', () => {
     });
   });
 
-  describe('Unit editor integration', () => {
-    it('opens unit editor when clicking edit button', async () => {
+  describe('Unit management', () => {
+    it('allows inline editing of unit name', async () => {
+      const user = userEvent.setup();
       render(<CourseEditor courseId="course_1" />);
 
-      // Wait for course data to load and unit to appear
       await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+        expect(screen.getByText('Unit 1')).toBeInTheDocument();
       });
 
+      // Start editing
       const editButtons = screen.getAllByTestId('EditIcon');
-      fireEvent.click(editButtons[0]);
+      await user.click(editButtons[0]);
 
-      expect(screen.getByTestId('unit-editor')).toBeInTheDocument();
+      // Edit name
+      const input = screen.getByRole('textbox');
+      await user.clear(input);
+      await user.type(input, 'Updated Unit Name{enter}');
+
+      // Verify updates
+      expect(updateUnit).toHaveBeenCalledWith('unit_1', { name: 'Updated Unit Name' });
+      expect(updateCourse).toHaveBeenCalled();
     });
 
-    it('closes unit editor', async () => {
+    it('handles expand/collapse all units', async () => {
+      const user = userEvent.setup();
       render(<CourseEditor courseId="course_1" />);
 
-      // Wait for course data to load and unit to appear
       await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
+        expect(screen.getByText('Unit 1')).toBeInTheDocument();
       });
 
-      // Open editor
-      const editButtons = screen.getAllByTestId('EditIcon');
-      fireEvent.click(editButtons[0]);
+      // Initially button should show "Expand All"
+      const toggleButton = screen.getByText('Expand All');
+      await user.click(toggleButton);
 
-      // Close editor
-      const closeButton = screen.getByText('Close');
-      fireEvent.click(closeButton);
+      // Should now show "Collapse All"
+      expect(screen.getByText('Collapse All')).toBeInTheDocument();
 
-      expect(screen.queryByTestId('unit-editor')).not.toBeInTheDocument();
-    });
-
-    it('reloads course after unit editor saves', async () => {
-      render(<CourseEditor courseId="course_1" />);
-
-      // Wait for course data to load and unit to appear
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Unit 1' })).toBeInTheDocument();
-      });
-
-      // Open editor
-      const editButtons = screen.getAllByTestId('EditIcon');
-      fireEvent.click(editButtons[0]);
-
-      // Clear previous calls to getCourse (from initial load)
-      vi.mocked(getCourse).mockClear();
-
-      // Save changes
-      const saveButton = screen.getByText('Save');
-      fireEvent.click(saveButton);
-
-      expect(getCourse).toHaveBeenCalledWith('course_1');
+      // Click again to collapse
+      await user.click(screen.getByText('Collapse All'));
+      expect(screen.getByText('Expand All')).toBeInTheDocument();
     });
   });
 });
