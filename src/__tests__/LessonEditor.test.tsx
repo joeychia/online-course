@@ -44,16 +44,6 @@ const mockLessonWithVideo: Lesson = {
   quizId: null
 };
 
-// Mock lesson without video fields
-const mockLessonWithoutVideo: Lesson = {
-  id: 'lesson1',
-  unitId: 'unit1',
-  name: TEST_DATA.LESSON_NAME,
-  content: TEST_DATA.CONTENT,
-  order: 0,
-  quizId: null
-};
-
 describe('LessonEditor', () => {
   const mockOnClose = vi.fn();
   const mockOnSave = vi.fn();
@@ -255,13 +245,8 @@ describe('LessonEditor', () => {
   });
 
   describe('Video Fields Handling', () => {
-    it('fails when saving with undefined video fields', async () => {
-      vi.mocked(getLesson).mockResolvedValue(mockLessonWithoutVideo);
-      vi.mocked(updateLesson).mockRejectedValue(new Error(
-        "FirebaseError: Function updateDoc() called with invalid data. Unsupported field value: undefined (found in field `video-title` in document lessons/lesson_1)"
-      ));
+    it('should save successfully when video fields are empty', async () => {
       const user = userEvent.setup();
-      
       render(
         <LessonEditor
           unitId="unit_1"
@@ -271,33 +256,7 @@ describe('LessonEditor', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(screen.getByText('Save')).toBeInTheDocument();
-      });
-
-      // Save without modifying video fields
-      await user.click(screen.getByText('Save'));
-
-      // Verify the error is thrown and save/close are not called
-      expect(mockOnSave).not.toHaveBeenCalled();
-      expect(mockOnClose).not.toHaveBeenCalled();
-    });
-
-    it('fails when saving with empty video fields', async () => {
-      const user = userEvent.setup();
-      vi.mocked(updateLesson).mockRejectedValue(new Error(
-        "FirebaseError: Function updateDoc() called with invalid data. Unsupported field value: undefined (found in field `video-title` in document lessons/lesson_1)"
-      ));
-      
-      render(
-        <LessonEditor
-          unitId="unit_1"
-          lessonId="lesson_1"
-          onClose={mockOnClose}
-          onSave={mockOnSave}
-        />
-      );
-
+      // Wait for form to load
       await waitFor(() => {
         expect(screen.getByLabelText('Video Title')).toBeInTheDocument();
         expect(screen.getByLabelText('Video URL')).toBeInTheDocument();
@@ -309,14 +268,18 @@ describe('LessonEditor', () => {
       await user.clear(titleInput);
       await user.clear(urlInput);
 
-      // Save with cleared fields
+      // Try to save
       await user.click(screen.getByText('Save'));
 
-      // Verify the error is thrown and save/close are not called
-      expect(mockOnSave).not.toHaveBeenCalled();
-      expect(mockOnClose).not.toHaveBeenCalled();
+      // Verify save was successful
+      expect(updateLesson).toHaveBeenCalledWith('lesson_1', {
+        name: TEST_DATA.LESSON_NAME,
+        content: TEST_DATA.CONTENT,
+        quizId: null
+      });
+      expect(mockOnSave).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
     });
-
   });
 
   describe('Error Handling', () => {

@@ -48,18 +48,67 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
     if (!lesson) return;
 
     try {
-      await updateLesson(lessonId, {
-        name: lesson.name,
-        content: lesson.content,
-        'video-title': lesson['video-title'],
-        'video-url': lesson['video-url'],
-        quizId: lesson.quizId
-      });
+      // Start with required fields
+      const { name, content, quizId } = lesson;
+      const updateData: Partial<Lesson> = { name, content, quizId };
+
+      // Only include video fields if they exist and are non-empty strings
+      if (typeof lesson['video-title'] === 'string' && lesson['video-title'].length > 0) {
+        updateData['video-title'] = lesson['video-title'];
+      }
+      if (typeof lesson['video-url'] === 'string' && lesson['video-url'].length > 0) {
+        updateData['video-url'] = lesson['video-url'];
+      }
+
+      await updateLesson(lessonId, updateData);
       onSave();
       onClose();
     } catch (error) {
       console.error('Error saving lesson:', error);
     }
+  };
+
+  const handleVideoFieldChange = (field: 'video-title' | 'video-url', value: string) => {
+    setLesson(prev => {
+      if (!prev) return null;
+
+      // Create a new lesson object without the video fields
+      const { ['video-title']: _, ['video-url']: __, ...baseLesson } = prev;
+
+      // Only add back non-empty video fields
+      const updates: Partial<Lesson> = {};
+      
+      // Handle video title changes
+      if (field === 'video-title') {
+        // Add new video title if it has a value
+        if (value.length > 0) {
+          updates['video-title'] = value;
+        }
+        // Preserve existing video URL if it exists
+        const existingUrl = prev['video-url'];
+        if (existingUrl && existingUrl.length > 0) {
+          updates['video-url'] = existingUrl;
+        }
+      }
+      
+      // Handle video URL changes
+      if (field === 'video-url') {
+        // Add new video URL if it has a value
+        if (value.length > 0) {
+          updates['video-url'] = value;
+        }
+        // Preserve existing video title if it exists
+        const existingTitle = prev['video-title'];
+        if (existingTitle && existingTitle.length > 0) {
+          updates['video-title'] = existingTitle;
+        }
+      }
+
+      return {
+        ...baseLesson,
+        ...updates
+      } as Lesson;
+    });
   };
 
   return (
@@ -70,27 +119,27 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
           <TextField
             label="Lesson Name"
             fullWidth
-            value={lesson?.name || ''}
+            value={lesson?.name ?? ''}
             onChange={(e) => setLesson(prev => prev ? { ...prev, name: e.target.value } : null)}
           />
           
           <TextField
             label="Video Title"
             fullWidth
-            value={lesson?.['video-title'] || ''}
-            onChange={(e) => setLesson(prev => prev ? { ...prev, 'video-title': e.target.value } : null)}
+            value={lesson?.['video-title'] ?? ''}
+            onChange={(e) => handleVideoFieldChange('video-title', e.target.value)}
           />
 
           <TextField
             label="Video URL"
             fullWidth
-            value={lesson?.['video-url'] || ''}
-            onChange={(e) => setLesson(prev => prev ? { ...prev, 'video-url': e.target.value } : null)}
+            value={lesson?.['video-url'] ?? ''}
+            onChange={(e) => handleVideoFieldChange('video-url', e.target.value)}
           />
 
           <Box>
             <RichTextEditor
-              value={lesson?.content || ''}
+              value={lesson?.content ?? ''}
               onChange={(content) => setLesson(prev => prev ? { ...prev, content } : null)}
             />
           </Box>

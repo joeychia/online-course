@@ -1,0 +1,1 @@
+`npm run test:auto` (or `npm run test:auto <test_file_path>` for single test file) to run unit tests
