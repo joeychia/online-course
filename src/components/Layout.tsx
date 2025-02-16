@@ -149,8 +149,8 @@ export default function Layout({ children }: LayoutProps) {
             display: 'flex', 
             justifyContent: 'space-between', 
             px: { xs: 1, sm: 2 },
-            height: 56,
-            minHeight: 56,
+            height: 62,
+            minHeight: 52,
             overflowX: 'auto',
             '&::-webkit-scrollbar': {
               display: 'none'

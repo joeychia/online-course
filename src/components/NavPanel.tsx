@@ -10,6 +10,7 @@ import {
   Stack,
   Drawer,
   CircularProgress,
+  Button,
 } from '@mui/material';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -57,7 +58,7 @@ const StyledUnitListItem = styled(ListItemButton)(({ theme }) => ({
 
 // Export the constants
 export const DRAWER_WIDTH = 350;
-export const TOOLBAR_HEIGHT = 56;
+export const TOOLBAR_HEIGHT = 62;
 
 interface NavPanelProps {
   course: Course;
@@ -81,6 +82,7 @@ export default function NavPanel({
   onToggle,
 }: NavPanelProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { language } = useTranslation();
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>(
     units.reduce((acc, unit) => ({ 
@@ -221,37 +223,98 @@ export default function NavPanel({
   let previousLessonId: string|null = null;
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, overflow: 'hidden' }}>
-          <Box 
-            sx={{ 
-              flex: 1, 
-              overflow: 'hidden',
-              '&:hover': {
-                cursor: 'pointer',
-                '& h1': {
-                  color: 'primary.main',
-                }
-              }
-            }}
-            onClick={() => navigate(`/${course.id}`)}
-          >
-            <Typography 
-              variant="h6" 
-              component="h4" 
-              noWrap 
-              sx={{ 
-                transition: 'color 0.2s',
-                fontSize: 'var(--font-size-h6)',
-              }}
-            >
-              {convertChinese(course.name, language)}
-            </Typography>
-           
-          </Box>
-        </Stack>
-      </Box>
-      <List sx={{ flex: 1, overflow: 'auto' }}>
+      {units.length > 50 && (
+        <Box sx={{ 
+          p: 1, 
+          borderBottom: 1, 
+          borderColor: 'divider',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 2
+        }}>
+          <Typography variant="subtitle2" sx={{ fontSize: 'var(--font-size-body)', fontWeight: 300, whiteSpace: 'nowrap' }}>
+            {t('quickJump')}
+          </Typography>
+          <Box sx={{
+            display: 'flex',
+            gap: { xs: 0.5, sm: 1 },
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            '-webkit-overflow-scrolling': 'touch',
+            '&::-webkit-scrollbar': {
+              display: 'none'
+            },
+            width: '100%',
+            flexWrap: 'nowrap',
+            py: { xs: 0.5, sm: 1 },
+            px: { xs: 1, sm: 0 }
+          }}
+        >
+          {Array.from({ length: Math.ceil(units.length / 30) }, (_, index) => {
+            const startUnit = index * 30 + 1;
+            return (
+              <Button
+                key={index}
+                size="small"
+                variant="outlined"
+                onClick={() => {
+                  const unitElement = document.querySelector(
+                    `[data-testid="unit-button-${units[index * 30].id}"]`
+                  );
+                  if (unitElement) {
+                    // Expand the unit when jumping to it
+                    setExpandedUnits(prev => ({ ...prev, [units[index * 30].id]: true }));
+                    
+                    // Wait for unit expansion and DOM update
+                    setTimeout(() => {
+                      const unitElement = document.querySelector(`[data-testid="unit-button-${units[index * 30].id}"]`);
+                      if (unitElement) {
+
+                        // Scroll the container instead of the window
+                          unitElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                          });
+                      }
+                    }, 100);
+                  }
+                }}
+                sx={{ 
+                  minWidth: '40px',
+                  height: '32px',
+                  whiteSpace: 'nowrap',
+                  fontSize: 'var(--font-size-body)',
+                  padding: '4px 8px',
+                  touchAction: 'manipulation',
+                  '&:active': {
+                    transform: 'scale(0.95)',
+                    transition: 'transform 0.1s'
+                  }
+                }}
+              >
+                {startUnit > 1 ? startUnit-1 : t('initUnit')}～
+              </Button>
+            );
+          })}
+        </Box>
+        </Box>
+      )}
+
+      <List sx={{ 
+        flex: 1, 
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        height: '100%',
+        '&::-webkit-scrollbar': {
+          display: 'none'
+        },
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'none'
+      }}>
         {units.map((unit) => {
           const lessons = unitLessons[unit.id] || [];
           return (
@@ -267,7 +330,7 @@ export default function NavPanel({
                 />
                 {expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />}
               </StyledUnitListItem>
-              <Collapse in={expandedUnits[unit.id]} timeout="auto" unmountOnExit>
+              <Collapse in={expandedUnits[unit.id]} timeout="auto">
                 <List component="div" disablePadding>
                   {loading[unit.id] ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
@@ -323,54 +386,43 @@ export default function NavPanel({
       sx={{
         width: { sm: isOpen ? DRAWER_WIDTH : 0 },
         flexShrink: { sm: 0 },
-        transition: theme => theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
       }}
     >
-      {/* Mobile Drawer */}
+      {/* Responsive Drawer */}
       <Drawer
         variant="temporary"
+        anchor="left"
         open={isOpen}
         onClose={onToggle}
         ModalProps={{ keepMounted: true }}
         sx={{
-          display: { xs: 'block', sm: 'none' },
           '& .MuiDrawer-paper': { 
             boxSizing: 'border-box', 
-            width: DRAWER_WIDTH,
+            width: { xs: '100%', sm: DRAWER_WIDTH },
+            maxWidth: { xs: '100%', sm: DRAWER_WIDTH },
             borderRight: 1,
             borderColor: 'divider',
-            mt: `${TOOLBAR_HEIGHT}px`,
-            height: '100%',
-            overflowX: 'hidden',
-          },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
-
-      {/* Desktop Drawer */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: 'none', sm: 'block' },
-          '& .MuiDrawer-paper': { 
-            boxSizing: 'border-box', 
-            width: DRAWER_WIDTH,
-            borderRight: 1,
-            borderColor: 'divider',
-            mt: `${TOOLBAR_HEIGHT}px`,
-            height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
-            overflowX: 'hidden',
-            transform: isOpen ? 'none' : `translateX(-${DRAWER_WIDTH}px)`,
-            visibility: isOpen ? 'visible' : 'hidden',
-            transition: theme => theme.transitions.create(['transform', 'visibility'], {
+            mt:  `${TOOLBAR_HEIGHT}px` ,
+            height: { 
+              xs: `calc(100% - ${TOOLBAR_HEIGHT}px)`,
+              sm: `calc(100vh - ${TOOLBAR_HEIGHT}px)`
+            },
+            position: 'fixed',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            '&::-webkit-scrollbar': {
+              display: 'none'
+            },
+            display: 'flex',
+            flexDirection: 'column',
+            transition: theme => theme.transitions.create(['transform'], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
-          },
+            transform: isOpen ? 'none' : `translateX(-${DRAWER_WIDTH}px)`,
+          }
         }}
       >
         {drawerContent}

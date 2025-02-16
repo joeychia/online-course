@@ -362,4 +362,12 @@ export const translations: Translations = {
     'zh-TW': '管理員',
     'zh-CN': '管理员'
   },
+  quickJump: {
+    'zh-TW': '快速跳轉',
+    'zh-CN': '快速跳转'
+  },
+  initUnit: {
+    'zh-TW': '起始',
+    'zh-CN': '起始'
+  }
 };
