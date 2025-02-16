@@ -2,17 +2,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '../services/authService';
 import { firestoreService } from '../services/firestoreService';
-import { UserProfile } from '../types';
-
-export interface AuthContextType {
-    currentUser: FirebaseUser | null;
-    userProfile: UserProfile | null;
-    loading: boolean;
-    signIn: (email: string, password: string) => Promise<FirebaseUser>;
-    signInWithGoogle: () => Promise<FirebaseUser>;
-    signUp: (email: string, password: string) => Promise<FirebaseUser>;
-    signOut: () => Promise<void>;
-}
+import { AuthContextType, UserProfile } from '../types';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -20,10 +10,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
         const unsubscribe = authService.onAuthStateChanged(async (user) => {
             setCurrentUser(user);
+            setIsAuthenticated(!!user);
             if (user) {
                 try {
                     const profile = await firestoreService.getUserById(user.uid);
@@ -57,8 +49,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const value: AuthContextType = {
-        currentUser,
+        currentUser: currentUser ? {
+            id: currentUser.uid,
+            name: currentUser.displayName || 'Anonymous'
+        } : null,
         userProfile,
+        isAuthenticated,
         loading,
         signIn: authService.signIn,
         signInWithGoogle: authService.signInWithGoogle,
@@ -71,4 +67,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             {!loading && children}
         </AuthContext.Provider>
     );
-}; 
+};
