@@ -81,6 +81,9 @@ export default function CourseView() {
           if (userData) {
             setUserProgress(userData.progress[courseId] || {});
             setIsRegistered(!!userData.registeredCourses?.[courseId]);
+            if (userData.progress[courseId]) {
+              setIsDrawerOpen(false);
+            }
           }
         }
       } catch (err) {
