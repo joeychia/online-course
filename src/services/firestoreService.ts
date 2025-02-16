@@ -32,7 +32,7 @@ export class FirestoreService {
                 id: doc.id,
                 name: data.name as string,
                 description: data.description as string,
-                units: data.units as Array<{ id: string; name: string; lessons: Array<{ id: string; name: string }> }>,
+                units: (data.units as Array<{ id: string; name: string; order: number; lessons: Array<{ id: string; name: string; order: number }> }>),
                 settings: data.settings as { unlockLessonIndex: number; token: string },
                 groupIds: data.groupIds as Record<string, boolean>,
                 isPublic: data.isPublic as boolean | undefined
@@ -49,7 +49,7 @@ export class FirestoreService {
             id: docSnap.id,
             name: data.name as string,
             description: data.description as string,
-            units: data.units as Array<{ id: string; name: string; lessons: Array<{ id: string; name: string }> }>,
+            units: (data.units as Array<{ id: string; name: string; order: number; lessons: Array<{ id: string; name: string; order: number }> }>),
             settings: data.settings as { unlockLessonIndex: number; token: string },
             groupIds: data.groupIds as Record<string, boolean>,
             isPublic: data.isPublic as boolean | undefined
@@ -88,7 +88,8 @@ export class FirestoreService {
             id: docSnap.id,
             name: data.name as string,
             description: data.description as string,
-            lessons: data.lessons as Array<{ id: string; name: string }>,
+            order: data.order as number,
+            lessons: data.lessons as Array<{ id: string; name: string; order: number }>,
             courseId: data.courseId as string
         };
     }
@@ -120,6 +121,7 @@ export class FirestoreService {
             name: data.name as string,
             content: data.content as string,
             unitId: data.unitId as string,
+            order: data.order as number,
             quizId: data.quizId as string | null,
             'video-title': data['video-title'] as string | undefined,
             'video-url': data['video-url'] as string | undefined

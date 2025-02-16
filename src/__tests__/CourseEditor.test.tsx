@@ -269,14 +269,12 @@ describe('CourseEditor', () => {
 
   describe('Drag and Drop functionality', () => {
     it('reorders units when dragged', async () => {
-      const user = userEvent.setup();
       render(<CourseEditor courseId="course_1" />);
 
       // TODO: Implement drag and drop test
     });
 
     it('updates backend after unit reordering', async () => {
-      const user = userEvent.setup();
       render(<CourseEditor courseId="course_1" />);
 
       // TODO: Implement reordering persistence test

@@ -5,6 +5,16 @@ import { LessonEditor } from '../components/admin/LessonEditor';
 import { getLesson, updateLesson } from '../services/dataService';
 import type { Lesson } from '../types';
 
+const TEST_DATA = {
+  LESSON_NAME: 'Test Lesson',
+  VIDEO_TITLE: 'Test Video',
+  VIDEO_URL: 'https://example.com/video',
+  CONTENT: 'Test content',
+  UPDATED_SUFFIX: ' Updated',
+  UPDATED_LESSON: 'Updated Lesson',
+  UPDATED_VIDEO: 'Updated Video'
+} as const;
+
 // Mock services
 vi.mock('../services/dataService', () => ({
   getLesson: vi.fn(),
@@ -22,13 +32,25 @@ vi.mock('../components/RichTextEditor', () => ({
   )
 }));
 
-const mockLesson: Lesson = {
-  id: 'lesson_1',
-  unitId: 'unit_1',
-  name: 'Test Lesson',
-  content: 'Test Content',
-  'video-title': 'Test Video',
-  'video-url': 'https://example.com/video',
+// Mock lesson with video fields
+const mockLessonWithVideo: Lesson = {
+  id: 'lesson1',
+  unitId: 'unit1',
+  name: TEST_DATA.LESSON_NAME,
+  content: TEST_DATA.CONTENT,
+  order: 0,
+  'video-title': TEST_DATA.VIDEO_TITLE,
+  'video-url': TEST_DATA.VIDEO_URL,
+  quizId: null
+};
+
+// Mock lesson without video fields
+const mockLessonWithoutVideo: Lesson = {
+  id: 'lesson1',
+  unitId: 'unit1',
+  name: TEST_DATA.LESSON_NAME,
+  content: TEST_DATA.CONTENT,
+  order: 0,
   quizId: null
 };
 
@@ -38,7 +60,7 @@ describe('LessonEditor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getLesson).mockResolvedValue(mockLesson);
+    vi.mocked(getLesson).mockResolvedValue(mockLessonWithVideo);
     vi.mocked(updateLesson).mockResolvedValue();
   });
 
@@ -54,11 +76,11 @@ describe('LessonEditor', () => {
 
     expect(getLesson).toHaveBeenCalledWith('lesson_1');
     await waitFor(() => {
-      expect(screen.getByText('Edit Lesson: Test Lesson')).toBeInTheDocument();
-      expect(screen.getByLabelText('Lesson Name')).toHaveValue('Test Lesson');
-      expect(screen.getByLabelText('Video Title')).toHaveValue('Test Video');
-      expect(screen.getByLabelText('Video URL')).toHaveValue('https://example.com/video');
-      expect(screen.getByTestId('rich-text-editor')).toHaveValue('Test Content');
+      expect(screen.getByText(`Edit Lesson: ${TEST_DATA.LESSON_NAME}`)).toBeInTheDocument();
+      expect(screen.getByLabelText('Lesson Name')).toHaveValue(TEST_DATA.LESSON_NAME);
+      expect(screen.getByLabelText('Video Title')).toHaveValue(TEST_DATA.VIDEO_TITLE);
+      expect(screen.getByLabelText('Video URL')).toHaveValue(TEST_DATA.VIDEO_URL);
+      expect(screen.getByTestId('rich-text-editor')).toHaveValue(TEST_DATA.CONTENT);
     });
   });
 
@@ -80,13 +102,13 @@ describe('LessonEditor', () => {
 
       const nameInput = screen.getByLabelText('Lesson Name');
       await user.clear(nameInput);
-      await user.type(nameInput, 'Updated Lesson');
+      await user.type(nameInput, TEST_DATA.UPDATED_LESSON);
 
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
       expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
-        name: 'Updated Lesson'
+        name: TEST_DATA.UPDATED_LESSON
       }));
     });
 
@@ -107,13 +129,13 @@ describe('LessonEditor', () => {
 
       const titleInput = screen.getByLabelText('Video Title');
       await user.clear(titleInput);
-      await user.type(titleInput, 'Updated Video');
+      await user.type(titleInput, TEST_DATA.UPDATED_VIDEO);
 
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
       expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
-        'video-title': 'Updated Video'
+        'video-title': TEST_DATA.UPDATED_VIDEO
       }));
     });
 
@@ -134,13 +156,13 @@ describe('LessonEditor', () => {
 
       const urlInput = screen.getByLabelText('Video URL');
       await user.clear(urlInput);
-      await user.type(urlInput, 'https://example.com/updated');
+      await user.type(urlInput, TEST_DATA.VIDEO_URL + '/updated');
 
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
       expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
-        'video-url': 'https://example.com/updated'
+        'video-url': TEST_DATA.VIDEO_URL + '/updated'
       }));
     });
 
@@ -161,13 +183,13 @@ describe('LessonEditor', () => {
 
       const contentInput = screen.getByTestId('rich-text-editor');
       await user.clear(contentInput);
-      await user.type(contentInput, 'Updated Content');
+      await user.type(contentInput, TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX);
 
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
       expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
-        content: 'Updated Content'
+        content: TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX
       }));
     });
   });
@@ -199,11 +221,11 @@ describe('LessonEditor', () => {
       await user.click(screen.getByText('Save'));
 
       expect(updateLesson).toHaveBeenCalledWith('lesson_1', {
-        name: 'Test Lesson Updated',
-        'video-title': 'Test Video Updated',
+        name: TEST_DATA.LESSON_NAME + TEST_DATA.UPDATED_SUFFIX,
+        'video-title': TEST_DATA.VIDEO_TITLE + TEST_DATA.UPDATED_SUFFIX,
         "quizId": null,
-        'video-url': 'https://example.com/video/updated',
-        content: 'Test Content Updated'
+        'video-url': TEST_DATA.VIDEO_URL + '/updated',
+        content: TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX
       });
       expect(mockOnSave).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();
@@ -232,6 +254,71 @@ describe('LessonEditor', () => {
     });
   });
 
+  describe('Video Fields Handling', () => {
+    it('fails when saving with undefined video fields', async () => {
+      vi.mocked(getLesson).mockResolvedValue(mockLessonWithoutVideo);
+      vi.mocked(updateLesson).mockRejectedValue(new Error(
+        "FirebaseError: Function updateDoc() called with invalid data. Unsupported field value: undefined (found in field `video-title` in document lessons/lesson_1)"
+      ));
+      const user = userEvent.setup();
+      
+      render(
+        <LessonEditor
+          unitId="unit_1"
+          lessonId="lesson_1"
+          onClose={mockOnClose}
+          onSave={mockOnSave}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Save')).toBeInTheDocument();
+      });
+
+      // Save without modifying video fields
+      await user.click(screen.getByText('Save'));
+
+      // Verify the error is thrown and save/close are not called
+      expect(mockOnSave).not.toHaveBeenCalled();
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
+    it('fails when saving with empty video fields', async () => {
+      const user = userEvent.setup();
+      vi.mocked(updateLesson).mockRejectedValue(new Error(
+        "FirebaseError: Function updateDoc() called with invalid data. Unsupported field value: undefined (found in field `video-title` in document lessons/lesson_1)"
+      ));
+      
+      render(
+        <LessonEditor
+          unitId="unit_1"
+          lessonId="lesson_1"
+          onClose={mockOnClose}
+          onSave={mockOnSave}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Video Title')).toBeInTheDocument();
+        expect(screen.getByLabelText('Video URL')).toBeInTheDocument();
+      });
+
+      // Clear video fields
+      const titleInput = screen.getByLabelText('Video Title');
+      const urlInput = screen.getByLabelText('Video URL');
+      await user.clear(titleInput);
+      await user.clear(urlInput);
+
+      // Save with cleared fields
+      await user.click(screen.getByText('Save'));
+
+      // Verify the error is thrown and save/close are not called
+      expect(mockOnSave).not.toHaveBeenCalled();
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
+  });
+
   describe('Error Handling', () => {
     it('handles lesson loading error', async () => {
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -247,7 +334,7 @@ describe('LessonEditor', () => {
       );
 
       await waitFor(() => {
-        expect(screen.queryByText('Test Lesson')).not.toBeInTheDocument();
+        expect(screen.queryByText(TEST_DATA.LESSON_NAME)).not.toBeInTheDocument();
       });
 
       consoleError.mockRestore();

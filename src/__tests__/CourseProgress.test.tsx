@@ -99,6 +99,7 @@ describe('CourseProgress', () => {
       name: 'Lesson 2',
       unitId: 'unit1',
       content: 'Test content',
+      order: 1,
       quizId: null,
     });
 
