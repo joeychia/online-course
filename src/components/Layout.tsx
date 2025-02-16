@@ -6,7 +6,6 @@ import {
   Typography,
   Box,
   Stack,
-  IconButton,
   Menu,
   Avatar,
   Button,
@@ -43,9 +42,8 @@ const menuButtonStyles = {
   minWidth: { xs: 'auto', sm: 'auto' },
   padding: { xs: '4px 8px', sm: '8px 16px' },
   fontSize: { xs: 'inherit', sm: '1.1rem' },
-  '&:hover': {
-    color: 'primary.light',
-  },
+  fontWeight: 300,
+
   whiteSpace: 'nowrap'
 };
 
@@ -82,10 +80,10 @@ export default function Layout({ children }: LayoutProps) {
   const showMenuButton = location.pathname.split('/').length > 1 && 
                         location.pathname !== '/login' &&
                         location.pathname !== '/' &&
-                        location.pathname !== '/notebook' &&
+                        !location.pathname.startsWith('/notebook') &&
                         location.pathname !== '/admin' &&
                         location.pathname !== '/help' &&
-                        location.pathname !== '/courses';
+                        !location.pathname.startsWith('/courses');
 
   const handleDrawerToggle = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -159,17 +157,17 @@ export default function Layout({ children }: LayoutProps) {
             scrollbarWidth: 'none'
           }}
         >
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 'fit-content' }}>
             {showMenuButton && (
-              <IconButton
+              <Button
                 color="inherit"
-                aria-label="open drawer"
-                edge="start"
                 onClick={handleDrawerToggle}
-                sx={{ mr: { xs: 0.5, sm: 2 } }}
+                aria-label="open drawer"
+                startIcon={null}
+                sx={menuButtonStyles}
               >
-                <MenuIcon />
-              </IconButton>
+                <MenuIcon sx={{ fontSize: '1.75rem' }} />
+                <span>{t('index')}</span>
+              </Button>
             )}
             <Button
               component={RouterLink}
@@ -178,70 +176,57 @@ export default function Layout({ children }: LayoutProps) {
               startIcon={null}
               sx={menuButtonStyles}
             >
-              <HomeIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
+              <HomeIcon sx={{ fontSize: '1.75rem' }} />
               <span>{t('appTitle')}</span>
             </Button>
-          </Stack>
-          <Stack 
-            direction="row" 
-            spacing={{ xs: 0.5, sm: 2 }} 
-            alignItems="center"
-            sx={{ 
-              minWidth: 'fit-content',
-              overflowX: 'auto',
-              '&::-webkit-scrollbar': {
-                display: 'none'
-              },
-              msOverflowStyle: 'none',
-              scrollbarWidth: 'none'
-            }}
-          >
-            {currentUser && (
-              <>
-                <Button
-                  component={RouterLink}
-                  to="/courses?myCourses=true"
-                  color="inherit"
-                  startIcon={null}
-                  sx={menuButtonStyles}
-                >
-                  <SchoolIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
-                  <span>{t('myCourses')}</span>
-                </Button>
-                <Button
-                  component={RouterLink}
-                  to={"/notebook"}
-                  color="inherit"
-                  startIcon={null}
-                  sx={menuButtonStyles}
-                >
-                  <MenuBookIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
-                  <span>{t('myNotes')}</span>
-                </Button>
-                <Button
-                  component={RouterLink}
-                  to={"/help"}
-                  color="inherit"
-                  startIcon={null}
-                  sx={menuButtonStyles}
-                >
-                  <HelpOutlineIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
-                  <span>{t('help')}</span>
-                </Button>
-                {isAdmin && (
+          
+            
+              {currentUser && (
+                <>
                   <Button
                     component={RouterLink}
-                    to="/admin"
+                    to="/courses?myCourses=true"
                     color="inherit"
                     startIcon={null}
                     sx={menuButtonStyles}
                   >
-                    <AdminPanelSettingsIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
-                    <span>{t('admin')}</span>
+                    <SchoolIcon sx={{ fontSize: '1.75rem' }} />
+                    <span>{t('myCourses')}</span>
                   </Button>
-                )}
-              </>
-            )}
+                  <Button
+                    component={RouterLink}
+                    to={"/notebook"}
+                    color="inherit"
+                    startIcon={null}
+                    sx={menuButtonStyles}
+                  >
+                    <MenuBookIcon sx={{ fontSize: '1.75rem' }} />
+                    <span>{t('myNotes')}</span>
+                  </Button>
+                  <Button
+                    component={RouterLink}
+                    to={"/help"}
+                    color="inherit"
+                    startIcon={null}
+                    sx={menuButtonStyles}
+                  >
+                    <HelpOutlineIcon sx={{ fontSize: '1.75rem' }} />
+                    <span>{t('help')}</span>
+                  </Button>
+                  {isAdmin && (
+                    <Button
+                      component={RouterLink}
+                      to="/admin"
+                      color="inherit"
+                      startIcon={null}
+                      sx={menuButtonStyles}
+                    >
+                      <AdminPanelSettingsIcon sx={{ fontSize: '1.75rem' }} />
+                      <span>{t('admin')}</span>
+                    </Button>
+                  )}
+                </>
+              )}
 
             <Button
               color="inherit"
@@ -249,7 +234,7 @@ export default function Layout({ children }: LayoutProps) {
               aria-label="settings"
               sx={menuButtonStyles}
             >
-              <SettingsIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' } }} />
+              <SettingsIcon sx={{ fontSize: '1.75rem' }} />
               <span>{t('settings')}</span>
             </Button>
             <Menu
@@ -337,8 +322,6 @@ export default function Layout({ children }: LayoutProps) {
                 )}
               </Box>
             </Menu>
-            
-          </Stack>
         </Toolbar>
       </AppBar>
       <Toolbar /> {/* This creates space for the fixed AppBar */}

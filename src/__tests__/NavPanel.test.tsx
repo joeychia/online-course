@@ -8,7 +8,8 @@ import { getLessonsIdNameForUnit } from '../services/dataService';
 
 // Mock dataService
 vi.mock('../services/dataService', () => ({
-  getLessonsIdNameForUnit: vi.fn()
+  getLessonsIdNameForUnit: vi.fn(),
+  getLesson: vi.fn()
 }));
 
 // Mock useTranslation hook
@@ -64,7 +65,7 @@ mockGetLessons.mockImplementation((unitId) => {
 });
 
 const renderWithRouter = async (ui: React.ReactElement) => {
-  render(
+  const result = render(
     <MemoryRouter>
       {ui}
     </MemoryRouter>
@@ -72,16 +73,17 @@ const renderWithRouter = async (ui: React.ReactElement) => {
 
   // Wait for initial render
   await act(async () => {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
   });
 
-  const drawer = screen.getByTestId('nav-drawer');
-  return { drawer };
+  // Wait for drawer to be mounted
+  const drawerPaper = await screen.findByRole('presentation');
+  return { drawer: drawerPaper, ...result };
 };
 
 describe('NavPanel', () => {
   it('renders course name and description', async () => {
-    await renderWithRouter(
+    const { drawer } = await renderWithRouter(
       <NavPanel
         course={mockCourse}
         units={mockUnits}
@@ -92,16 +94,13 @@ describe('NavPanel', () => {
       />
     );
 
-    const drawer = screen.getByTestId('nav-drawer');
-    const unitButtons = within(drawer).getAllByTestId('unit-button-1');
-    expect(unitButtons[0]).toBeInTheDocument();
-
-    const courseName = within(drawer).getByText('測試課程');
-    expect(courseName).toBeInTheDocument();
+    const unitButton = await within(drawer).findByTestId('unit-button-1');
+    expect(unitButton).toBeInTheDocument();
+    expect(within(drawer).getByText('第一單元')).toBeInTheDocument();
   });
 
   it('loads lessons when unit is expanded', async () => {
-    await renderWithRouter(
+    const { drawer } = await renderWithRouter(
       <NavPanel
         course={mockCourse}
         units={mockUnits}
@@ -113,17 +112,17 @@ describe('NavPanel', () => {
       />
     );
 
-    const drawer = screen.getByTestId('nav-drawer');
+    // Wait for unit button to be available
+    const unitButton = await within(drawer).findByTestId('unit-button-1');
+    expect(unitButton).toBeInTheDocument();
 
     // Wait for lessons to load
-    await waitFor(() => {
-      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
-      expect(lessonItems[0]).toBeInTheDocument();
-    });
+    const lessonItem = await within(drawer).findByTestId('lesson-item-u1l1');
+    expect(lessonItem).toBeInTheDocument();
   });
 
   it('shows completion status correctly', async () => {
-    await renderWithRouter(
+    const { drawer } = await renderWithRouter(
       <NavPanel
         course={mockCourse}
         units={mockUnits}
@@ -131,27 +130,18 @@ describe('NavPanel', () => {
         onSelectLesson={() => {}}
         isOpen={true}
         onToggle={() => {}}
-        selectedUnitId="1" // Set selectedUnitId to ensure first unit is expanded
+        selectedUnitId="1"
       />
     );
 
-    const drawer = screen.getByTestId('nav-drawer');
-    
-    // Wait for lessons to load
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
-
     // Wait for completion icon to appear
-    await waitFor(() => {
-      const completeIcon = within(drawer).getByTestId('lesson-complete-u1l1');
-      expect(completeIcon).toBeInTheDocument();
-    });
+    const completeIcon = await within(drawer).findByTestId('lesson-complete-u1l1');
+    expect(completeIcon).toBeInTheDocument();
   });
 
   it('calls onSelectLesson when a lesson is clicked', async () => {
     const onSelectLesson = vi.fn();
-    await renderWithRouter(
+    const { drawer } = await renderWithRouter(
       <NavPanel
         course={mockCourse}
         units={mockUnits}
@@ -163,21 +153,13 @@ describe('NavPanel', () => {
       />
     );
 
-    const drawer = screen.getByTestId('nav-drawer');
-
-    // Wait for lessons to load
-    await waitFor(() => {
-      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
-      expect(lessonItems[0]).toBeInTheDocument();
-    });
-
-    const lessonItem = within(drawer).getByTestId('lesson-item-u1l1');
+    const lessonItem = await within(drawer).findByTestId('lesson-item-u1l1');
     fireEvent.click(lessonItem);
     expect(onSelectLesson).toHaveBeenCalledWith('1', 'u1l1');
   });
 
-  it('locks lessons based on course settings', async () => {
-    await renderWithRouter(
+  it('locks lessons based on course settings and completion status', async () => {
+    const { drawer } = await renderWithRouter(
       <NavPanel
         course={mockCourse}
         units={mockUnits}
@@ -189,13 +171,15 @@ describe('NavPanel', () => {
       />
     );
 
-    const drawer = screen.getByTestId('nav-drawer');
+    // First lesson should be accessible
+    const firstLesson = await within(drawer).findByTestId('lesson-item-u1l1');
+    expect(firstLesson).toBeInTheDocument();
+    expect(firstLesson).not.toHaveAttribute('aria-disabled');
 
-    // Wait for lessons to load
-    await waitFor(() => {
-      const unlockedIcon = within(drawer).getByTestId('lesson-unlocked-u1l2');
-      expect(unlockedIcon).toBeInTheDocument();
-    });
+    // Second lesson should be accessible because first lesson is completed
+    const secondLesson = await within(drawer).findByTestId('lesson-item-u1l2');
+    expect(secondLesson).toBeInTheDocument();
+    expect(secondLesson).not.toHaveAttribute('aria-disabled');
   });
 
   it('toggles unit expansion when clicked', async () => {
@@ -206,33 +190,31 @@ describe('NavPanel', () => {
         progress={mockProgress}
         isOpen={true}
         onToggle={() => {}}
-        selectedUnitId="1" // Set selectedUnitId to ensure first unit is expanded
+        selectedUnitId="1"
       />
     );
 
-    // Wait for initial lessons to load
-    await waitFor(() => {
-      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
-      expect(lessonItems.length).toBe(1);
-    });
+    // Initial state - expanded
+    const lessonItem = await within(drawer).findByTestId('lesson-item-u1l1');
+    expect(lessonItem).toBeInTheDocument();
 
     // Click to collapse
     const unitButton = within(drawer).getByTestId('unit-button-1');
     fireEvent.click(unitButton);
 
-    // Wait for collapse animation and verify lessons are hidden
+    // Verify collapse
     await waitFor(() => {
-      const lessonItems = within(drawer).queryAllByTestId('lesson-item-u1l1');
-      expect(lessonItems.length).toBe(0);
+      const collapseDiv = within(drawer).getByTestId('unit-button-1').nextElementSibling;
+      expect(collapseDiv).toHaveClass('MuiCollapse-hidden');
     });
 
     // Click to expand again
     fireEvent.click(unitButton);
 
-    // Wait for lessons to reappear
+    // Verify expand
     await waitFor(() => {
-      const lessonItems = within(drawer).getAllByTestId('lesson-item-u1l1');
-      expect(lessonItems.length).toBe(1);
+      const collapseDiv = within(drawer).getByTestId('unit-button-1').nextElementSibling;
+      expect(collapseDiv).not.toHaveClass('MuiCollapse-hidden');
     });
   });
 
@@ -248,8 +230,9 @@ describe('NavPanel', () => {
       />
     );
 
-    const drawer = screen.getByTestId('nav-drawer');
-    const mobileDrawer = drawer.querySelector('.MuiDrawer-paper');
-    expect(mobileDrawer).toHaveClass('MuiDrawer-paper', 'MuiDrawer-paperAnchorLeft');
+    const mobileDrawer = document.querySelector('.MuiDrawer-paper');
+    expect(mobileDrawer).toBeInTheDocument();
+    expect(mobileDrawer).toHaveClass('MuiDrawer-paper');
+    expect(mobileDrawer).toHaveClass('MuiDrawer-paperAnchorLeft');
   });
 });

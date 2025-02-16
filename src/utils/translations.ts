@@ -369,5 +369,9 @@ export const translations: Translations = {
   initUnit: {
     'zh-TW': '起始',
     'zh-CN': '起始'
+  },
+  index: {
+    'zh-TW': '目錄',
+    'zh-CN': '目录'
   }
 };
