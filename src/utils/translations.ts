@@ -191,8 +191,8 @@ export const translations: Translations = {
     'zh-CN': '注册课程'
   },
   dropCourse: {
-    'zh-TW': '退出課程',
-    'zh-CN': '退出课程'
+    'zh-TW': '註銷課程',
+    'zh-CN': '注销课程'
   },
   dropCourseConfirm: {
     'zh-TW': '您確定要退出此課程嗎？您的進度將被保存，但您需要重新註冊才能繼續。',
