@@ -14,6 +14,11 @@ vi.mock('../services/dataService', () => ({
   updateUnit: vi.fn()
 }));
 
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
+  GoogleAuthProvider: vi.fn(() => ({}))
+}));
+
 const mockCourse: Course = {
   id: 'course_1',
   name: 'Test Course',
