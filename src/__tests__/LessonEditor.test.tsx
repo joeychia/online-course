@@ -21,6 +21,11 @@ vi.mock('../services/dataService', () => ({
   updateLesson: vi.fn()
 }));
 
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
+  GoogleAuthProvider: vi.fn(() => ({}))
+}));
+
 // Mock RichTextEditor
 vi.mock('../components/RichTextEditor', () => ({
   default: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
