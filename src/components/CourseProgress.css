@@ -65,3 +65,8 @@
   white-space: pre-line !important;
   max-width: 300px;
 }
+/* Calendar label styles */
+.react-calendar-heatmap .react-calendar-heatmap-weekday-label,
+.react-calendar-heatmap .react-calendar-heatmap-month-label {
+  font-size: 0.4rem;
+}

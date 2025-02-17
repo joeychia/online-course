@@ -216,7 +216,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
       </Box>
       
       {/* Calendar Section */}
-      <Box sx={{ mt: 3, mb: 4 }}>
+      <Box sx={{ mt: 3, mb: 4, maxWidth: '800px' }}>
         <Typography variant="subtitle1" gutterBottom sx={{ fontSize: `calc(${fontSize}px * 1.1)` }}>
           {t('completionCalendar')}
         </Typography>
@@ -226,7 +226,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
             endDate={new Date()}
             values={calendarValues}
             showWeekdayLabels={true}
-            weekdayLabels={['日', '一', '二', '三', '四', '五', '六'].map(day => convertChinese(day, language)) as [string, string, string, string, string, string, string]}
+            weekdayLabels={['周日', '周一', '周二', '周三', '周四', '周五', '周六'].map(day => convertChinese(day, language)) as [string, string, string, string, string, string, string]}
             monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'].map(month => convertChinese(month, language)) as [string, string, string, string, string, string, string, string, string, string, string, string]}
             classForValue={(value) => {
               if (!value) {
