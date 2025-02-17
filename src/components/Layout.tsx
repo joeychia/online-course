@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -56,7 +56,6 @@ export default function Layout({ children }: LayoutProps) {
   const { currentUser, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -75,14 +74,6 @@ export default function Layout({ children }: LayoutProps) {
     checkAdminStatus();
     console.log('isAdmin:', isAdmin);
   }, [currentUser]);
-
-
-  const handleDrawerToggle = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-    // Propagate drawer state to CourseView
-    const event = new CustomEvent('toggleDrawer', { detail: !isDrawerOpen });
-    window.dispatchEvent(event);
-  };
 
   const handleSignOut = async () => {
     try {
