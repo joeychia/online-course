@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import { Quiz, QuizQuestion, QuizOption } from '../../types';
 import { saveQuiz, getQuiz } from '../../services/dataService';
 import {

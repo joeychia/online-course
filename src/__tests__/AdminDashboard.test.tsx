@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AdminDashboard } from '../pages/AdminDashboard';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { getUser } from '../services/dataService';
 import { MemoryRouter } from 'react-router-dom';
 import type { User as FirebaseUser } from 'firebase/auth';
@@ -47,7 +47,7 @@ const mockUserProfile: UserProfile = {
 };
 
 // Mock dependencies
-vi.mock('../contexts/useAuth');
+vi.mock('../hooks/useAuth');
 vi.mock('../services/dataService');
 vi.mock('../components/admin/CourseManagement', () => ({
   CourseManagement: () => <div data-testid="course-management">Course Management Component</div>

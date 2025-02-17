@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Container } from '@mui/material';
 import { CourseManagement } from '../components/admin/CourseManagement';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { Navigate, useParams } from 'react-router-dom';
 import { getUser } from '../services/dataService';
 import { useState, useEffect } from 'react';

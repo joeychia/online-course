@@ -25,7 +25,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Course } from '../types';
 import { getAllCourses, getUser } from '../services/dataService';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
 import MarkdownViewer from '../components/MarkdownViewer';

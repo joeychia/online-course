@@ -15,7 +15,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
 import type { Quiz } from '../types';

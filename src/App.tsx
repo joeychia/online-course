@@ -6,7 +6,7 @@ import Login from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
 import Notebook from './pages/Notebook';
 import Help from './pages/Help';
-import { useAuth } from './contexts/useAuth';
+import { useAuth } from './hooks/useAuth';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FontSizeProvider } from './contexts/FontSizeContext';
 import { AuthProvider } from './contexts/AuthContext';

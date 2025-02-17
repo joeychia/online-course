@@ -15,7 +15,7 @@ import {
   useTheme,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { getNotesForUserCourse, getAllCourses } from '../services/dataService';
 import { convertChinese } from '../utils/chineseConverter';

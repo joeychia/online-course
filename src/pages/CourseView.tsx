@@ -16,7 +16,7 @@ import { analyticsService } from '../services/analyticsService';
 import NavPanel from '../components/NavPanel';
 import { useState, useEffect } from 'react';
 import { Lesson, Course, UserProgress, Unit } from '../types';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
 import { useTranslation } from '../hooks/useTranslation';
