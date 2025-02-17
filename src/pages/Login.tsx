@@ -9,7 +9,8 @@ import {
     Paper,
     Divider,
     Stack,
-    Link
+    Link,
+    Alert
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { useAuth } from '../hooks/useAuth';
@@ -130,13 +131,12 @@ export default function Login() {
                     </Typography>
                     
                     {error && (
-                        <Typography 
-                            color="error" 
-                            role="alert"
-                            sx={{ mt: 2, textAlign: 'center' }}
+                        <Alert 
+                            severity="error"
+                            sx={{ mt: 2, mb: 2 }}
                         >
                             {error}
-                        </Typography>
+                        </Alert>
                     )}
 
                     <form onSubmit={handleEmailSignIn}>
