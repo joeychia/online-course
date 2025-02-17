@@ -1,0 +1,923 @@
+{
+  "courses": {
+    "rW6dp3AfbJ32u7h7ZmSI": {
+      "name": "東區國語堂小組長訓練課程",
+      "groupIds": {},
+      "isPublic": false,
+      "description": "##### 東區國語堂 建立健康小組系列\n\n###### 系列理念：\n\n教導原則；更新靈命；經歷成長；建立關係\n\n###### 系列目標：\n\n* 增強群體的信仰生活品質。\n* 建立更強烈的小組向心力。\n* 增強領導和團隊合作技能。\n* 提高衝突處理和解決能力。\n* 建立持久的彼此相愛關係。\n\n一個人可以走得更快，但一群人可以走得更遠。 建立健康的小組，讓我們一起走得更遠。",
+      "settings": {
+        "token": "SMLT",
+        "enableNote": false
+      },
+      "units": [
+        {
+          "id": "unit_1739516004188",
+          "name": "第一課 小組功能與異象"
+        },
+        {
+          "id": "unit_1739482504707",
+          "name": "第二課 聖經中心的社區"
+        },
+        {
+          "name": "第三課 團隊事奉的社區",
+          "id": "unit_1739482698629"
+        },
+        {
+          "id": "unit_1739482766918",
+          "name": "第四課 彼此關懷的社區"
+        },
+        {
+          "name": "第五課 和睦悔改的社區",
+          "id": "unit_1739482825492"
+        },
+        {
+          "id": "unit_1739482889733",
+          "name": "第六課 活力使命的社區"
+        },
+        {
+          "id": "unit_1739482955423",
+          "name": "第七課 歡慶敬拜的社區"
+        },
+        {
+          "name": "第八課 成長倍增的社區",
+          "id": "unit_1739483011460"
+        }
+      ]
+    }
+  },
+  "units": {
+    "unit_1739482504707": {
+      "id": "unit_1739482504707",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "name": "第二課 聖經中心的社區",
+      "lessons": [
+        {
+          "name": "討論",
+          "id": "lesson_1739482608373"
+        }
+      ]
+    },
+    "unit_1739482698629": {
+      "id": "unit_1739482698629",
+      "name": "第三課 團隊事奉的社區",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "lessons": [
+        {
+          "name": "討論",
+          "id": "lesson_1739482709666"
+        }
+      ]
+    },
+    "unit_1739482766918": {
+      "id": "unit_1739482766918",
+      "name": "第四課 彼此關懷的社區",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "lessons": [
+        {
+          "id": "lesson_1739482778133",
+          "name": "問答"
+        }
+      ]
+    },
+    "unit_1739482825492": {
+      "id": "unit_1739482825492",
+      "name": "第五課 和睦悔改的社區",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "lessons": [
+        {
+          "name": "問答",
+          "id": "lesson_1739482835501"
+        }
+      ]
+    },
+    "unit_1739482889733": {
+      "id": "unit_1739482889733",
+      "name": "第六課 活力使命的社區",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "lessons": [
+        {
+          "id": "lesson_1739482900488",
+          "name": "問答"
+        }
+      ]
+    },
+    "unit_1739482955423": {
+      "id": "unit_1739482955423",
+      "name": "第七課 歡慶敬拜的社區",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "lessons": [
+        {
+          "id": "lesson_1739482967110",
+          "name": "問答"
+        }
+      ]
+    },
+    "unit_1739483011460": {
+      "id": "unit_1739483011460",
+      "name": "第八課 成長倍增的社區",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "lessons": [
+        {
+          "name": "問答",
+          "id": "lesson_1739483020686"
+        }
+      ]
+    },
+    "unit_1739516004188": {
+      "id": "unit_1739516004188",
+      "description": "",
+      "courseId": "rW6dp3AfbJ32u7h7ZmSI",
+      "name": "第一課 小組功能與異象",
+      "lessons": [
+        {
+          "name": "問答",
+          "id": "lesson_1739584730698"
+        }
+      ]
+    }
+  },
+  "lessons": {
+    "lesson_1739482601876": {
+      "id": "lesson_1739482601876",
+      "name": "短片",
+      "content": "",
+      "unitId": "unit_1739482504707",
+      "quizId": null,
+      "video-title": "建立健康小組 第二課 聖經中心的社區",
+      "video-url": "https://youtu.be/6AoPmfma3JI"
+    },
+    "lesson_1739482608373": {
+      "id": "lesson_1739482608373",
+      "unitId": "unit_1739482504707",
+      "quizId": "quiz_1739514444017",
+      "content": "#### 請完成測驗，才可以進入下一課。",
+      "video-url": " https://youtu.be/6AoPmfma3JI",
+      "name": "学习和讨论",
+      "video-title": " 建立健康小組 第二单元 聖經中心的社區"
+    },
+    "lesson_1739482704339": {
+      "id": "lesson_1739482704339",
+      "name": "短片",
+      "content": "",
+      "unitId": "unit_1739482698629",
+      "quizId": null,
+      "video-title": "建立健康小組 第三課 團隊事奉的社區",
+      "video-url": "https://youtu.be/rL0dGvf7ubc"
+    },
+    "lesson_1739482709666": {
+      "id": "lesson_1739482709666",
+      "unitId": "unit_1739482698629",
+      "name": "問答",
+      "quizId": "quiz_1739584108853",
+      "content": "#### 請完成測試，才可以進入下一課。",
+      "video-title": " 建立健康小組 第三課 團隊事奉的社區",
+      "video-url": " https://youtu.be/rL0dGvf7ubc"
+    },
+    "lesson_1739482773248": {
+      "id": "lesson_1739482773248",
+      "name": "短片",
+      "content": "",
+      "unitId": "unit_1739482766918",
+      "quizId": null,
+      "video-title": "建立健康小組 第四課 彼此關懷的社區",
+      "video-url": "https://youtu.be/u_4XMxlmISs"
+    },
+    "lesson_1739482778133": {
+      "id": "lesson_1739482778133",
+      "name": "問答",
+      "unitId": "unit_1739482766918",
+      "quizId": "quiz_1739584256341",
+      "content": "#### 請完成測試，才可以進入下一課。",
+      "video-title": " 建立健康小組 第四課 彼此關懷的社區",
+      "video-url": " https://youtu.be/u_4XMxlmISs"
+    },
+    "lesson_1739482831373": {
+      "id": "lesson_1739482831373",
+      "name": "短片",
+      "content": "",
+      "unitId": "unit_1739482825492",
+      "quizId": null,
+      "video-title": "建立健康小組 第五課 和睦悔改的社區",
+      "video-url": "https://youtu.be/uBpFZS5l8s8"
+    },
+    "lesson_1739482835501": {
+      "id": "lesson_1739482835501",
+      "name": "問答",
+      "unitId": "unit_1739482825492",
+      "quizId": "quiz_1739584327211",
+      "content": "#### 請完成測試，才可以進入下一課。",
+      "video-title": "建立健康小組 第五課 和睦悔改的社區",
+      "video-url": " https://youtu.be/uBpFZS5l8s8"
+    },
+    "lesson_1739482895845": {
+      "id": "lesson_1739482895845",
+      "name": "短片",
+      "content": "",
+      "unitId": "unit_1739482889733",
+      "quizId": null,
+      "video-title": "建立健康小組 第六課 活力使命的社區",
+      "video-url": "https://youtu.be/cRfSdImvX38"
+    },
+    "lesson_1739482900488": {
+      "id": "lesson_1739482900488",
+      "name": "問答",
+      "unitId": "unit_1739482889733",
+      "quizId": "quiz_1739584388751",
+      "content": "#### 請完成測試，才可以進入下一課。",
+      "video-title": " 建立健康小組 第六課 活力使命的社區",
+      "video-url": " https://youtu.be/cRfSdImvX38"
+    },
+    "lesson_1739482963500": {
+      "id": "lesson_1739482963500",
+      "name": "短片",
+      "content": "",
+      "unitId": "unit_1739482955423",
+      "quizId": null,
+      "video-title": "建立健康小組 第七課 歡慶敬拜的社區",
+      "video-url": "https://youtu.be/B0j7P89eomo"
+    },
+    "lesson_1739482967110": {
+      "id": "lesson_1739482967110",
+      "name": "問答",
+      "unitId": "unit_1739482955423",
+      "quizId": "quiz_1739584457360",
+      "content": "#### 請完成測試，才可以進入下一課。",
+      "video-title": " 建立健康小組 第七課 歡慶敬拜的社區",
+      "video-url": " https://youtu.be/B0j7P89eomo"
+    },
+    "lesson_1739483016790": {
+      "id": "lesson_1739483016790",
+      "name": "短片",
+      "content": "",
+      "unitId": "unit_1739483011460",
+      "quizId": null,
+      "video-title": "建立健康小組 第八课 成長倍增的社區",
+      "video-url": "https://youtu.be/c4iaBY2g72s"
+    },
+    "lesson_1739483020686": {
+      "id": "lesson_1739483020686",
+      "name": "問答",
+      "unitId": "unit_1739483011460",
+      "quizId": "quiz_1739584527680",
+      "content": "#### 請完成測試，才可以進入下一課。\n\n#### ",
+      "video-title": " 建立健康小組 第八课 成長倍增的社區",
+      "video-url": " https://youtu.be/c4iaBY2g72s"
+    },
+    "lesson_1739516146075": {
+      "id": "lesson_1739516146075",
+      "unitId": "unit_1739516004188",
+      "video-title": "建立健康小組 第一課 小組功能與異象",
+      "video-url": "https://youtu.be/dMx7nbaPSjY",
+      "quizId": "quiz_1739516223827",
+      "name": "觀看本課短片",
+      "content": "#### "
+    },
+    "lesson_1739584730698": {
+      "id": "lesson_1739584730698",
+      "name": "問答",
+      "unitId": "unit_1739516004188",
+      "quizId": "quiz_1739584737257",
+      "content": "#### **請觀看短片，之後完成本課功課。**",
+      "video-title": "建立健康小組 第一課 小組功能與異象",
+      "video-url": "https://youtu.be/dMx7nbaPSjY"
+    }
+  },
+  "quizzes": {
+    "quiz_1739514444017": {
+      "questions": [
+        {
+          "type": "free_form",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "isCorrect": false,
+              "text": ""
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "isCorrect": false,
+              "text": ""
+            }
+          ],
+          "text": "有沒有人帶查經時曾讓你感到非常得幫助？如果有，請分享她/他的帶領方式。  "
+        },
+        {
+          "options": [
+            {
+              "isCorrect": false,
+              "text": ""
+            },
+            {
+              "isCorrect": false,
+              "text": ""
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "isCorrect": false,
+              "text": ""
+            }
+          ],
+          "text": "你自己預備和帶領小組查經的時候遇到過什麼困難，你是如何解決的？  ",
+          "type": "free_form"
+        },
+        {
+          "text": "現階段你覺得你們小組在查經聚會上有哪些做的不錯，有哪些可以進步的？ ",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "isCorrect": false,
+              "text": ""
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ],
+          "type": "free_form"
+        },
+        {
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "isCorrect": false,
+              "text": ""
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ],
+          "text": "教會可以如何幫助你的小組有更好的查經聚會？",
+          "type": "free_form"
+        }
+      ]
+    },
+    "quiz_1739584108853": {
+      "questions": [
+        {
+          "type": "free_form",
+          "text": "請指出一些你在同工身上看到的最欣賞的特質？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "從加拿大大雁的學習中，你們小組在哪些團隊特質上做得很好，哪些還有改善的空間（共同的目標，團隊的合作，領袖的擔當，犧牲的精神，生命的共享，同行與勉勵，扶持與陪伴，相愛又相顧，忠心的擺上，適度的休息）？  ",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "小組就是互為肢體的家庭，每位家庭成員都可以彼此服事。請分享小組目前的需要，並禱告組員在其中一些需要上來參與服事。",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    "quiz_1739584256341": {
+      "questions": [
+        {
+          "type": "free_form",
+          "text": "你的小組有一個互相關懷的環境嗎？有什麼困難？你打算如何解決這些困難？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "請分享你在小組關懷中積累的經驗？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "你的小組有多少新組員？他們在什麼階段？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    "quiz_1739584327211": {
+      "questions": [
+        {
+          "type": "free_form",
+          "text": "您的小組你們小組曾在哪些方面有過衝突或張力？  例：聚會的內容、解經的看法、活動的安排、分組的安排、組員的衝突、子女的衝突、個性的不同、文化的差異、價值的差異、肢體的軟弱、個人的喜好、無謂的堅持  ",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "在衝突的經歷裡，您學到什麼教訓與功課？經歷什麼樣的成長？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "您覺得您可以做哪些事來促進小組的合一？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    "quiz_1739584388751": {
+      "questions": [
+        {
+          "type": "free_form",
+          "text": "您的小組對成為有使命的小組有什麼共識跟目標？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "您的小組曾透過哪些活動來提升小組的動力和組員的使命感？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "在未來的一年，您希望透過哪些事工、活動跟組員一起來經歷使命的實踐？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    "quiz_1739584457360": {
+      "questions": [
+        {
+          "type": "free_form",
+          "text": "過去一年，您的小組  a.  有什麼感恩的事情  b.  有什麼屬靈的學習  c.  哪些禱告蒙神垂聽  d.  哪些重要的里程碑  ",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "您的小組，透過什麼方式  a.     數算神的恩典  b.     宣告神的大能  c.      紀念神的信實  d.     見證生命改變  e.     激勵屬靈委身  ",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "您期待小組可以如何共同學習歡慶敬拜？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    "quiz_1739584527680": {
+      "questions": [
+        {
+          "type": "free_form",
+          "text": "教會可以怎樣幫助你的小組增長和倍增？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "你的小組有多少組員？他們在什麼階段？(新組員，1年以上，5年以上)  ",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "關於尋找小組同工和副組長，你在過去曾經有過經驗嗎？請分享。",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "你的小組打算分組嗎？現在還需要哪些準備？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    },
+    "quiz_1739516223827": {
+      "questions": []
+    },
+    "quiz_1739584737257": {
+      "questions": [
+        {
+          "type": "free_form",
+          "text": "你認為一個健康的小組最重要的功能有哪些（例：小組查經、栽培同工、建立團隊、分享團契、肢體關懷、兒女同伴、彼此代禱、其他），為什麼？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "你的小組最吸引你特質有哪些？為什麼？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "你覺得你們小組有哪些挑戰？你最希望你的小組在哪些方面可以改善？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "type": "free_form",
+          "text": "如果要為你們的小組定一些目標（短程與長程的），你們的目標是什麼？請將這新目標寫下來，並請分享你們如何可以共同來達到這個目標？",
+          "options": [
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            },
+            {
+              "text": "",
+              "isCorrect": false
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

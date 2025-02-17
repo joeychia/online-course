@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "deploy": "tsc -b && vite build && firebase deploy --only hosting",
     "seed": "tsx src/scripts/seed.ts",
+    "backup": "tsx src/scripts/backupCourse.ts",
     "test": "vitest",
     "test:once": "vitest run",
     "test:auto": "vitest run --reporter=json",
