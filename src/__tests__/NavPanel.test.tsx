@@ -76,8 +76,8 @@ const renderWithRouter = async (ui: React.ReactElement) => {
     await new Promise(resolve => setTimeout(resolve, 200));
   });
 
-  // Wait for drawer to be mounted
-  const drawerPaper = await screen.findByRole('presentation');
+  // Wait for drawer to be mounted using data-testid instead of role
+  const drawerPaper = await screen.findByTestId('nav-drawer');
   return { drawer: drawerPaper, ...result };
 };
 

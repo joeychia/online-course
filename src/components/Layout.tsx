@@ -49,6 +49,7 @@ const menuButtonStyles = {
 
 export default function Layout({ children }: LayoutProps) {
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const { isDarkMode, toggleTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
@@ -100,6 +101,14 @@ export default function Layout({ children }: LayoutProps) {
     setSettingsAnchorEl(null);
   };
 
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
   const handleFontSizeChange = (
     _event: React.MouseEvent<HTMLElement>,
     newSize: string | null,
@@ -148,19 +157,56 @@ export default function Layout({ children }: LayoutProps) {
             scrollbarWidth: 'none'
           }}
         >
-
             <Button
-              component={RouterLink}
-              to="/"
               color="inherit"
-              startIcon={null}
+              onClick={handleMenuClick}
               sx={menuButtonStyles}
             >
-              <HomeIcon sx={{ fontSize: '1.75rem' }} />
-              <span>{t('appTitle')}</span>
+              <MenuIcon sx={{ fontSize: '1.75rem' }} />
+              <span>{t('menu')}</span>
             </Button>
-          
-            
+            <Menu
+              anchorEl={menuAnchorEl}
+              open={Boolean(menuAnchorEl)}
+              onClose={handleMenuClose}
+              onClick={handleMenuClose}
+            >
+              <Box sx={{ minWidth: 200 }}>
+                <Button
+                  component={RouterLink}
+                  to="/"
+                  color="inherit"
+                  fullWidth
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                >
+                  <HomeIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                  <span>{t('appTitle')}</span>
+                </Button>
+                <Button
+                  component={RouterLink}
+                  to="/help"
+                  color="inherit"
+                  fullWidth
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                >
+                  <HelpOutlineIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                  <span>{t('help')}</span>
+                </Button>
+                {isAdmin && (
+                  <Button
+                    component={RouterLink}
+                    to="/admin"
+                    color="inherit"
+                    fullWidth
+                    sx={{ justifyContent: 'flex-start', py: 1 }}
+                  >
+                    <AdminPanelSettingsIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                    <span>{t('admin')}</span>
+                  </Button>
+                )}
+              </Box>
+            </Menu>
+
               {currentUser && (
                 <>
                   <Button
@@ -183,28 +229,6 @@ export default function Layout({ children }: LayoutProps) {
                     <MenuBookIcon sx={{ fontSize: '1.75rem' }} />
                     <span>{t('myNotes')}</span>
                   </Button>
-                  <Button
-                    component={RouterLink}
-                    to={"/help"}
-                    color="inherit"
-                    startIcon={null}
-                    sx={menuButtonStyles}
-                  >
-                    <HelpOutlineIcon sx={{ fontSize: '1.75rem' }} />
-                    <span>{t('help')}</span>
-                  </Button>
-                  {isAdmin && (
-                    <Button
-                      component={RouterLink}
-                      to="/admin"
-                      color="inherit"
-                      startIcon={null}
-                      sx={menuButtonStyles}
-                    >
-                      <AdminPanelSettingsIcon sx={{ fontSize: '1.75rem' }} />
-                      <span>{t('admin')}</span>
-                    </Button>
-                  )}
                 </>
               )}
 

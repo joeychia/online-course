@@ -6,6 +6,10 @@ interface Translations {
 }
 
 export const translations: Translations = {
+  menu: {
+    'zh-TW': '選單',
+    'zh-CN': '菜单'
+  },
   courseDirectory: {
     'zh-TW': '課程目錄',
     'zh-CN': '课程目录'
