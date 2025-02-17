@@ -12,7 +12,7 @@ import {
     Link
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { firestoreService } from '../services/firestoreService';
 import { useTranslation } from '../hooks/useTranslation';
 

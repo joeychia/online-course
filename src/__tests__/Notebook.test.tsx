@@ -127,7 +127,7 @@ describe('Notebook Component', () => {
     // Mock current date to ensure consistent testing
     vi.setSystemTime(new Date('2024-01-15'));
     // Mock useAuth hook
-    vi.mock('../contexts/useAuth', () => ({
+    vi.mock('../hooks/useAuth', () => ({
       useAuth: () => ({
         currentUser: mockUser
       })

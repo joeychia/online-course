@@ -16,7 +16,7 @@ import {
     deleteDoc,
     QueryConstraint
 } from 'firebase/firestore';
-import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile as User, QuizHistory } from '../types';
+import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile, QuizHistory } from '../types';
 import { app } from './firebaseConfig';
 
 const db = getFirestore(app);
@@ -249,13 +249,13 @@ export class FirestoreService {
     }
 
     // User operations
-    async getUserById(id: string): Promise<User | null> {
+    async getUserById(id: string): Promise<UserProfile | null> {
         const docRef = doc(db, 'users', id);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as User : null;
+        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as UserProfile : null;
     }
 
-    async createUser(user: User): Promise<void> {
+    async createUser(user: UserProfile): Promise<void> {
         const userRef = doc(db, 'users', user.id);
         await setDoc(userRef, user);
     }

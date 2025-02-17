@@ -28,7 +28,7 @@ import {
   saveNote,
   saveQuizHistory,
 } from '../services/dataService';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
 import { useTranslation } from '../hooks/useTranslation';
 import { useParams } from 'react-router-dom';

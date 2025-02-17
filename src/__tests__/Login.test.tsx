@@ -9,7 +9,7 @@ const mockSignIn = vi.fn();
 const mockSignUp = vi.fn();
 const mockSignInWithGoogle = vi.fn();
 
-vi.mock('../contexts/useAuth', () => ({
+vi.mock('../hooks/useAuth', () => ({
   useAuth: () => ({
     signIn: mockSignIn,
     signUp: mockSignUp,

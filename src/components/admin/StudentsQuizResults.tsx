@@ -21,7 +21,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { firestoreService } from '../../services/firestoreService';
 import QuizView from '../QuizView';
-import type { Quiz, QuizHistory, User } from '../../types';
+import type { Quiz, QuizHistory, UserProfile } from '../../types';
 
 interface StudentsQuizResultsProps {
   courseId: string;
@@ -30,7 +30,7 @@ interface StudentsQuizResultsProps {
 }
 
 interface ExpandableRowProps {
-  user: User;
+  user: UserProfile;
   quizHistory: QuizHistory;
   quiz: Quiz | null;
 }
@@ -82,7 +82,7 @@ export const StudentsQuizResults: React.FC<StudentsQuizResultsProps> = ({
   onClose,
 }) => {
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [quizHistories, setQuizHistories] = useState<{ [userId: string]: QuizHistory }>({});
   const [quiz, setQuiz] = useState<Quiz | null>(null);
 
@@ -109,7 +109,7 @@ export const StudentsQuizResults: React.FC<StudentsQuizResultsProps> = ({
       
       // Get quiz history and user data for each registered user
       const histories: { [userId: string]: QuizHistory } = {};
-      const loadedUsers: User[] = [];
+      const loadedUsers: UserProfile[] = [];
       
       await Promise.all(
         registeredUsersId.map(async (userId) => {

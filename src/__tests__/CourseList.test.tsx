@@ -28,7 +28,7 @@ mockUseAuth.mockReturnValue({
 });
 
 // Mock useAuth hook
-vi.mock('../contexts/useAuth', () => ({
+vi.mock('../hooks/useAuth', () => ({
   useAuth: () => mockUseAuth()
 }));
 

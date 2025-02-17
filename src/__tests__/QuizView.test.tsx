@@ -20,7 +20,7 @@ const mockUseAuth = vi.fn(() => ({
   signOut: vi.fn()
 }));
 
-vi.mock('../contexts/useAuth', () => ({
+vi.mock('../hooks/useAuth', () => ({
   useAuth: () => mockUseAuth()
 }));
 
