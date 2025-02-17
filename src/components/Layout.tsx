@@ -54,7 +54,6 @@ export default function Layout({ children }: LayoutProps) {
   const { language, setLanguage } = useLanguage();
   const { currentUser, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -76,14 +75,6 @@ export default function Layout({ children }: LayoutProps) {
     console.log('isAdmin:', isAdmin);
   }, [currentUser]);
 
-  // Only show menu button on course pages
-  const showMenuButton = location.pathname.split('/').length > 1 && 
-                        location.pathname !== '/login' &&
-                        location.pathname !== '/' &&
-                        !location.pathname.startsWith('/notebook') &&
-                        location.pathname !== '/admin' &&
-                        location.pathname !== '/help' &&
-                        !location.pathname.startsWith('/courses');
 
   const handleDrawerToggle = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -157,18 +148,7 @@ export default function Layout({ children }: LayoutProps) {
             scrollbarWidth: 'none'
           }}
         >
-            {showMenuButton && (
-              <Button
-                color="inherit"
-                onClick={handleDrawerToggle}
-                aria-label="open drawer"
-                startIcon={null}
-                sx={menuButtonStyles}
-              >
-                <MenuIcon sx={{ fontSize: '1.75rem' }} />
-                <span>{t('index')}</span>
-              </Button>
-            )}
+
             <Button
               component={RouterLink}
               to="/"

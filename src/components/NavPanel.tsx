@@ -12,6 +12,7 @@ import {
   CircularProgress,
   Button,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LockIcon from '@mui/icons-material/Lock';
@@ -57,7 +58,8 @@ const StyledUnitListItem = styled(ListItemButton)(({ theme }) => ({
 }));
 
 // Export the constants
-export const DRAWER_WIDTH = 350;
+export const DRAWER_WIDTH_MOBILE = '100%';
+export const DRAWER_WIDTH_DESKTOP = 350;
 export const TOOLBAR_HEIGHT = 62;
 
 interface NavPanelProps {
@@ -118,7 +120,7 @@ export default function NavPanel({
         const lesson = await getLesson(completedLessonId);
         if (!lesson) return;
 
-        // Get all lessons in the current unit
+        // Get avg ff ds fll lessons in the current unit
         const currentUnitLessons = await getLessonsIdNameForUnit(lesson.unitId);
         const lessonIndex = currentUnitLessons.findIndex(l => l.id === completedLessonId);
         const currentUnitIndex = units.findIndex(u => u.id === lesson.unitId);
@@ -223,37 +225,43 @@ export default function NavPanel({
   let previousLessonId: string|null = null;
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {units.length > 50 && (
-        <Box sx={{ 
-          p: 1, 
-          borderBottom: 1, 
-          borderColor: 'divider',
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 2
-        }}>
-          <Typography variant="subtitle2" sx={{ fontSize: 'var(--font-size-body)', fontWeight: 300, whiteSpace: 'nowrap' }}>
-            {t('quickJump')}
-          </Typography>
-          <Box sx={{
-            display: 'flex',
-            gap: { xs: 0.5, sm: 1 },
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            '-webkit-overflow-scrolling': 'touch',
-            '&::-webkit-scrollbar': {
-              display: 'none'
-            },
-            width: '100%',
-            flexWrap: 'nowrap',
-            py: { xs: 0.5, sm: 1 },
-            px: { xs: 1, sm: 0 }
-          }}
-        >
+      <Box sx={{ 
+        py: 1.5,
+        px: 2,
+        borderBottom: 1, 
+        borderColor: 'divider',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 1,
+        position: 'relative',
+        minHeight: '32px'
+      }}>
+        {units.length > 50 ? (
+          <>
+            <Typography variant="subtitle2" sx={{ fontSize: 'var(--font-size-body)', fontWeight: 300, whiteSpace: 'nowrap' }}>
+              {t('quickJump')}
+            </Typography>
+            <Box sx={{
+                display: 'flex',
+                gap: { xs: 0.25, sm: 0.25 },
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                '-webkit-overflow-scrolling': 'touch',
+                '&::-webkit-scrollbar': {
+                  display: 'none'
+                },
+                width: '100%',
+                flexWrap: 'nowrap',
+                py: { xs: 0.5, sm: 1 },
+                px: { xs: 0.5, sm: 0 },
+                position: 'relative',
+                pr: 7
+              }}
+            >
           {Array.from({ length: Math.ceil(units.length / 30) }, (_, index) => {
             const startUnit = index * 30 + 1;
             return (
@@ -266,29 +274,24 @@ export default function NavPanel({
                     `[data-testid="unit-button-${units[index * 30].id}"]`
                   );
                   if (unitElement) {
-                    // Expand the unit when jumping to it
                     setExpandedUnits(prev => ({ ...prev, [units[index * 30].id]: true }));
-                    
-                    // Wait for unit expansion and DOM update
                     setTimeout(() => {
                       const unitElement = document.querySelector(`[data-testid="unit-button-${units[index * 30].id}"]`);
                       if (unitElement) {
-
-                        // Scroll the container instead of the window
-                          unitElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                          });
+                        unitElement.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'start'
+                        });
                       }
                     }, 100);
                   }
                 }}
                 sx={{ 
-                  minWidth: '40px',
+                  minWidth: { xs: '32px', sm: '32px' },
                   height: '32px',
                   whiteSpace: 'nowrap',
                   fontSize: 'var(--font-size-body)',
-                  padding: '4px 8px',
+                  padding: { xs: '4px', sm: '4px' },
                   touchAction: 'manipulation',
                   '&:active': {
                     transform: 'scale(0.95)',
@@ -300,10 +303,38 @@ export default function NavPanel({
               </Button>
             );
           })}
-        </Box>
-        </Box>
-      )}
-
+          </Box>
+        </>) : (
+          <Typography variant="subtitle2" sx={{ fontSize: 'var(--font-size-body)', fontWeight: 300, whiteSpace: 'nowrap' }}>
+            {t('courseDirectory')}
+          </Typography>
+        )}
+        <Button
+          onClick={onToggle}
+          size="small"
+          variant="contained"
+          sx={{
+            minWidth: '32px',
+            height: '32px',
+            width: '32px',
+            borderRadius: '50%',
+            position: 'absolute',
+            right: 4,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            boxShadow: 2,
+            bgcolor: 'grey.300',
+            color: 'grey.800',
+            '&:hover': {
+              bgcolor: 'grey.400',
+              boxShadow: 4,
+            },
+            zIndex: 1,
+          }}
+        >
+          <CloseIcon />
+        </Button>
+      </Box>
       <List sx={{ 
         flex: 1, 
         overflow: 'auto',
@@ -384,13 +415,13 @@ export default function NavPanel({
       component="nav"
       data-testid="nav-drawer"
       sx={{
-        width: { sm: isOpen ? DRAWER_WIDTH : 0 },
+        width: { sm: isOpen ? DRAWER_WIDTH_DESKTOP : 0, xs: isOpen ? DRAWER_WIDTH_MOBILE : 0  },
         flexShrink: { sm: 0 },
       }}
     >
       {/* Responsive Drawer */}
       <Drawer
-        variant="temporary"
+        variant="permanent"
         anchor="left"
         open={isOpen}
         onClose={onToggle}
@@ -398,8 +429,8 @@ export default function NavPanel({
         sx={{
           '& .MuiDrawer-paper': { 
             boxSizing: 'border-box', 
-            width: { xs: '100%', sm: DRAWER_WIDTH },
-            maxWidth: { xs: '100%', sm: DRAWER_WIDTH },
+            width: { xs: '100%', sm: DRAWER_WIDTH_DESKTOP },
+            maxWidth: { xs: '100%', sm: DRAWER_WIDTH_DESKTOP },
             borderRight: 1,
             borderColor: 'divider',
             mt:  `${TOOLBAR_HEIGHT}px` ,
@@ -421,7 +452,7 @@ export default function NavPanel({
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
-            transform: isOpen ? 'none' : `translateX(-${DRAWER_WIDTH}px)`,
+            transform: isOpen ? 'none' : `translateX(-100%)`,
           }
         }}
       >

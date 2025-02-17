@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
+import SegmentIcon from '@mui/icons-material/Segment';
 import { getLesson, getCourse, getUnitsIdNameForCourse, getLessonsIdNameForUnit, getUser, updateUserProgress } from '../services/dataService';
 import { analyticsService } from '../services/analyticsService';
 import NavPanel from '../components/NavPanel';
@@ -81,9 +82,6 @@ export default function CourseView() {
           if (userData) {
             setUserProgress(userData.progress[courseId] || {});
             setIsRegistered(!!userData.registeredCourses?.[courseId]);
-            if (userData.progress[courseId]) {
-              setIsDrawerOpen(false);
-            }
           }
         }
       } catch (err) {
@@ -156,7 +154,7 @@ export default function CourseView() {
   }, [currentUser]);
 
   if (!course) {
-    return <Typography>{t('courseNotFound')}</Typography>;
+    return <Typography sx={{ mt: 2 }}>{t('courseNotFound')}</Typography>;
   }
 
   const handleSelectLesson = (unitId: string, lessonId: string) => {
@@ -289,8 +287,30 @@ export default function CourseView() {
       <Box sx={{ 
         display: 'flex',
         minHeight: '100vh',
-        overflow: 'hidden' // Prevent body scroll
+        overflow: 'hidden', // Prevent body scroll
+        position: 'relative'
       }}>
+        <Button
+          onClick={handleDrawerToggle}
+          sx={{
+            position: 'fixed',
+            left: { xs: 16, sm: 24 },
+            top: TOOLBAR_HEIGHT + 16,
+            zIndex: theme => theme.zIndex.drawer - 1,
+            minWidth: 'unset',
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: theme => `${theme.palette.background.paper}99`, // 99 makes it 60% transparent
+            boxShadow: 2,
+            transition: 'background-color 0.2s ease',
+            '&:hover': {
+              backgroundColor: 'background.paper' // Solid background on hover
+            }
+          }}
+        >
+          <SegmentIcon />
+        </Button>
         <NavPanel
           course={course}
           units={units}
@@ -309,7 +329,7 @@ export default function CourseView() {
             width: '100%',
             height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
             overflow: 'auto',
-            ml: { xs: 0 },
+            ml: { xs: 0, sm: 0 },
             '& > *': {
               maxWidth: 'lg',
               mx: 'auto'

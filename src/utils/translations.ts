@@ -6,6 +6,10 @@ interface Translations {
 }
 
 export const translations: Translations = {
+  courseDirectory: {
+    'zh-TW': '課程目錄',
+    'zh-CN': '课程目录'
+  },
   noNotesFound: {
     'zh-TW': '目前沒有筆記',
     'zh-CN': '目前没有笔记'
