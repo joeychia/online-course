@@ -49,6 +49,10 @@ const mockUserProfile: UserProfile = {
 // Mock dependencies
 vi.mock('../hooks/useAuth');
 vi.mock('../services/dataService');
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
+  GoogleAuthProvider: vi.fn(() => ({}))
+}));
 vi.mock('../components/admin/CourseManagement', () => ({
   CourseManagement: () => <div data-testid="course-management">Course Management Component</div>
 }));
