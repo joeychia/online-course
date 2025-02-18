@@ -53,10 +53,16 @@ function App() {
                   
                   <Route path="/courses" element={
                     <Layout>
-                      <CourseList myCourses={window.location.search.includes('myCourses=true')} />
+                      <CourseList myCourses={false} />
                     </Layout>
                   } />
                   
+                  <Route path="/mycourses" element={
+                    <Layout>
+                      <CourseList myCourses={true} />
+                    </Layout>
+                  } />
+
                   <Route path="/help" element={
                     <Layout>
                       <Help />

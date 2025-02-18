@@ -202,7 +202,7 @@ export default function Layout({ children }: LayoutProps) {
                 <>
                   <Button
                     component={RouterLink}
-                    to="/courses?myCourses=true"
+                    to="/mycourses"
                     color="inherit"
                     startIcon={null}
                     sx={menuButtonStyles}
