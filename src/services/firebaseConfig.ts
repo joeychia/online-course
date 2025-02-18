@@ -1,12 +1,18 @@
 import { initializeApp } from 'firebase/app';
 
-const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID
+const getEnvVar = (key: string): string => {
+    return typeof process !== 'undefined' && process.env
+        ? process.env[`VITE_${key}`] || import.meta.env[`VITE_${key}`]
+        : import.meta.env[`VITE_${key}`] || '';
 };
 
-export const app = initializeApp(firebaseConfig); 
+const firebaseConfig = {
+    apiKey: getEnvVar('FIREBASE_API_KEY'),
+    authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN'),
+    projectId: getEnvVar('FIREBASE_PROJECT_ID'),
+    storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET'),
+    messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID'),
+    appId: getEnvVar('FIREBASE_APP_ID')
+};
+
+export const app = initializeApp(firebaseConfig);
