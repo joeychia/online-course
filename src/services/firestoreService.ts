@@ -21,6 +21,15 @@ import { app } from './firebaseConfig';
 
 const db = getFirestore(app);
 
+const WRITE_TIMEOUT_MS = 10000; // 10 seconds timeout for write operations
+
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number = WRITE_TIMEOUT_MS): Promise<T> => {
+    const timeoutPromise = new Promise<T>((_, reject) => {
+        setTimeout(() => reject(new Error('Operation timed out')), timeoutMs);
+    });
+    return Promise.race([promise, timeoutPromise]);
+};
+
 export class FirestoreService {
     // Course operations
     async getAllCourses(): Promise<Course[]> {
@@ -58,18 +67,18 @@ export class FirestoreService {
 
     async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
         const courseCollection = collection(db, 'courses');
-        const docRef = await addDoc(courseCollection, courseData);
+        const docRef = await withTimeout(addDoc(courseCollection, courseData));
         return docRef.id;
     }
 
     async updateCourse(courseId: string, courseData: Partial<Course>): Promise<void> {
         const courseRef = doc(db, 'courses', courseId);
-        await updateDoc(courseRef, courseData);
+        await withTimeout(updateDoc(courseRef, courseData));
     }
 
     async deleteCourse(courseId: string): Promise<void> {
         const courseRef = doc(db, 'courses', courseId);
-        await deleteDoc(courseRef);
+        await withTimeout(deleteDoc(courseRef));
     }
 
     // Unit operations
@@ -96,12 +105,12 @@ export class FirestoreService {
 
     async createUnit(unitId: string, unitData: Unit): Promise<void> {
         const unitRef = doc(db, 'units', unitId);
-        await setDoc(unitRef, unitData);
+        await withTimeout(setDoc(unitRef, unitData));
     }
 
     async updateUnit(unitId: string, unitData: Partial<Unit>): Promise<void> {
         const unitRef = doc(db, 'units', unitId);
-        await updateDoc(unitRef, unitData);
+        await withTimeout(updateDoc(unitRef, unitData));
     }
 
     // Lesson operations
@@ -130,12 +139,12 @@ export class FirestoreService {
 
     async createLesson(lessonId: string, lessonData: Lesson): Promise<void> {
         const lessonRef = doc(db, 'lessons', lessonId);
-        await setDoc(lessonRef, lessonData);
+        await withTimeout(setDoc(lessonRef, lessonData));
     }
 
     async updateLesson(lessonId: string, lessonData: Partial<Lesson>): Promise<void> {
         const lessonRef = doc(db, 'lessons', lessonId);
-        await updateDoc(lessonRef, lessonData);
+        await withTimeout(updateDoc(lessonRef, lessonData));
     }
 
     // Quiz operations
@@ -153,24 +162,20 @@ export class FirestoreService {
     async saveQuiz(quizData: Omit<Quiz, 'id'> & { id?: string }): Promise<string> {
         try {
             if (quizData.id) {
-                // Check if document exists before updating
                 const quizRef = doc(db, 'quizzes', quizData.id);
                 const docSnap = await getDoc(quizRef);
 
                 const { id, ...dataWithoutId } = quizData;
                 
                 if (docSnap.exists()) {
-                    // Update existing quiz
-                    await updateDoc(quizRef, dataWithoutId);
+                    await withTimeout(updateDoc(quizRef, dataWithoutId));
                 } else {
-                    // Create new quiz with specified ID
-                    await setDoc(quizRef, dataWithoutId);
+                    await withTimeout(setDoc(quizRef, dataWithoutId));
                 }
                 return id;
             } else {
-                // Create new quiz with auto-generated ID
                 const quizCollection = collection(db, 'quizzes');
-                const docRef = await addDoc(quizCollection, quizData);
+                const docRef = await withTimeout(addDoc(quizCollection, quizData));
                 return docRef.id;
             }
         } catch (error) {
@@ -237,7 +242,7 @@ export class FirestoreService {
     async createQuizHistory(userId: string, lessonId: string, quizHistory: Omit<QuizHistory, 'id'>): Promise<QuizHistory> {
         try {
             const quizHistoryRef = doc(db, `users/${userId}/quizHistory/${lessonId}`);
-            await setDoc(quizHistoryRef, quizHistory);
+            await withTimeout(setDoc(quizHistoryRef, quizHistory));
             return {
                 ...quizHistory,
                 id: lessonId
@@ -257,7 +262,7 @@ export class FirestoreService {
 
     async createUser(user: UserProfile): Promise<void> {
         const userRef = doc(db, 'users', user.id);
-        await setDoc(userRef, user);
+        await withTimeout(setDoc(userRef, user));
     }
 
     async updateUserProgress(userId: string, courseId: string, lessonId: string, completed: boolean, completedAt: string, lessonName: string): Promise<void> {
@@ -271,7 +276,7 @@ export class FirestoreService {
         }
         progress[courseId][lessonId] = { completed, completedAt, lessonName };
 
-        await updateDoc(userRef, { progress });
+        await withTimeout(updateDoc(userRef, { progress }));
     }
 
     async registerCourse(userId: string, courseId: string): Promise<void> {
@@ -282,7 +287,7 @@ export class FirestoreService {
         const registeredCourses = user.registeredCourses || {};
         registeredCourses[courseId] = true;
 
-        await updateDoc(userRef, { registeredCourses });
+        await withTimeout(updateDoc(userRef, { registeredCourses }));
     }
 
     async dropCourse(userId: string, courseId: string): Promise<void> {
@@ -293,7 +298,7 @@ export class FirestoreService {
         const registeredCourses = user.registeredCourses || {};
         delete registeredCourses[courseId];
 
-        await updateDoc(userRef, { registeredCourses });
+        await withTimeout(updateDoc(userRef, { registeredCourses }));
     }
 
     // Note operations
@@ -330,8 +335,7 @@ export class FirestoreService {
                 text,
                 updatedAt: new Date().toISOString()
             };
-            console.log("courseId:", courseId)
-            await setDoc(noteRef, note);
+            await withTimeout(setDoc(noteRef, note));
             return {
                 id: lessonId,
                 ...note
