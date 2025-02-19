@@ -220,6 +220,7 @@ const LessonView: React.FC<LessonViewProps> = ({
       }
     } catch (err) {
       console.error('Error saving note:', err);
+      alert(t('saveNoteError', { message: err instanceof Error ? err.message : 'Unknown error occurred' }));
     } finally {
       setIsSaving(false);
     }

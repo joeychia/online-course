@@ -176,7 +176,10 @@ export const translations: Translations = {
     'zh-TW': '開始測驗',
     'zh-CN': '开始测验'
   },
-
+  saveNoteError: {
+    'zh-TW': '儲存筆記時發生錯誤：{{message}}。請重試。',
+    'zh-CN': '保存笔记时发生错误：{{message}}。请重试。'
+  },
   // Course View
   courseNotFound: {
     'zh-TW': '正在載入課程...',
