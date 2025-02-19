@@ -286,9 +286,12 @@ export default function CourseView() {
     <>
       <Box sx={{ 
         display: 'flex',
-        minHeight: '100vh',
-        overflow: 'hidden', // Prevent body scroll
-        position: 'relative'
+        height: '100vh',
+        overflow: 'hidden',
+        position: 'fixed',
+        width: '100%',
+        top: 0,
+        left: 0
       }}>
         <Button
           onClick={handleDrawerToggle}
@@ -325,11 +328,11 @@ export default function CourseView() {
           component="main"
           sx={{
             flexGrow: 1,
-            m: { xs: 2, sm: 3 },
+            p: { xs: 2, sm: 3 },
             width: '100%',
-            height: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
+            height: `calc(100vh - ${TOOLBAR_HEIGHT+30}px)`,
             overflow: 'auto',
-            ml: { xs: 0, sm: 0 },
+            mt: `${TOOLBAR_HEIGHT}px`,
             '& > *': {
               maxWidth: 'lg',
               mx: 'auto'
