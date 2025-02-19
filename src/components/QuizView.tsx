@@ -91,7 +91,7 @@ export default function QuizView({ quiz, onSubmit, onClose, readOnlyAnswers }: Q
       </Box>
     );
   }
-
+  const totalRequiredQuestions = quiz.questions.filter(question => question.type === 'single_choice').length;
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 1 }}>
       <Paper sx={{ p: 1 }}>
@@ -173,23 +173,32 @@ export default function QuizView({ quiz, onSubmit, onClose, readOnlyAnswers }: Q
             </>
           )}
 
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
+          <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center">
+            {!submitted && (
+              <>
+                {totalRequiredQuestions > 0 && (
+                  <Typography variant="body2" color="text.secondary">
+                     {t('requiredQuestionsRemaining', { completed: quiz.questions.filter((question, index) =>
+                      question.type ==='single_choice' && answers[index] !== undefined
+                    ).length , total: totalRequiredQuestions})}
+                  </Typography>
+                )}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSubmit}
+                  disabled={!isComplete()}
+                >
+                  {t('submit')}
+                </Button>
+              </>
+            )}
             <Button
               variant="outlined"
               onClick={onClose}
             >
               {t('close')}
             </Button>
-            {!submitted && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={!isComplete()}
-              >
-                {t('submit')}
-              </Button>
-            )}
           </Stack>
         </Stack>
       </Paper>

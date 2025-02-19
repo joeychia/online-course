@@ -384,5 +384,9 @@ export const translations: Translations = {
   index: {
     'zh-TW': '目錄',
     'zh-CN': '目录'
+  },
+  requiredQuestionsRemaining: {
+    'zh-TW': '已完成 {{completed}}/{{total}}',
+    'zh-CN': '已完成 {{completed}}/{{total}}'
   }
 };
