@@ -297,7 +297,7 @@ export default function CourseView() {
           onClick={handleDrawerToggle}
           sx={{
             position: 'fixed',
-            left: { xs: 16, sm: 24 },
+            left: { xs: 16, sm: 12 },
             top: TOOLBAR_HEIGHT + 16,
             zIndex: theme => theme.zIndex.drawer - 1,
             minWidth: 'unset',

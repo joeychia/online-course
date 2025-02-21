@@ -294,7 +294,7 @@ const LessonView: React.FC<LessonViewProps> = ({
   const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';
 
   return (
-    <Box sx={{ flex: 1, height: '100%', p: 3, mt: 2 }}>
+    <Box sx={{ flex: 1, height: 'auto', px: 4 }}>
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Typography variant="h4" component="h1">
