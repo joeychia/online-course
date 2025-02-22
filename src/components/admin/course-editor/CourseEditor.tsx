@@ -11,6 +11,7 @@ import { DeleteUnitDialog } from '../dialogs/DeleteUnitDialog';
 import { useCourseData } from './hooks/useCourseData';
 import { useUnitOperations } from './hooks/useUnitOperations';
 import { useLessonOperations } from './hooks/useLessonOperations';
+import { useCourseOperations } from './hooks/useCourseOperations';
 
 interface CourseEditorProps {
   courseId: string;
@@ -27,6 +28,11 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
     isSaving: isUnitSaving,
     error: unitError 
   } = useUnitOperations({ courseId, course, reloadCourse });
+  const {
+    updateCourseSettings,
+    isSaving: isSettingsSaving,
+    error: settingsError
+  } = useCourseOperations({ courseId, reloadCourse });
   const {
     addLesson,
     deleteLesson,
@@ -50,7 +56,7 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Compute error message from all possible sources
-  const error = courseError || unitError || lessonError;
+  const error = courseError || unitError || lessonError || settingsError;
 
   // Header handlers
   const handleToggleExpandAll = () => {
@@ -134,9 +140,10 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
         isLoading={isLoading}
         onAddUnit={() => setIsUnitDialogOpen(true)}
         onToggleExpandAll={handleToggleExpandAll}
-        isSaving={isUnitSaving || isLessonSaving}
+        isSaving={isUnitSaving || isLessonSaving || isSettingsSaving}
         isAllExpanded={course ? expandedUnits.length === course.units.length : false}
         hasUnits={Boolean(course?.units?.length)}
+        onUpdateSettings={updateCourseSettings}
       />
 
       {course && (
