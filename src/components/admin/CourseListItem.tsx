@@ -62,9 +62,11 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
             maxHeight: expanded ? 'none' : '200px',
             overflow: 'hidden',
             position: 'relative',
-            bgcolor: '#f5f5f5',
+            bgcolor: 'background.paper',
             p: 2,
-            borderRadius: 1
+            borderRadius: 1,
+            border: 1,
+            borderColor: 'divider'
           }}
         >
           <MarkdownViewer content={course.description} />
@@ -76,7 +78,7 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
                 left: 0,
                 right: 0,
                 height: '50px',
-                background: 'linear-gradient(180deg, rgba(245,245,245,0) 0%, rgba(245,245,245,1) 100%)',
+                background: (theme) => `linear-gradient(180deg, ${theme.palette.background.paper}00 0%, ${theme.palette.background.paper} 100%)`,
                 display: 'flex',
                 alignItems: 'flex-end',
                 justifyContent: 'center',
