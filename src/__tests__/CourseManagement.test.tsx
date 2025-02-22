@@ -199,7 +199,7 @@ describe('CourseManagement', () => {
       });
 
       // Click delete button
-      const deleteButtons = await screen.findAllByText('Delete');
+      const deleteButtons = await screen.findAllByTitle('Delete Course');
       fireEvent.click(deleteButtons[0]);
 
       expect(window.confirm).toHaveBeenCalled();
@@ -216,7 +216,7 @@ describe('CourseManagement', () => {
       });
 
       // Click delete button
-      const deleteButtons = await screen.findAllByText('Delete');
+      const deleteButtons = await screen.findAllByTitle('Delete Course');
       fireEvent.click(deleteButtons[0]);
 
       expect(deleteCourse).not.toHaveBeenCalled();

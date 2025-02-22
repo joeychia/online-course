@@ -59,7 +59,7 @@ describe('CourseEditor', () => {
     await waitFor(() => {
       expect(screen.getByText('Test Course')).toBeInTheDocument();
       expect(screen.getByText('Unit 1')).toBeInTheDocument();
-      expect(screen.getByText('(0 lessons)')).toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
   });
 

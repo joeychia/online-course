@@ -86,7 +86,7 @@ describe('CourseListItem', () => {
       />
     );
 
-    const deleteButton = screen.getByText('Delete');
+    const deleteButton = screen.getByTitle('Delete Course');
     fireEvent.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith(mockCourse.id);
@@ -107,10 +107,10 @@ describe('CourseListItem', () => {
     expect(screen.getByTestId('EditIcon')).toBeInTheDocument();
     expect(screen.getByTestId('DeleteIcon')).toBeInTheDocument();
 
-    // Check button labels
+    // Check button labels and icons
     expect(screen.getByText('View')).toBeInTheDocument();
     expect(screen.getByText('Edit')).toBeInTheDocument();
-    expect(screen.getByText('Delete')).toBeInTheDocument();
+    expect(screen.getByTitle('Delete Course')).toBeInTheDocument();
   });
 
   it('maintains consistent button styling', () => {

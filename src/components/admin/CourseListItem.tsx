@@ -103,14 +103,13 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
         p: 2, 
         pt: 0,
         display: 'flex',
-        flexDirection: { xs: 'column', sm: 'row' },
-        justifyContent: { xs: 'stretch', sm: 'flex-end' },
-        gap: 1,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: { xs: 0.5, sm: 1 },
         '& .MuiButton-root': {
-          width: { xs: '100%', sm: 'auto' },
-          height: '40px',
-          padding: '6px 16px',
-          fontSize: '0.9rem',
+          height: { xs: '32px', sm: '40px' },
+          padding: { xs: '4px 8px', sm: '6px 16px' },
+          fontSize: { xs: '0.8rem', sm: '0.9rem' },
           marginLeft: '0px'
         }
       }}>
@@ -135,14 +134,14 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
           Edit
         </Button>
         <Button
-          startIcon={<DeleteIcon />}
           onClick={() => onDelete(course.id)}
           variant="contained"
           size="small"
           color="error"
           title="Delete Course"
+          sx={{ minWidth: '32px' }}
         >
-          Delete
+          <DeleteIcon />
         </Button>
       </CardActions>
     </Card>

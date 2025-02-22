@@ -14,7 +14,7 @@
     "backup": "tsx src/scripts/backupCourse.ts",
     "test": "vitest",
     "test:once": "vitest run",
-    "test:auto": "vitest run --reporter=json",
+    "test:auto": "vitest run --reporter=tap-flat",
     "pre-commit": "npm run test:once && npm run build"
   },
   "dependencies": {

@@ -16,6 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import AddIcon from '@mui/icons-material/Add';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { LessonItem } from './LessonItem';
@@ -77,17 +78,35 @@ export const UnitItem: React.FC<UnitItemProps> = ({
             expanded={isExpanded}
             onChange={(_, expanded) => onExpand(expanded)}
           >
-            <AccordionSummary 
-              expandIcon={<ExpandMoreIcon />}
-              {...draggableProvided.dragHandleProps}
+            <AccordionSummary
               sx={{
+                minHeight: 0,
+                padding: 1,
                 '& .MuiAccordionSummary-content': {
-                  alignItems: 'center'
+                  margin: 0
                 }
               }}
             >
-              <DragIndicatorIcon sx={{ mr: 1, color: 'text.secondary' }} />
-              <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box 
+                {...draggableProvided.dragHandleProps}
+                sx={{ 
+                  display: 'flex',
+                  alignItems: 'stretch',
+                  mr: 1,
+                  alignSelf: 'stretch',
+                  color: 'text.secondary'
+                }}
+              >
+                <DragIndicatorIcon sx={{ mt: 0.75, mb: 'auto' }} />
+              </Box>
+              <Box sx={{ 
+                width: '100%', 
+                display: 'flex', 
+                flexDirection: {xs: 'column', sm: 'row'}, 
+                gap: {xs: 1, sm: 2},
+                alignItems: {xs: 'flex-start', sm: 'center'},
+                pt: 0
+              }}>
                 {isEditing ? (
                   <TextField
                     size="small"
@@ -103,44 +122,81 @@ export const UnitItem: React.FC<UnitItemProps> = ({
                     sx={{ flexGrow: 1 }}
                   />
                 ) : (
-                  <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography>{name}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      ({lessons.length} {lessons.length === 1 ? 'lesson' : 'lessons'})
-                    </Typography>
+                  <Box sx={{ 
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: {xs: 'column', sm: 'row'},
+                    gap: 1
+                  }}>
+                    <Typography sx={{ flexGrow: 1, pt: 0.75 }}>{name}</Typography>
+                    <Box sx={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: {xs: '100%', sm: 'auto'}
+                    }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 0.5,
+                        color: 'text.secondary'
+                      }}>
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            '& .expand-icon': {
+                              transition: 'transform 0.2s',
+                              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                            }
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onExpand(!isExpanded);
+                          }}
+                        >
+                          <MenuBookIcon fontSize="small" />
+                          <Typography variant="body2" sx={{ mx: 0.5 }}>
+                            {lessons.length}
+                          </Typography>
+                          <ExpandMoreIcon className="expand-icon" fontSize="small" />
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton 
+                          size="small" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditStart();
+                          }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton 
+                          size="small" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete();
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                        <Tooltip title="View Quiz Results">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewQuizResults();
+                            }}
+                          >
+                            <AssessmentIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </Box>
                   </Box>
                 )}
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <IconButton 
-                    size="small" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditStart();
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete();
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                  <Tooltip title="View Quiz Results">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onViewQuizResults();
-                      }}
-                    >
-                      <AssessmentIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
               </Box>
             </AccordionSummary>
             <AccordionDetails>
