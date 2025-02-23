@@ -1,2 +1,2 @@
 * `npm run test:auto` (or `npm run test:auto <test_file_path>` for single test file) to run unit tests
-* Always run `npm run build` at the end of each task to make sure the code would compile without problems
+* Always run `npm run test:auto && npm run build` at the end of each task to make sure the code would compile without problems

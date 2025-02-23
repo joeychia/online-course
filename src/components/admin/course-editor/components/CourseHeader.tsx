@@ -3,10 +3,13 @@ import {
   Box,
   Typography,
   Button,
-  Divider
+  Divider,
+  IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { CourseSettings } from './CourseSettings';
 import { Course } from '../../../../types';
 
@@ -14,22 +17,20 @@ interface CourseHeaderProps {
   course: Course | null;
   isLoading: boolean;
   onAddUnit: () => void;
-  onToggleExpandAll: () => void;
   isSaving: boolean;
-  isAllExpanded: boolean;
-  hasUnits: boolean;
   onUpdateSettings: (settings: Course['settings']) => Promise<boolean>;
+  onEditCourse: (course: Course) => void;
+  onDeleteCourse: (courseId: string) => Promise<void>;
 }
 
 export const CourseHeader: React.FC<CourseHeaderProps> = ({
   course,
   isLoading,
   onAddUnit,
-  onToggleExpandAll,
   isSaving,
-  isAllExpanded,
-  hasUnits,
-  onUpdateSettings
+  onUpdateSettings,
+  onEditCourse,
+  onDeleteCourse
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   return (
@@ -42,31 +43,68 @@ export const CourseHeader: React.FC<CourseHeaderProps> = ({
           <Divider />
         </Box>
         
-        <Box display="flex" justifyContent="flex-end" alignItems="center" mb={3}>
-          <Box display="flex" gap={2}>
-            <Button
-              startIcon={<SettingsIcon />}
-              variant="outlined"
-              onClick={() => setIsSettingsOpen(true)}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Box>
+            <IconButton
+              color="error"
+              onClick={() => course && onDeleteCourse(course.id)}
               disabled={!course || isSaving}
+              title="Delete Course"
             >
-              Settings
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={onToggleExpandAll}
-              disabled={!hasUnits}
-            >
-              {isAllExpanded ? 'Collapse All' : 'Expand All'}
-            </Button>
-            <Button
-              startIcon={<AddIcon />}
-              variant="contained"
-              onClick={onAddUnit}
-              disabled={isSaving}
-            >
-              Add Unit
-            </Button>
+              <DeleteOutlineIcon />
+            </IconButton>
+          </Box>
+          <Box display="flex" gap={2}>
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
+              <Button
+                startIcon={<EditIcon />}
+                variant="outlined"
+                onClick={() => course && onEditCourse(course)}
+                disabled={!course || isSaving}
+              >
+                Edit Course
+              </Button>
+              <Button
+                startIcon={<SettingsIcon />}
+                variant="outlined"
+                onClick={() => setIsSettingsOpen(true)}
+                disabled={!course || isSaving}
+              >
+                Settings
+              </Button>
+              <Button
+                startIcon={<AddIcon />}
+                variant="contained"
+                onClick={onAddUnit}
+                disabled={isSaving}
+              >
+                Add Unit
+              </Button>
+            </Box>
+            <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 1 }}>
+              <IconButton
+                onClick={() => course && onEditCourse(course)}
+                disabled={!course || isSaving}
+                title="Edit Course"
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                onClick={() => setIsSettingsOpen(true)}
+                disabled={!course || isSaving}
+                title="Settings"
+              >
+                <SettingsIcon />
+              </IconButton>
+              <IconButton
+                onClick={onAddUnit}
+                disabled={isSaving}
+                color="primary"
+                title="Add Unit"
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
           </Box>
         </Box>
       </Box>

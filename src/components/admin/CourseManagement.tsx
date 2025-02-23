@@ -12,7 +12,7 @@ import {
   Typography
 } from '@mui/material';
 import { Course } from '../../types';
-import { createCourse, updateCourse, deleteCourse, getAllCourses } from '../../services/dataService';
+import { createCourse, updateCourse, getAllCourses } from '../../services/dataService';
 import RichTextEditor from '../RichTextEditor';
 import { CourseListItem } from './CourseListItem';
 import { CourseEditor } from './CourseEditor';
@@ -75,28 +75,6 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
     }
   };
 
-  const handleEdit = (course: Course) => {
-    try {
-      setEditingCourse(course);
-      setCourseName(course.name);
-      setCourseDescription(course.description);
-      setOpen(true);
-    } catch (error) {
-      console.error('Error setting up course edit:', error);
-    }
-  };
-
-  const handleDelete = async (courseId: string) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
-      try {
-        await deleteCourse(courseId);
-        await loadCourses();
-      } catch (error) {
-        console.error('Error deleting course:', error);
-      }
-    }
-  };
-
   const resetForm = () => {
     setEditingCourse(null);
     setCourseName('');
@@ -146,13 +124,11 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
             </Button>
           </Box>
 
-          <Grid container spacing={3}>
+          <Grid container spacing={3} data-testid="course-grid">
             {courses.map((course) => (
               <Grid item xs={12} key={course.id}>
                 <CourseListItem
                   course={course}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
                   onSelect={() => {
                     setSelectedCourseId(course.id);
                     navigate(`/admin/courses/${course.id}`);

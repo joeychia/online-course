@@ -16,8 +16,6 @@ const mockCourse: Course = {
 };
 
 describe('CourseListItem', () => {
-  const mockOnEdit = vi.fn();
-  const mockOnDelete = vi.fn();
   const mockOnSelect = vi.fn();
 
   const renderWithProviders = (ui: React.ReactElement) => {
@@ -34,8 +32,6 @@ describe('CourseListItem', () => {
     renderWithProviders(
       <CourseListItem
         course={mockCourse}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
         onSelect={mockOnSelect}
       />
     );
@@ -44,89 +40,17 @@ describe('CourseListItem', () => {
     expect(screen.getByText('Test Description')).toBeInTheDocument();
   });
 
-  it('calls onSelect when View Details button is clicked', () => {
+  it('calls onSelect when card is clicked', () => {
     renderWithProviders(
       <CourseListItem
         course={mockCourse}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
         onSelect={mockOnSelect}
       />
     );
 
-    const viewButton = screen.getByText('View');
-    fireEvent.click(viewButton);
+    const card = screen.getByRole('button');
+    fireEvent.click(card);
 
     expect(mockOnSelect).toHaveBeenCalled();
-  });
-
-  it('calls onEdit with course when Edit button is clicked', () => {
-    renderWithProviders(
-      <CourseListItem
-        course={mockCourse}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        onSelect={mockOnSelect}
-      />
-    );
-
-    const editButton = screen.getByText('Edit');
-    fireEvent.click(editButton);
-
-    expect(mockOnEdit).toHaveBeenCalledWith(mockCourse);
-  });
-
-  it('calls onDelete with course ID when Delete button is clicked', async () => {
-    renderWithProviders(
-      <CourseListItem
-        course={mockCourse}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        onSelect={mockOnSelect}
-      />
-    );
-
-    const deleteButton = screen.getByTitle('Delete Course');
-    fireEvent.click(deleteButton);
-
-    expect(mockOnDelete).toHaveBeenCalledWith(mockCourse.id);
-  });
-
-  it('renders all action buttons with correct icons', () => {
-    renderWithProviders(
-      <CourseListItem
-        course={mockCourse}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        onSelect={mockOnSelect}
-      />
-    );
-
-    // Check that all buttons are present with their icons
-    expect(screen.getByTestId('VisibilityIcon')).toBeInTheDocument();
-    expect(screen.getByTestId('EditIcon')).toBeInTheDocument();
-    expect(screen.getByTestId('DeleteIcon')).toBeInTheDocument();
-
-    // Check button labels and icons
-    expect(screen.getByText('View')).toBeInTheDocument();
-    expect(screen.getByText('Edit')).toBeInTheDocument();
-    expect(screen.getByTitle('Delete Course')).toBeInTheDocument();
-  });
-
-  it('maintains consistent button styling', () => {
-    renderWithProviders(
-      <CourseListItem
-        course={mockCourse}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        onSelect={mockOnSelect}
-      />
-    );
-
-    const buttons = screen.getAllByRole('button');
-    buttons.forEach(button => {
-      expect(button).toHaveClass('MuiButton-contained');
-      expect(button).toHaveClass('MuiButton-sizeSmall');
-    });
   });
 });

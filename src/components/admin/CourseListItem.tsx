@@ -3,28 +3,21 @@ import MarkdownViewer from '../MarkdownViewer';
 import {
   Card,
   CardContent,
-  CardActions,
   Box,
   Typography,
-  Button,
-  Paper
+  Paper,
+  CardActionArea,
+  Button
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Course } from '../../types';
 
 interface CourseListItemProps {
   course: Course;
-  onEdit: (course: Course) => void;
-  onDelete: (courseId: string) => Promise<void>;
   onSelect: () => void;
 }
 
 export const CourseListItem: React.FC<CourseListItemProps> = ({
   course,
-  onEdit,
-  onDelete,
   onSelect
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -39,8 +32,9 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
   }, [course.description]);
 
   return (
-    <Card component={Paper} elevation={2} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardContent sx={{ flexGrow: 1, position: 'relative' }}>
+    <Card component={Paper} elevation={2}>
+      <CardActionArea onClick={onSelect} sx={{ height: '100%' }}>
+      <CardContent>
         <Typography 
           variant="h4" 
           component="h2" 
@@ -99,51 +93,7 @@ export const CourseListItem: React.FC<CourseListItemProps> = ({
           </Button>
         )}
       </CardContent>
-      <CardActions sx={{ 
-        p: 2, 
-        pt: 0,
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: { xs: 0.5, sm: 1 },
-        '& .MuiButton-root': {
-          height: { xs: '32px', sm: '40px' },
-          padding: { xs: '4px 8px', sm: '6px 16px' },
-          fontSize: { xs: '0.8rem', sm: '0.9rem' },
-          marginLeft: '0px'
-        }
-      }}>
-        <Button
-          startIcon={<VisibilityIcon />}
-          onClick={onSelect}
-          variant="contained"
-          size="small"
-          color="primary"
-          title="View Details"
-        >
-          View
-        </Button>
-        <Button
-          startIcon={<EditIcon />}
-          onClick={() => onEdit(course)}
-          variant="contained"
-          size="small"
-          color="primary"
-          title="Edit Course"
-        >
-          Edit
-        </Button>
-        <Button
-          onClick={() => onDelete(course.id)}
-          variant="contained"
-          size="small"
-          color="error"
-          title="Delete Course"
-          sx={{ minWidth: '32px' }}
-        >
-          <DeleteIcon />
-        </Button>
-      </CardActions>
+      </CardActionArea>
     </Card>
   );
 };

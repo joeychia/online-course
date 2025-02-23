@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourseEditor } from '../components/admin/CourseEditor';
-import { getCourse, updateCourse, createUnit, getUnit, updateUnit } from '../services/dataService';
+import { getCourse, updateCourse, createUnit, getUnit } from '../services/dataService';
 import type { Course } from '../types';
 
 // Mock services
@@ -225,50 +225,6 @@ describe('CourseEditor', () => {
       fireEvent.click(cancelButton);
 
       expect(updateCourse).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Unit management', () => {
-    it('allows inline editing of unit name', async () => {
-      const user = userEvent.setup();
-      render(<CourseEditor courseId="course_1" />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Unit 1')).toBeInTheDocument();
-      });
-
-      // Start editing
-      const editButtons = screen.getAllByTestId('EditIcon');
-      await user.click(editButtons[0]);
-
-      // Edit name
-      const input = screen.getByRole('textbox');
-      await user.clear(input);
-      await user.type(input, 'Updated Unit Name{enter}');
-
-      // Verify updates
-      expect(updateUnit).toHaveBeenCalledWith('unit_1', { name: 'Updated Unit Name' });
-      expect(updateCourse).toHaveBeenCalled();
-    });
-
-    it('handles expand/collapse all units', async () => {
-      const user = userEvent.setup();
-      render(<CourseEditor courseId="course_1" />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Unit 1')).toBeInTheDocument();
-      });
-
-      // Initially button should show "Expand All"
-      const toggleButton = screen.getByText('Expand All');
-      await user.click(toggleButton);
-
-      // Should now show "Collapse All"
-      expect(screen.getByText('Collapse All')).toBeInTheDocument();
-
-      // Click again to collapse
-      await user.click(screen.getByText('Collapse All'));
-      expect(screen.getByText('Expand All')).toBeInTheDocument();
     });
   });
 

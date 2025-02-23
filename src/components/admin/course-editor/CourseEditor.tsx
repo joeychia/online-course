@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Snackbar, Alert } from '@mui/material';
+import { Box, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import { DropResult } from 'react-beautiful-dnd';
 import { StudentsQuizResults } from '../StudentsQuizResults';
 import { LessonEditor } from '../LessonEditor';
@@ -12,6 +12,9 @@ import { useCourseData } from './hooks/useCourseData';
 import { useUnitOperations } from './hooks/useUnitOperations';
 import { useLessonOperations } from './hooks/useLessonOperations';
 import { useCourseOperations } from './hooks/useCourseOperations';
+import { updateCourse, deleteCourse } from '../../../services/dataService';
+import RichTextEditor from '../../RichTextEditor';
+import { Course } from '../../../types';
 
 interface CourseEditorProps {
   courseId: string;
@@ -54,19 +57,46 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const [selectedQuizUnit, setSelectedQuizUnit] = useState<{ unitId: string; lessonId: string } | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingCourseName, setEditingCourseName] = useState('');
+  const [editingCourseDescription, setEditingCourseDescription] = useState('');
+
+  // Course edit handlers
+  const handleEditCourse = (course: Course) => {
+    setEditingCourseName(course.name);
+    setEditingCourseDescription(course.description);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateCourse = async () => {
+    if (!course || !editingCourseName.trim()) return;
+    
+    try {
+      await updateCourse(course.id, {
+        name: editingCourseName,
+        description: editingCourseDescription,
+      });
+      setEditDialogOpen(false);
+      reloadCourse();
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Error updating course:', error);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    if (window.confirm('Are you sure you want to delete this course?')) {
+      try {
+        await deleteCourse(courseId);
+        window.location.href = '/admin'; // Redirect to admin dashboard after deletion
+      } catch (error) {
+        console.error('Error deleting course:', error);
+      }
+    }
+  };
 
   // Compute error message from all possible sources
   const error = courseError || unitError || lessonError || settingsError;
-
-  // Header handlers
-  const handleToggleExpandAll = () => {
-    if (!course) return;
-    if (expandedUnits.length === course.units.length) {
-      setExpandedUnits([]);
-    } else {
-      setExpandedUnits(course.units.map(u => u.id));
-    }
-  };
 
   // Unit handlers
   const handleAddUnit = async (name: string) => {
@@ -139,11 +169,10 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
         course={course}
         isLoading={isLoading}
         onAddUnit={() => setIsUnitDialogOpen(true)}
-        onToggleExpandAll={handleToggleExpandAll}
         isSaving={isUnitSaving || isLessonSaving || isSettingsSaving}
-        isAllExpanded={course ? expandedUnits.length === course.units.length : false}
-        hasUnits={Boolean(course?.units?.length)}
         onUpdateSettings={updateCourseSettings}
+        onEditCourse={handleEditCourse}
+        onDeleteCourse={handleDeleteCourse}
       />
 
       {course && (
@@ -209,6 +238,35 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
         onClose={() => setDeleteUnitDialogOpen(false)}
         onConfirm={handleConfirmDeleteUnit}
       />
+
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Course</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Course Name"
+            fullWidth
+            value={editingCourseName}
+            onChange={(e) => setEditingCourseName(e.target.value)}
+          />
+          <Box mt={2}>
+            <RichTextEditor
+              value={editingCourseDescription}
+              onChange={setEditingCourseDescription}
+              placeholder="Enter course description..."
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleUpdateCourse} variant="contained" color="primary">
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {selectedQuizUnit && (
         <StudentsQuizResults
