@@ -33,3 +33,6 @@ dist-ssr
 
 # Firebase
 service-account.json
+
+# Local test related files
+.test*
