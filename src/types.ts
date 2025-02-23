@@ -1,3 +1,11 @@
+// Minimal unit data stored in course
+export interface CourseUnit {
+  id: string;
+  name: string;
+  order: number;
+  lessonCount: number;
+}
+
 export interface Course {
   id: string;
   name: string;
@@ -7,31 +15,26 @@ export interface Course {
     token?: string;
     enableNote?: boolean;
   };
-  units: Array<{
-    id: string;
-    name: string;
-    order: number;
-    lessons: Array<{
-      id: string;
-      name: string;
-      order: number;
-    }>;
-  }>;
+  units: CourseUnit[];
   groupIds: Record<string, boolean>;
   isPublic?: boolean;
 }
 
+// Full unit data with lessons, loaded on demand
 export interface Unit {
   id: string;
   courseId: string;
   name: string;
   description: string;
   order: number;
-  lessons: Array<{
-    id: string;
-    name: string;
-    order: number;
-  }>;
+  lessons: UnitLesson[];
+}
+
+export interface UnitLesson {
+  id: string;
+  name: string;
+  order: number;
+  hasQuiz: boolean;
 }
 
 export interface Lesson {

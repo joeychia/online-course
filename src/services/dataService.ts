@@ -10,7 +10,22 @@ export const getCourse = async (courseId: string): Promise<Course | null> => {
 };
 
 export const getUnit = async (unitId: string): Promise<Unit | null> => {
-  return await firestoreService.getUnitById(unitId);
+  return await firestoreService.getUnitWithLessons(unitId);
+};
+
+// Get unit details with lessons (lazy loading)
+export const getUnitWithLessons = async (unitId: string): Promise<Unit | null> => {
+  return await firestoreService.getUnitWithLessons(unitId);
+};
+
+// Clear unit cache
+export const clearUnitCache = (unitId: string): void => {
+  firestoreService.clearUnitCache(unitId);
+};
+
+// Clear all unit caches
+export const clearAllUnitCache = (): void => {
+  firestoreService.clearAllUnitCache();
 };
 
 export const getLesson = async (lessonId: string): Promise<Lesson | null> => {

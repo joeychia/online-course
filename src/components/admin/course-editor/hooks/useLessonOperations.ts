@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Course } from '../../../../types';
-import { createLesson, updateUnit } from '../../../../services/dataService';
+import { createLesson, updateUnit, updateCourse, getUnit } from '../../../../services/dataService';
+import type { UnitLesson } from '../../../../types';
 
 interface UseLessonOperationsProps {
   courseId: string;
@@ -19,13 +20,13 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
 
     try {
       const newLessonId = `lesson_${Date.now()}`;
-      const unit = course.units.find(u => u.id === unitId);
-      
+      // Get full unit data
+      const unit = await getUnit(unitId);
       if (!unit) {
         throw new Error('Unit not found');
       }
 
-      const newOrder = unit.lessons?.length || 0;
+      const newOrder = unit.lessons.length;
 
       await createLesson(newLessonId, {
         id: newLessonId,
@@ -36,13 +37,23 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
         order: newOrder
       });
 
-      const newLesson = {
+      const newLesson: UnitLesson = {
         id: newLessonId,
         name: name.trim(),
-        order: newOrder
+        order: newOrder,
+        hasQuiz: false
       };
       const updatedLessons = [...(unit.lessons || []), newLesson];
+      // Update unit with new lesson
       await updateUnit(unitId, { lessons: updatedLessons });
+      
+      // Update course unit's lessonCount
+      const updatedUnits = course.units.map(u => 
+        u.id === unitId 
+          ? { ...u, lessonCount: updatedLessons.length }
+          : u
+      );
+      await updateCourse(course.id, { units: updatedUnits });
       
       await reloadCourse();
       return true;
@@ -61,16 +72,27 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
     setError(null);
 
     try {
-      const unit = course.units.find(u => u.id === unitId);
+      // Get full unit data
+      const unit = await getUnit(unitId);
       if (!unit) {
         throw new Error('Unit not found');
       }
 
-      const updatedLessons = unit.lessons
-        .filter(lesson => lesson.id !== lessonId)
-        .map((lesson, index) => ({ ...lesson, order: index }));
+      const updatedLessons: UnitLesson[] = unit.lessons
+        .filter((lesson: UnitLesson) => lesson.id !== lessonId)
+        .map((lesson: UnitLesson, index: number) => ({ ...lesson, order: index }));
 
+      // Update unit with filtered lessons
       await updateUnit(unitId, { lessons: updatedLessons });
+      
+      // Update course unit's lessonCount
+      const updatedUnits = course.units.map(u => 
+        u.id === unitId 
+          ? { ...u, lessonCount: updatedLessons.length }
+          : u
+      );
+      await updateCourse(course.id, { units: updatedUnits });
+      
       await reloadCourse();
       return true;
     } catch (err) {
@@ -92,12 +114,13 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
     setError(null);
 
     try {
-      const unit = course.units.find(u => u.id === unitId);
+      // Get full unit data
+      const unit = await getUnit(unitId);
       if (!unit) {
         throw new Error('Unit not found');
       }
 
-      const newLessons = Array.from(unit.lessons);
+      const newLessons: UnitLesson[] = Array.from(unit.lessons);
       const [removed] = newLessons.splice(sourceIndex, 1);
       newLessons.splice(destinationIndex, 0, removed);
 
@@ -107,7 +130,11 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
         order: index
       }));
 
+      // Update unit with reordered lessons
       await updateUnit(unitId, { lessons: updatedLessons });
+      
+      // No need to update lessonCount since we're just reordering
+      
       await reloadCourse();
       return true;
     } catch (err) {

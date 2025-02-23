@@ -40,42 +40,73 @@
    - Group-based course access
 
 ## Recent Changes
-- Documentation and Data Model Alignment:
-  - Updated requirements.md to match actual TypeScript types
-  - Enhanced systemPatterns.md with detailed data model features
-  - Documented ordering system for courses, units, and lessons
-  - Added context for note-taking system
-  - Clarified enhanced settings and user tracking
+- Lesson Count Improvements:
+  - Fixed lesson count display in course editor:
+    - Units now show correct lesson count without expansion
+    - Using lessonCount from CourseUnit data instead of loaded lessons array
+    - Improved data consistency between unit and course levels
+  - Enhanced lesson count persistence:
+    - Added automatic course document updates when fetching counts
+    - Maintaining count consistency during lesson operations
+  - Code cleanup:
+    - Removed unused clearUnitCache from CourseEditor
+    - Removed unused mapToUnit method from UnitDataAccess
+    - Optimized imports
 
-- Previous Changes:
-  - Identified performance bottlenecks:
-    - Separate requests for each unit's lesson details
-    - Loading all units and lessons at once
+- Lesson Deletion Improvements:
+  - Added confirmation dialog before lesson deletion
+  - Fixed UI update issue after lesson deletion
+  - Enhanced user feedback during deletion process
+  - Improved state management for lesson operations
+
+- Service Layer Reorganization:
+  - Created new `services/dataAccess` directory
+  - Moved database operations to dedicated modules:
+    - CourseDataAccess: Course-specific operations
+    - UnitDataAccess: Unit and lesson operations with caching
+  - Updated firestoreService to delegate operations
+  - Enhanced systemPatterns.md with new architecture
+  - Improved code organization and maintainability
+
+- Previous Documentation Updates:
+  - Updated requirements.md to match TypeScript types
+  - Enhanced systemPatterns.md with data model features
+  - Documented ordering system for content
+  - Added note-taking system context
+  - Clarified settings and user tracking
+
+- Performance Improvements:
+  - Identified and addressed bottlenecks:
+    - Separate requests for unit details
+    - Loading all data at once
     - No pagination or lazy loading
-  - Planned optimization strategy:
-    - Pagination and lazy loading implementation
-    - Data structure denormalization
-    - Caching and batch loading
-  - Previous improvements:
-    - Admin interface improvements
-    - Course management features
-    - Basic user features
-    - Testing infrastructure
+  - Implemented optimizations:
+    - Moved to layered architecture
+    - Added unit data caching
+    - Improved data access patterns
 
 ## Active Decisions
 
 ### Technical Decisions
-1. Performance Optimization
-   - Implement lazy loading for unit lessons
-   - Load lesson details only when unit expanded
-   - Cache loaded unit data in memory
-   - Simple and efficient loading pattern
+1. Architecture Improvements
+   - Three-layer architecture:
+     - Data Access Layer: Direct database operations
+     - Service Layer: Business logic and orchestration
+     - API Layer: Clean interface for components
+   - Clear separation of concerns
+   - Improved testability and maintainability
 
-2. Data Structure
-   - Store minimal unit data in course document
-   - Keep lesson data in unit documents
-   - Load lessons on demand
-   - Natural user interaction flow
+2. Performance Optimization
+   - Smart caching in UnitDataAccess
+   - Lazy loading for unit lessons
+   - Load lesson details on demand
+   - Efficient data patterns
+
+3. Data Structure
+   - Minimal course data with unit references
+   - Complete unit data in separate documents
+   - Cached unit data with TTL
+   - Clear data flow through layers
 
 3. Testing Strategy
    - Add performance benchmarks
@@ -102,17 +133,17 @@
 ## Next Steps
 
 ### Immediate Priorities
-1. Performance Optimization
-   - Update course data structure
-   - Implement lazy loading for units
-   - Add loading states to UI
-   - Implement unit data caching
+1. Testing Updates
+   - Update test suite for new architecture
+   - Add tests for data access layer
+   - Verify caching behavior
+   - Test error handling
 
-2. Data Structure Changes
-   - Simplify course document structure
-   - Move lesson data to unit documents
-   - Create migration script
-   - Update database queries
+2. Documentation
+   - Update API documentation
+   - Add architecture diagrams
+   - Document caching strategy
+   - Update development guides
 
 3. Testing & Validation
    - Add performance benchmarks
@@ -120,7 +151,13 @@
    - Measure improvements
 
 ### Future Considerations
-1. User & Group Management
+1. Course Upload Enhancement
+   - Implement UI-based batch course upload
+   - Replace manual script-based upload
+   - Add progress tracking for large uploads
+   - Consider chunked upload for large courses
+
+2. User & Group Management
    - User management features
    - Group assignment system
    - Access control refinement
@@ -128,6 +165,12 @@
 ## Current Challenges
 
 ### Technical Challenges
+- Lesson Management:
+  - ✓ Fixed lesson deletion confirmation
+  - ✓ Fixed UI update after deletion
+  - ✓ Improved state management
+  - ✓ Enhanced user feedback
+
 1. Performance Optimization
    - Efficient lazy loading
    - Smart caching strategy
@@ -144,6 +187,14 @@
    - Performance benchmarking
    - Large dataset testing
    - Migration validation
+
+4. Testing Issues
+   - Unit deletion test failing in CourseEditor
+   - Dialog confirmation not triggering updateCourse
+   - Test improvements needed:
+     * Added proper test IDs to UnitItem
+     * Updated test to use userEvent
+     * Still investigating dialog interaction
 
 ### UX Challenges
 1. Loading Experience

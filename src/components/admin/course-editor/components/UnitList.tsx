@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { UnitItem } from './UnitItem';
-import { Course } from '../../../../types';
+import { Course, Unit } from '../../../../types';
 
 interface UnitListProps {
   course: Course;
+  loadedUnits: Record<string, Unit>;
   expandedUnits: string[];
   editingUnitId: string | null;
   editingUnitName: string;
@@ -19,10 +20,12 @@ interface UnitListProps {
   onDeleteLesson: (unitId: string, lessonId: string) => void;
   onViewQuizResults: (unitId: string, lessonId: string) => void;
   onDragEnd: (result: DropResult) => void;
+  loadUnitDetails: (unitId: string) => Promise<Unit | null>;
 }
 
 export const UnitList: React.FC<UnitListProps> = ({
   course,
+  loadedUnits,
   expandedUnits,
   editingUnitId,
   editingUnitName,
@@ -36,8 +39,18 @@ export const UnitList: React.FC<UnitListProps> = ({
   onEditLesson,
   onDeleteLesson,
   onViewQuizResults,
-  onDragEnd
+  onDragEnd,
+  loadUnitDetails
 }) => {
+  // Handle unit expansion with lazy loading
+  const handleUnitExpand = useCallback(async (unitId: string, expanded: boolean) => {
+    if (expanded && !loadedUnits[unitId]) {
+      // Load unit details when expanding
+      await loadUnitDetails(unitId);
+    }
+    onUnitExpand(unitId, expanded);
+  }, [loadedUnits, loadUnitDetails, onUnitExpand]);
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="units" type="unit">
@@ -45,33 +58,35 @@ export const UnitList: React.FC<UnitListProps> = ({
           <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
             {course.units
               .sort((a, b) => a.order - b.order)
-              .map((unit, index) => (
-                <UnitItem
-                  key={unit.id}
-                  id={unit.id}
-                  name={unit.name}
-                  index={index}
-                  lessons={unit.lessons}
-                  isExpanded={expandedUnits.includes(unit.id)}
-                  isEditing={editingUnitId === unit.id}
-                  editingName={editingUnitId === unit.id ? editingUnitName : unit.name}
-                  isSaving={isSaving}
-                  onExpand={(expanded) => onUnitExpand(unit.id, expanded)}
-                  onEditStart={() => onUnitEditStart(unit.id, unit.name)}
-                  onEditSave={() => onUnitEditSave(unit.id)}
-                  onEditChange={onUnitEditChange}
-                  onDelete={() => onUnitDelete(unit.id)}
-                  onAddLesson={() => onAddLesson(unit.id)}
-                  onEditLesson={(lessonId) => onEditLesson(unit.id, lessonId)}
-                  onDeleteLesson={(lessonId) => onDeleteLesson(unit.id, lessonId)}
-                  onViewQuizResults={() => {
-                    const lastLesson = unit.lessons[unit.lessons.length - 1];
-                    if (lastLesson) {
-                      onViewQuizResults(unit.id, lastLesson.id);
-                    }
-                  }}
-                />
-              ))}
+              .map((unit, index) => {
+                const loadedUnit = loadedUnits[unit.id];
+                const isLoading = expandedUnits.includes(unit.id) && !loadedUnit;
+
+                return (
+                  <UnitItem
+                    key={unit.id}
+                    id={unit.id}
+                    name={unit.name}
+                    index={index}
+                    lessons={loadedUnit?.lessons || []}
+                    lessonCount={unit.lessonCount}
+                    isExpanded={expandedUnits.includes(unit.id)}
+                    isLoading={isLoading}
+                    isEditing={editingUnitId === unit.id}
+                    editingName={editingUnitId === unit.id ? editingUnitName : unit.name}
+                    isSaving={isSaving}
+                    onExpand={(expanded) => handleUnitExpand(unit.id, expanded)}
+                    onEditStart={() => onUnitEditStart(unit.id, unit.name)}
+                    onEditSave={() => onUnitEditSave(unit.id)}
+                    onEditChange={onUnitEditChange}
+                    onDelete={() => onUnitDelete(unit.id)}
+                    onAddLesson={() => onAddLesson(unit.id)}
+                    onEditLesson={(lessonId) => onEditLesson(unit.id, lessonId)}
+                    onDeleteLesson={(lessonId) => onDeleteLesson(unit.id, lessonId)}
+                    onViewQuizResults={(lessonId) => onViewQuizResults(unit.id, lessonId)}
+                  />
+                );
+              })}
             {droppableProvided.placeholder}
           </div>
         )}

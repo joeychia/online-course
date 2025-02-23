@@ -4,6 +4,12 @@
 
 ### Admin Features
 1. Course Management
+   - Lesson count improvements:
+     * Fixed display of lesson counts in unit list
+     * Implemented proper count persistence
+     * Enhanced data consistency between unit and course levels
+     * Optimized code by removing unused functions
+   - Create/edit/delete courses
    - Create/edit/delete courses
    - Create/edit/delete units
    - Create/edit/delete lessons
@@ -92,6 +98,10 @@
 - [ ] Advanced caching strategies
 - [ ] Real-time update optimizations
 - [ ] Enhanced analytics tracking
+- [ ] UI-based batch course upload system
+  - Replace manual script-based upload
+  - Add upload progress tracking
+  - Implement chunked upload for large courses
 
 ## Known Issues 🐛
 
@@ -100,6 +110,12 @@
   - Loading all lesson data at once
   - No lazy loading for unit details
   - Slow admin dashboard and course editor loading
+
+### Testing
+- Unit deletion test failing in CourseEditor.test.tsx
+  - Dialog confirmation not triggering updateCourse
+  - Test using proper test IDs but still failing
+  - Investigating potential async/timing issues
 
 ### Non-Critical
 - Need to optimize course data structure
@@ -134,6 +150,11 @@
    - Move lesson data to units
    - Create migration script
    - Update queries
+
+3. Test Fixes
+   - Fix unit deletion test in CourseEditor
+   - Verify dialog interaction in tests
+   - Ensure proper async handling
 
 ### Medium Priority
 1. Testing

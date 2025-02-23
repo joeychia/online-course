@@ -8,6 +8,7 @@ import { UnitList } from './components/UnitList';
 import { AddUnitDialog } from './dialogs/AddUnitDialog';
 import { AddLessonDialog } from './dialogs/AddLessonDialog';
 import { DeleteUnitDialog } from '../dialogs/DeleteUnitDialog';
+import { DeleteLessonDialog } from '../dialogs/DeleteLessonDialog';
 import { useCourseData } from './hooks/useCourseData';
 import { useUnitOperations } from './hooks/useUnitOperations';
 import { useLessonOperations } from './hooks/useLessonOperations';
@@ -22,7 +23,15 @@ interface CourseEditorProps {
 
 export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
   // Course data and operations
-  const { course, isLoading, error: courseError, reloadCourse } = useCourseData(courseId);
+  const { 
+    course, 
+    loadedUnits,
+    isLoading, 
+    error: courseError, 
+    reloadCourse,
+    loadUnitDetails,
+    updateUnitLessons
+  } = useCourseData(courseId);
   const { 
     addUnit, 
     updateUnitName, 
@@ -56,6 +65,8 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
   const [editingUnitName, setEditingUnitName] = useState('');
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const [selectedQuizUnit, setSelectedQuizUnit] = useState<{ unitId: string; lessonId: string } | null>(null);
+  const [deleteLessonDialogOpen, setDeleteLessonDialogOpen] = useState(false);
+  const [lessonToDelete, setLessonToDelete] = useState<{ unitId: string; lessonId: string } | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingCourseName, setEditingCourseName] = useState('');
@@ -137,13 +148,52 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
   const handleAddLesson = async (name: string) => {
     if (!selectedUnitForLesson) return false;
     const success = await addLesson(selectedUnitForLesson, name);
-    if (success) setShowSuccess(true);
+    if (success) {
+      // Get the current unit's lessons to determine the new lesson's order
+      const unit = loadedUnits[selectedUnitForLesson];
+      if (unit) {
+        const newOrder = unit.lessons.length;
+        // Add the new lesson to the UI immediately
+        updateUnitLessons(selectedUnitForLesson, unit => ({
+          ...unit,
+          lessons: [
+            ...unit.lessons,
+            {
+              id: `lesson_${Date.now()}`, // Same ID generation as in useLessonOperations
+              name: name.trim(),
+              order: newOrder,
+              hasQuiz: false
+            }
+          ]
+        }));
+      }
+      setShowSuccess(true);
+    }
     return success;
   };
 
-  const handleDeleteLesson = async (unitId: string, lessonId: string) => {
-    const success = await deleteLesson(unitId, lessonId);
-    if (success) setShowSuccess(true);
+  const handleDeleteLesson = (unitId: string, lessonId: string) => {
+    setLessonToDelete({ unitId, lessonId });
+    setDeleteLessonDialogOpen(true);
+  };
+
+  const handleConfirmDeleteLesson = async () => {
+    if (!lessonToDelete) return;
+    const success = await deleteLesson(lessonToDelete.unitId, lessonToDelete.lessonId);
+    if (success) {
+      // Immediately update UI by removing the deleted lesson
+      updateUnitLessons(lessonToDelete.unitId, unit => ({
+        ...unit,
+        lessons: unit.lessons.filter(lesson => lesson.id !== lessonToDelete.lessonId)
+      }));
+      
+      // Update backend state
+      await reloadCourse();
+      
+      setDeleteLessonDialogOpen(false);
+      setLessonToDelete(null);
+      setShowSuccess(true);
+    }
   };
 
   // Drag and drop handler
@@ -178,10 +228,12 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
       {course && (
         <UnitList
           course={course}
+          loadedUnits={loadedUnits}
           expandedUnits={expandedUnits}
           editingUnitId={editingUnitId}
           editingUnitName={editingUnitName}
           isSaving={isUnitSaving || isLessonSaving}
+          loadUnitDetails={loadUnitDetails}
           onUnitExpand={(unitId, expanded) => {
             setExpandedUnits(prev => 
               expanded 
@@ -299,6 +351,12 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
           Operation completed successfully
         </Alert>
       </Snackbar>
+
+      <DeleteLessonDialog
+        open={deleteLessonDialogOpen}
+        onClose={() => setDeleteLessonDialogOpen(false)}
+        onConfirm={handleConfirmDeleteLesson}
+      />
 
       {error && (
         <Snackbar
