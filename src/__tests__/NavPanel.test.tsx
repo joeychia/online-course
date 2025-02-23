@@ -27,8 +27,8 @@ vi.mock('../hooks/useTranslation', () => ({
 }));
 
 const mockUnits = [
-  { id: '1', name: '第一單元', order: 0, lessons: [] },
-  { id: '2', name: '第二單元', order: 1, lessons: [] }
+  { id: '1', name: '第一單元', order: 0, lessonCount: 2 },
+  { id: '2', name: '第二單元', order: 1, lessonCount: 2 }
 ];
 
 const mockCourse: Course = {

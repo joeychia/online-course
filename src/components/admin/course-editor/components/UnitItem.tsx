@@ -26,7 +26,9 @@ interface UnitItemProps {
   name: string;
   index: number;
   lessons: Array<{ id: string; name: string; order: number }>;
+  lessonCount: number;
   isExpanded: boolean;
+  isLoading: boolean;
   isEditing: boolean;
   editingName: string;
   isSaving: boolean;
@@ -38,7 +40,7 @@ interface UnitItemProps {
   onAddLesson: () => void;
   onEditLesson: (lessonId: string) => void;
   onDeleteLesson: (lessonId: string) => void;
-  onViewQuizResults: () => void;
+  onViewQuizResults: (lessonId: string) => void;
 }
 
 export const UnitItem: React.FC<UnitItemProps> = ({
@@ -46,7 +48,9 @@ export const UnitItem: React.FC<UnitItemProps> = ({
   name,
   index,
   lessons,
+  lessonCount,
   isExpanded,
+  isLoading,
   isEditing,
   editingName,
   isSaving,
@@ -77,6 +81,7 @@ export const UnitItem: React.FC<UnitItemProps> = ({
             }}
             expanded={isExpanded}
             onChange={(_, expanded) => onExpand(expanded)}
+            disabled={isLoading}
           >
             <AccordionSummary
               sx={{
@@ -158,7 +163,7 @@ export const UnitItem: React.FC<UnitItemProps> = ({
                         >
                           <MenuBookIcon fontSize="small" />
                           <Typography variant="body2" sx={{ mx: 0.5 }}>
-                            {lessons.length}
+                            {lessonCount}
                           </Typography>
                           <ExpandMoreIcon className="expand-icon" fontSize="small" />
                         </Box>
@@ -174,20 +179,25 @@ export const UnitItem: React.FC<UnitItemProps> = ({
                           <EditIcon />
                         </IconButton>
                         <IconButton 
-                          size="small" 
+                          size="small"
+                          data-testid="delete-unit-button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDelete();
                           }}
                         >
-                          <DeleteIcon />
+                          <DeleteIcon data-testid="delete-unit-icon" />
                         </IconButton>
                         <Tooltip title="View Quiz Results">
                           <IconButton
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onViewQuizResults();
+                              // Pass the last lesson's ID for quiz results
+                            const lastLesson = lessons[lessons.length - 1];
+                            if (lastLesson) {
+                              onViewQuizResults(lastLesson.id);
+                            }
                             }}
                           >
                             <AssessmentIcon />
@@ -200,18 +210,24 @@ export const UnitItem: React.FC<UnitItemProps> = ({
               </Box>
             </AccordionSummary>
             <AccordionDetails>
-              <Box mb={2}>
-                <Button
-                  startIcon={<AddIcon />}
-                  variant="outlined"
-                  size="small"
-                  onClick={onAddLesson}
-                  disabled={isSaving}
-                >
-                  Add Lesson
-                </Button>
-              </Box>
-              <Droppable droppableId={id} type="lesson">
+              {isLoading ? (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography color="text.secondary">Loading lessons...</Typography>
+                </Box>
+              ) : (
+                <>
+                  <Box mb={2}>
+                    <Button
+                      startIcon={<AddIcon />}
+                      variant="outlined"
+                      size="small"
+                      onClick={onAddLesson}
+                      disabled={isSaving}
+                    >
+                      Add Lesson
+                    </Button>
+                  </Box>
+                  <Droppable droppableId={id} type="lesson">
                 {(droppableProvided) => (
                   <List
                     ref={droppableProvided.innerRef}
@@ -229,10 +245,12 @@ export const UnitItem: React.FC<UnitItemProps> = ({
                           onDelete={() => onDeleteLesson(lesson.id)}
                         />
                       ))}
-                    {droppableProvided.placeholder}
-                  </List>
-                )}
-              </Droppable>
+                      {droppableProvided.placeholder}
+                    </List>
+                  )}
+                </Droppable>
+                </>
+              )}
             </AccordionDetails>
           </Accordion>
         </div>

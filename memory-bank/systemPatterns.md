@@ -10,7 +10,37 @@ The system follows a modern web application architecture with:
 ## Core Patterns
 
 ### Data Architecture
-1. Hierarchical Course Structure
+1. Lesson Count Management
+   ```typescript
+   // Course level - minimal unit data with count
+   interface CourseUnit {
+     id: string;
+     name: string;
+     order: number;
+     lessonCount: number;  // Maintained at course level
+   }
+
+   // Unit level - full lesson data
+   interface Unit {
+     id: string;
+     lessons: Array<{
+       id: string;
+       name: string;
+       order: number;
+     }>;
+   }
+   ```
+
+   Key patterns:
+   - Course document maintains lesson counts for quick access
+   - Unit document contains full lesson data
+   - Counts synchronized during:
+     * Initial data fetch
+     * Lesson addition/deletion
+     * Unit data updates
+   - Automatic count updates in CourseDataAccess
+
+2. Hierarchical Course Structure
    ```
    Course (with order)
    └── Unit (with order)
@@ -99,38 +129,64 @@ The system follows a modern web application architecture with:
    - Custom hooks for business logic
    - Service layer for data operations
 
-### Service Layer
-1. Authentication Service
+### Service Layer Architecture
+1. Data Access Layer (services/dataAccess/)
+   - CourseDataAccess: Handles course-specific Firestore operations
+   - UnitDataAccess: Manages unit and lesson data with caching
+   - Clear separation of database interactions
+   - Focused responsibility per module
+
+2. Service Layer (services/)
+   - firestoreService: Orchestrates data access operations
+   - Delegates to appropriate data access modules
+   - Handles business logic and caching strategy
+   - Example structure:
+     ```typescript
+     // Data Access Layer
+     class CourseDataAccess {
+       async getCourseById(id: string): Promise<Course | null>;
+       async createCourse(courseData: Omit<Course, 'id'>): Promise<string>;
+       // ... other course operations
+     }
+
+     class UnitDataAccess {
+       private unitCache: Map<string, { data: Unit; timestamp: number }>;
+       async getUnitWithLessons(unitId: string): Promise<Unit | null>;
+       // ... other unit operations
+     }
+
+     // Service Layer
+     class FirestoreService {
+       // Delegates to CourseDataAccess
+       async getCourseById(id: string) {
+         return courseDataAccess.getCourseById(id);
+       }
+
+       // Delegates to UnitDataAccess
+       async getUnitWithLessons(unitId: string) {
+         return unitDataAccess.getUnitWithLessons(unitId);
+       }
+     }
+     ```
+
+3. API Layer (services/dataService)
+   - Public interface for components
+   - Abstracts service layer complexity
+   - Provides consistent API surface
+   - Example:
+     ```typescript
+     // API Layer
+     export const getCourse = async (courseId: string) => {
+       return await firestoreService.getCourseById(courseId);
+     };
+     ```
+
+4. Authentication Service
    - Firebase Auth integration
    - Role-based access control
    - Session management
 
-2. Data Services
-   - Firestore integration
-   - Optimized batch operations
-   - Efficient data loading patterns:
-     ```typescript
-     // Example of efficient data loading
-     async function loadCourseData(courseId: string, page: number) {
-       // Get course with minimal unit data
-       const course = await getCourse(courseId);
-       
-       // Batch load visible units
-       const unitsPerPage = 20;
-       const startIndex = page * unitsPerPage;
-       const visibleUnits = course.units.slice(startIndex, startIndex + unitsPerPage);
-       
-       // Single batch request for visible units
-       const unitDetails = await batchGetUnits(visibleUnits.map(u => u.id));
-       
-       return {
-         course,
-         units: unitDetails
-       };
-     }
-     ```
-
-3. Analytics Service
+5. Analytics Service
    - User behavior tracking
    - Progress monitoring
    - Performance metrics

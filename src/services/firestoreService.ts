@@ -1,5 +1,4 @@
 import { 
-    getFirestore, 
     collection, 
     doc, 
     getDoc, 
@@ -13,104 +12,78 @@ import {
     QueryDocumentSnapshot,
     addDoc,
     limit,
-    deleteDoc,
     QueryConstraint
 } from 'firebase/firestore';
-import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile, QuizHistory } from '../types';
-import { app } from './firebaseConfig';
-
-const db = getFirestore(app);
-
-const WRITE_TIMEOUT_MS = 10000; // 10 seconds timeout for write operations
-
-const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number = WRITE_TIMEOUT_MS): Promise<T> => {
-    const timeoutPromise = new Promise<T>((_, reject) => {
-        setTimeout(() => reject(new Error('Operation timed out')), timeoutMs);
-    });
-    return Promise.race([promise, timeoutPromise]);
-};
+import type { 
+    Course, 
+    Unit, 
+    Lesson, 
+    Quiz, 
+    Grade, 
+    Note, 
+    UserProfile, 
+    QuizHistory
+} from '../types';
+import { withTimeout } from './utils';
+import { courseDataAccess } from './dataAccess/CourseDataAccess';
+import { unitDataAccess } from './dataAccess/UnitDataAccess';
+import { db } from './firestoreConfig';
 
 export class FirestoreService {
-    // Course operations
+    // Course operations delegated to CourseDataAccess
     async getAllCourses(): Promise<Course[]> {
-        const coursesRef = collection(db, 'courses');
-        const snapshot = await getDocs(coursesRef);
-        return snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                name: data.name as string,
-                description: data.description as string,
-                units: (data.units as Array<{ id: string; name: string; order: number; lessons: Array<{ id: string; name: string; order: number }> }>),
-                settings: data.settings as { unlockLessonIndex: number; token: string },
-                groupIds: data.groupIds as Record<string, boolean>,
-                isPublic: data.isPublic as boolean | undefined
-            };
-        });
+        return courseDataAccess.getAllCourses();
     }
 
     async getCourseById(id: string): Promise<Course | null> {
-        const docRef = doc(db, 'courses', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) return null;
-        const data = docSnap.data();
-        return {
-            id: docSnap.id,
-            name: data.name as string,
-            description: data.description as string,
-            units: (data.units as Array<{ id: string; name: string; order: number; lessons: Array<{ id: string; name: string; order: number }> }>),
-            settings: data.settings as { unlockLessonIndex: number; token: string },
-            groupIds: data.groupIds as Record<string, boolean>,
-            isPublic: data.isPublic as boolean | undefined
-        };
+        return courseDataAccess.getCourseById(id);
     }
 
     async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
-        const courseCollection = collection(db, 'courses');
-        const docRef = await withTimeout(addDoc(courseCollection, courseData));
-        return docRef.id;
+        return courseDataAccess.createCourse(courseData);
     }
 
     async updateCourse(courseId: string, courseData: Partial<Course>): Promise<void> {
-        const courseRef = doc(db, 'courses', courseId);
-        await withTimeout(updateDoc(courseRef, courseData));
+        await courseDataAccess.updateCourse(courseId, courseData);
     }
 
     async deleteCourse(courseId: string): Promise<void> {
-        const courseRef = doc(db, 'courses', courseId);
-        await withTimeout(deleteDoc(courseRef));
+        await courseDataAccess.deleteCourse(courseId);
     }
 
-    // Unit operations
+    // Unit operations delegated to UnitDataAccess
+    async getUnitWithLessons(unitId: string): Promise<Unit | null> {
+        return unitDataAccess.getUnitWithLessons(unitId);
+    }
+
+    async getUnitById(unitId: string): Promise<Unit | null> {
+        return unitDataAccess.getUnitWithLessons(unitId);
+    }
+
     async getUnitsIdNameForCourse(courseId: string): Promise<Array<{ id: string; name: string }>> {
         const course = await this.getCourseById(courseId);
         if (!course) return [];
         return course.units;
     }
 
-    async getUnitById(id: string): Promise<Unit | null> {
-        const docRef = doc(db, 'units', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) return null;
-        const data = docSnap.data();
-        return {
-            id: docSnap.id,
-            name: data.name as string,
-            description: data.description as string,
-            order: data.order as number,
-            lessons: data.lessons as Array<{ id: string; name: string; order: number }>,
-            courseId: data.courseId as string
-        };
+    async getUnitLessonsCount(unitId: string): Promise<number> {
+        return unitDataAccess.getUnitLessonsCount(unitId);
     }
 
     async createUnit(unitId: string, unitData: Unit): Promise<void> {
-        const unitRef = doc(db, 'units', unitId);
-        await withTimeout(setDoc(unitRef, unitData));
+        return unitDataAccess.createUnit(unitId, unitData);
     }
 
     async updateUnit(unitId: string, unitData: Partial<Unit>): Promise<void> {
-        const unitRef = doc(db, 'units', unitId);
-        await withTimeout(updateDoc(unitRef, unitData));
+        return unitDataAccess.updateUnit(unitId, unitData);
+    }
+
+    clearUnitCache(unitId: string) {
+        unitDataAccess.clearUnitCache(unitId);
+    }
+
+    clearAllUnitCache() {
+        unitDataAccess.clearAllUnitCache();
     }
 
     // Lesson operations
