@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    environment: test
+    environment: ${{ github.ref == 'refs/heads/prod' && 'prod' || 'test' }}
     env:
       VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
       VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -35,8 +35,8 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    environment: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: ${{ github.ref == 'refs/heads/prod' && 'prod' || 'test' }}
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prod') && github.event_name == 'push'
     env:
       VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
       VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
