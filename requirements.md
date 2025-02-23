@@ -22,7 +22,7 @@
 - User can join/quit a group
 - User must put down a note for a lesson in order to complete the lesson - done
 - User can open the first lesson of each unit, but locked out from other lessons until the previous lesson is completed - done
-- User can switch language between English, Simplified Chinese, and Traditional Chinese. Default is Traditional Chinese.
+- User can switch language between English, Simplified Chinese, and Traditional Chinese. Default is Traditional Chinese. - done
 
 ## Technical Stack
 
@@ -49,12 +49,22 @@ Courses
     "name": "Course Name",
     "description": "Course Description",
     "settings": {
-      "unlockLessonIndex": 1
+      "unlockLessonIndex": 1,
+      "token": "optional token",
+      "enableNote": true
     },
     "units": [
       {
         "id": "unitId",
-        "name": "unit name"
+        "name": "unit name",
+        "order": 1,
+        "lessons": [
+          {
+            "id": "lessonId",
+            "name": "lesson name",
+            "order": 1
+          }
+        ]
       }
     ],
     "groupIds": {
@@ -64,6 +74,7 @@ Courses
   }
 }
 ```
+
 Units
 ```json
 "units": {
@@ -72,10 +83,12 @@ Units
     "courseId": "courseId",
     "name": "Unit Name",
     "description": "Unit Description",
+    "order": 1,
     "lessons": [
       {
         "id": "lessonId",
-        "name": "lesson name"
+        "name": "lesson name",
+        "order": 1
       }
     ]
   }
@@ -90,12 +103,14 @@ Lessons
     "unitId": "unitId",
     "name": "Lesson Title",
     "content": "markdown content",
+    "order": 1,
     "video-title": "video title",
     "video-url": "video url",
     "quizId": null
   }
 }
 ```
+
 Quizzes
 ```json
 "quizzes": {
@@ -168,13 +183,14 @@ User Profiles & Progress
       }
     },
     "groupIds": {
-      "$groupId1": true,
-      "$groupId2": true
+      "$groupId": true
     },
     "notes": {
       "$lessonId": {
         "id": "noteId",
-        "lessonId": "lessonId",
+        "courseId": "courseId",
+        "unitName": "Unit Name",
+        "lessonName": "Lesson Name",
         "text": "User's note here",
         "updatedAt": "timestamp"
       }
@@ -193,7 +209,9 @@ User Profiles & Progress
         "correct": 10,
         "total": 10
       }
-    }
+    },
+    "createdAt": "timestamp",
+    "updatedAt": "timestamp"
   }
 }
 ```
