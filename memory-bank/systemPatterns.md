@@ -12,21 +12,70 @@ The system follows a modern web application architecture with:
 ### Data Architecture
 1. Hierarchical Course Structure
    ```
-   Course
-   └── Unit
-       └── Lesson
+   Course (with order)
+   └── Unit (with order)
+       └── Lesson (with order)
            ├── Content (markdown/video)
+           ├── Notes (with courseId/unitName)
            └── Quiz (optional)
    ```
 
 2. Data Models
-   - Courses: Top-level container with units
-   - Units: Organizational structure within courses
-   - Lessons: Content delivery units (moving away from Course-level lesson names)
-   - Quizzes: Assessment components
+   - Courses: Container with ordered units, settings (unlockLessonIndex, token, enableNote)
+   - Units: Ordered structure with lesson references
+   - Lessons: Ordered content units with video and quiz support
+   - Quizzes: Assessment components (single_choice, free_form)
    - Groups: Collaborative learning units
-   - User Profiles: Progress and preferences
+   - User Profiles: Progress, notes, quiz history, and timestamps
    - Grades: Performance tracking
+   - Notes: Enhanced with course and unit context
+
+3. Key Model Features
+   - Ordered content structure (courses, units, lessons)
+   - Enhanced settings control (token, note requirements)
+   - Contextual note-taking (course, unit, lesson context)
+   - Comprehensive user tracking (progress, history, timestamps)
+   - Flexible quiz system
+   - Group-based access control
+
+### Database Access Patterns
+1. Lazy Loading
+   - Load minimal course data initially
+   - Fetch unit details on demand
+   - Load lessons when unit expanded
+   - Cache loaded unit data
+
+2. Query Optimization
+   - Store minimal unit data in course document
+   - Keep full lesson data in unit documents
+   - Load only what's needed, when needed
+   - Leverage Firestore query efficiency
+
+3. Data Structure
+   ```typescript
+   // Course document - minimal unit data
+   interface Course {
+     id: string;
+     units: Array<{
+       id: string;
+       name: string;
+       order: number;
+     }>;
+   }
+
+   // Unit document - full lesson data, loaded on demand
+   interface Unit {
+     id: string;
+     name: string;
+     order: number;
+     lessons: Array<{
+       id: string;
+       name: string;
+       order: number;
+       hasQuiz: boolean;
+     }>;
+   }
+   ```
 
 ### Component Architecture
 1. Layout Patterns
@@ -58,9 +107,28 @@ The system follows a modern web application architecture with:
 
 2. Data Services
    - Firestore integration
-   - CRUD operations
-   - Real-time updates
-   - Optimized data loading for large courses
+   - Optimized batch operations
+   - Efficient data loading patterns:
+     ```typescript
+     // Example of efficient data loading
+     async function loadCourseData(courseId: string, page: number) {
+       // Get course with minimal unit data
+       const course = await getCourse(courseId);
+       
+       // Batch load visible units
+       const unitsPerPage = 20;
+       const startIndex = page * unitsPerPage;
+       const visibleUnits = course.units.slice(startIndex, startIndex + unitsPerPage);
+       
+       // Single batch request for visible units
+       const unitDetails = await batchGetUnits(visibleUnits.map(u => u.id));
+       
+       return {
+         course,
+         units: unitDetails
+       };
+     }
+     ```
 
 3. Analytics Service
    - User behavior tracking
@@ -83,11 +151,17 @@ The system follows a modern web application architecture with:
    └── utils/        (Helper functions)
    ```
 
-2. Testing Strategy
+2. Data Loading
+   - Lazy load unit details on expansion
+   - Cache loaded units in memory
+   - Clear loading states for feedback
+   - Simple and intuitive loading pattern
+
+3. Testing Strategy
    - Unit tests with Vitest
    - Component testing
    - Service mocking
-   - Interface testing
+   - Performance testing
 
 ### Security Patterns
 1. Authentication
@@ -102,10 +176,10 @@ The system follows a modern web application architecture with:
 
 ### Performance Patterns
 1. Loading Optimization
-   - Lazy loading
-   - Code splitting
-   - PWA caching
-   - Optimized data structures for large courses
+   - Lazy loading for units
+   - On-demand lesson loading
+   - Smart data caching
+   - Minimal initial payload
 
 2. State Management
    - Context optimization
@@ -122,7 +196,7 @@ The system follows a modern web application architecture with:
    - Component isolation
    - Service mocking
    - Integration testing
-   - Interface testing
+   - Performance testing
 
 3. Error Handling
    - Consistent error patterns

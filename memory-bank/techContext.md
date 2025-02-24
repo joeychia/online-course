@@ -98,11 +98,13 @@
 - Firestore query limitations
 - Real-time update constraints
 - Security rules complexity
+- Document size considerations
 
 ### Performance Requirements
-- Initial load time targets
-- Runtime performance goals
-- Memory usage constraints
+- Fast initial course load with minimal data
+- Lazy loading for unit details and lessons
+- Efficient caching of loaded units
+- Smooth loading state transitions
 
 ### Security Requirements
 - Authentication requirements

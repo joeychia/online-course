@@ -9,7 +9,7 @@
    - Lesson CRUD operations
    - Quiz CRUD operations
    - Course settings implementation
-   - Fix dark mode constrast problem
+   - Fix dark mode contrast problem
 
 2. User Features
    - Authentication system
@@ -21,46 +21,73 @@
    - Progressive lesson unlocking
 
 ### In Progress Features
-1. Data Structure Optimization
-   - Lesson name removal from Course data
-   - Performance improvements when load course of large number of units
+1. Performance Optimization (High Priority)
+   - Critical: Fix performance issues with large courses
+   - Implement pagination and lazy loading
+   - Optimize data structure for efficient loading
+   - Add caching strategy for course data
 
-2. User & Group Management
+2. Data Structure Improvements
+   - Denormalize essential unit/lesson data
+   - Remove lesson names from Course data
+   - Implement batch loading
+   - Add virtual scrolling for large courses
+
+3. User & Group Management (Pending)
    - Comprehensive user management
    - Group assignment system
    - Member management
    - Group-based course access
 
 ## Recent Changes
-- Admin interface improvements:
-  - Simplified course list with clickable cards
-  - Course actions consolidated in course editor view
-  - Mobile-responsive action buttons
-  - Dark mode constrast fixed
-  - Added course settings implementation
-- Core course management features implemented
-- Basic user features operational
-- Testing infrastructure established
+- Documentation and Data Model Alignment:
+  - Updated requirements.md to match actual TypeScript types
+  - Enhanced systemPatterns.md with detailed data model features
+  - Documented ordering system for courses, units, and lessons
+  - Added context for note-taking system
+  - Clarified enhanced settings and user tracking
+
+- Previous Changes:
+  - Identified performance bottlenecks:
+    - Separate requests for each unit's lesson details
+    - Loading all units and lessons at once
+    - No pagination or lazy loading
+  - Planned optimization strategy:
+    - Pagination and lazy loading implementation
+    - Data structure denormalization
+    - Caching and batch loading
+  - Previous improvements:
+    - Admin interface improvements
+    - Course management features
+    - Basic user features
+    - Testing infrastructure
 
 ## Active Decisions
 
 ### Technical Decisions
-1. State Management
-   - Using Context API for global state
-   - Custom hooks for business logic
-   - Service layer for data operations
+1. Performance Optimization
+   - Implement lazy loading for unit lessons
+   - Load lesson details only when unit expanded
+   - Cache loaded unit data in memory
+   - Simple and efficient loading pattern
 
-2. Testing Strategy
-   - Vitest for unit testing
-   - Component-level tests
-   - Integration testing for critical paths
+2. Data Structure
+   - Store minimal unit data in course document
+   - Keep lesson data in unit documents
+   - Load lessons on demand
+   - Natural user interaction flow
+
+3. Testing Strategy
+   - Add performance benchmarks
+   - Test with large datasets
+   - Measure loading improvements
 
 ### UX Decisions
 1. Admin Interface
-   - Simplified course management workflow
-   - Context-appropriate action placement
-   - Mobile-first responsive design
-   - Dark mode contrast fix
+   - Show loading state when expanding units
+   - Load lessons only when needed
+   - Clear user feedback during loading
+   - Maintain mobile-first responsive design
 
 2. Navigation
    - Progressive lesson unlocking
@@ -75,64 +102,68 @@
 ## Next Steps
 
 ### Immediate Priorities
-1. Data Structure Refactoring
-   - Remove lesson names from Course data
-   - Optimize data model for loading of large courses
+1. Performance Optimization
+   - Update course data structure
+   - Implement lazy loading for units
+   - Add loading states to UI
+   - Implement unit data caching
 
-2. User & Group Management
-   - Implement user management features
-   - Group assignment functionality
-   - User-group associations
-   - Access control refinement
+2. Data Structure Changes
+   - Simplify course document structure
+   - Move lesson data to unit documents
+   - Create migration script
+   - Update database queries
 
+3. Testing & Validation
+   - Add performance benchmarks
+   - Test with large datasets
+   - Measure improvements
 
 ### Future Considerations
-1. Performance Optimization
-   - Load time improvements
-   - State management optimization
-   - Caching strategy
-
-2. Enhanced Features
-   - Advanced analytics
-   - Expanded quiz types
-   - Rich media support
+1. User & Group Management
+   - User management features
+   - Group assignment system
+   - Access control refinement
 
 ## Current Challenges
 
 ### Technical Challenges
-1. Data Structure Refactoring
-   - Maintaining data consistency
+1. Performance Optimization
+   - Efficient lazy loading
+   - Smart caching strategy
+   - Loading state management
+   - Migration approach
+
+2. Data Structure
+   - Maintaining consistency
    - Migration strategy
-   - Performance impact
+   - Query optimization
+   - Index management
 
-2. Group System Implementation
-   - Complex permission management
-   - Real-time updates
-   - Data consistency
-
-3. Language Support
-   - Content synchronization
-   - Translation management
-   - UI adaptation
+3. Testing
+   - Performance benchmarking
+   - Large dataset testing
+   - Migration validation
 
 ### UX Challenges
-1. Group Interactions
-   - Intuitive group management
-   - Clear member permissions
-   - Seamless course access
+1. Loading Experience
+   - Progressive loading feedback
+   - Smooth scrolling
+   - Responsive performance
 
-2. Language Switching
-   - Smooth transition
-   - Content availability
-   - Default handling
+2. Data Management
+   - Efficient updates
+   - Optimistic UI
+   - Error handling
 
 ## Active Monitoring
 1. Performance Metrics
    - Load times
    - State updates
    - Database queries
+   - Cache effectiveness
 
-2. User Engagement
-   - Feature usage
-   - Completion rates
-   - Error patterns
+2. User Experience
+   - Loading indicators
+   - Scroll performance
+   - Update responsiveness
