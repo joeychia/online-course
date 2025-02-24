@@ -40,6 +40,16 @@
    - Group-based course access
 
 ## Recent Changes
+- Unit Creation Fix:
+  - Fixed issue with undefined lessonCount in unit creation
+  - Added proper handling of order property for historical unit data
+  - Enhanced data consistency in CourseDataAccess:
+    * Added fallback for missing order property
+    * Improved handling of historical unit data
+    * Added automatic updates for missing properties
+  - Improved error handling in unit operations
+  - Updated progress documentation
+
 - Lesson Count Improvements:
   - Fixed lesson count display in course editor:
     - Units now show correct lesson count without expansion
