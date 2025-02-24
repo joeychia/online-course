@@ -14,7 +14,7 @@ dist-ssr
 
 # Environment files
 .env
-.env.local
+.env.*
 .env.*.local
 .env.development.local
 .env.test.local
@@ -32,7 +32,8 @@ dist-ssr
 *.sw?
 
 # Firebase
-service-account.json
+service-account-test.json
+service-account-prod.json
 
 # Local test related files
 .test*

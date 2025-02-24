@@ -448,7 +448,7 @@ const LessonView: React.FC<LessonViewProps> = ({
       </Dialog>
       
       {/* Notes Section or Completion Button */}
-      {enableNote ? (
+      {enableNote && !quiz ? (
         <Paper sx={{ 
           p: 3, 
           mb: 4, 
@@ -459,8 +459,7 @@ const LessonView: React.FC<LessonViewProps> = ({
               {t('mustWriteNote')}
             </Typography>
           )}
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h2" sx={{ fontWeight: 'bold' }}>
               {t('personalNotes')}
               {(noteSaved || noteLastUpdated) && (
@@ -502,9 +501,8 @@ const LessonView: React.FC<LessonViewProps> = ({
             onChange={setNote}
             placeholder={t('writeNotesHere')}
           />
-          
         </Paper>
-      ) : ( !quiz && 
+      ) : (!quiz && 
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Button
             variant="contained"
