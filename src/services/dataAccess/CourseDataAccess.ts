@@ -53,16 +53,17 @@ export class CourseDataAccess {
     private async mapToCourse(id: string, data: DocumentData): Promise<Course> {
         const units = await Promise.all(
             (data.units as Array<CourseUnit>).map(async unit => {
-                // For historical data without lessonCount, get it from the unit document
+                // For historical data without lessonCount or order, get/set defaults
                 const lessonCount = unit.lessonCount ?? await unitDataAccess.getUnitLessonsCount(unit.id);
+                const order = unit.order ?? (data.units as Array<CourseUnit>).indexOf(unit);
                 
-                // If the count was fetched (not from existing data), update the course
-                if (!unit.lessonCount) {
+                // If any required data was missing, update the course
+                if (!unit.lessonCount || unit.order === undefined) {
                     await this.updateCourse(id, {
-                        units: (data.units as Array<CourseUnit>).map(u => 
+                        units: (data.units as Array<CourseUnit>).map((u, index) => 
                             u.id === unit.id 
-                                ? { ...u, lessonCount }
-                                : u
+                                ? { ...u, lessonCount, order }
+                                : { ...u, order: u.order ?? index }
                         )
                     });
                 }
@@ -70,7 +71,7 @@ export class CourseDataAccess {
                 return {
                     id: unit.id,
                     name: unit.name,
-                    order: unit.order,
+                    order,
                     lessonCount
                 };
             })

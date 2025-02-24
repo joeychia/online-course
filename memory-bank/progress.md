@@ -111,6 +111,13 @@
   - No lazy loading for unit details
   - Slow admin dashboard and course editor loading
 
+### Fixed Issues ✅
+- Unit creation error resolved:
+  - Fixed undefined lessonCount issue in unit creation
+  - Added proper order handling for historical unit data
+  - Enhanced data consistency in CourseDataAccess
+  - Improved error handling in unit operations
+
 ### Testing
 - Unit deletion test failing in CourseEditor.test.tsx
   - Dialog confirmation not triggering updateCourse

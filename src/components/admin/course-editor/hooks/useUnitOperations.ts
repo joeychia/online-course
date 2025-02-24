@@ -21,26 +21,30 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
       const newUnitId = `unit_${Date.now()}`;
       const newOrder = course.units.length;
       
-      // Create minimal unit data with lessonCount
-      const newUnit = {
-        id: newUnitId,
-        name: name.trim(),
-        order: newOrder,
-        lessonCount: 0
-      };
-
-      // Create the unit document in Firestore
-      await createUnit(newUnitId, {
+      // Create unit document data
+      const unitData = {
         id: newUnitId,
         name: name.trim(),
         description: '',
         lessons: [],
         courseId,
         order: newOrder
-      });
+      };
 
-      // Update the course's units array with minimal data
-      const updatedUnits = [...(course.units || []), newUnit];
+      // Create the unit document in Firestore
+      console.log(unitData)
+      await createUnit(newUnitId, unitData);
+
+      // Create minimal unit data for course update
+      const newCourseUnit = {
+        id: newUnitId,
+        name: name.trim(),
+        order: newOrder,
+        lessonCount: 0
+      };
+
+      // Update the course's units array
+      const updatedUnits = [...(course.units || []), newCourseUnit];
       await updateCourse(courseId, { units: updatedUnits });
       await reloadCourse();
       return true;
