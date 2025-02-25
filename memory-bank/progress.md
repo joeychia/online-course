@@ -66,7 +66,7 @@
    - Implement lazy loading for units
    - Load lessons on unit expansion
    - Add loading states to UI
-   - Implement unit caching
+   - Direct database access (removed unit caching)
 
 2. Data Structure Improvements
    - Simplify course document structure
@@ -112,6 +112,26 @@
   - Slow admin dashboard and course editor loading
 
 ### Fixed Issues ✅
+- Course name synchronization fixed:
+  - Resolved course name mismatch between admin dashboard and editor
+  - Enhanced CourseManagement to reload courses after editor changes
+  - Improved data consistency across views
+  - Verified fix through testing
+
+- Unit cache layer removed:
+  - Eliminated unit caching from UnitDataAccess
+  - Simplified data access with direct Firestore queries
+  - Removed cache management complexity
+  - Improved data consistency and predictability
+  - Updated tests to verify direct database access
+
+- Lesson name update issue resolved:
+  - Fixed lesson names not updating immediately in unit list
+  - Implemented dual-document update pattern
+  - Enhanced cache invalidation with forceReload parameter
+  - Added type safety for lesson name updates
+  - Improved data consistency across documents
+
 - Unit creation error resolved:
   - Fixed undefined lessonCount issue in unit creation
   - Added proper order handling for historical unit data
@@ -150,7 +170,7 @@
    - Implement lazy loading pattern
    - Add loading states
    - Optimize data loading
-   - Add unit caching
+   - Monitor direct database access performance
 
 2. Data Structure
    - Update course schema

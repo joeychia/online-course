@@ -103,7 +103,15 @@
 ### Performance Requirements
 - Fast initial course load with minimal data
 - Lazy loading for unit details and lessons
-- Efficient caching of loaded units
+- View synchronization patterns:
+  * Component state synchronization
+  * Data reloading on view transitions
+  * Immediate UI updates after changes
+  * Consistent data across views
+- Data synchronization patterns:
+  * Dual-document updates for consistency
+  * Atomic updates for related documents
+  * Type-safe data modifications
 - Smooth loading state transitions
 
 ### Security Requirements

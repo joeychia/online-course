@@ -40,6 +40,57 @@
    - Group-based course access
 
 ## Recent Changes
+- Course Name Synchronization Fix:
+  - Fixed issue with course name not updating in admin dashboard after edit
+  - Enhanced CourseManagement component:
+    * Added selectedCourseId dependency to useEffect
+    * Reloads course list when returning from editor
+  - Benefits:
+    * Immediate UI updates after course name changes
+    * Consistent course data across views
+    * Better user experience
+  - Testing:
+    * Verified course name updates in both views
+    * Confirmed data consistency
+    * Tested navigation behavior
+
+- Unit Cache Layer Removal:
+  - Removed unit caching from UnitDataAccess:
+    * Eliminated unitCache Map and CACHE_TTL
+    * Simplified data access to direct Firestore queries
+    * Removed cache management methods
+  - Benefits:
+    * Reduced complexity in data layer
+    * Eliminated potential stale data issues
+    * Simplified state management
+    * More predictable data flow
+  - Code improvements:
+    * Streamlined UnitDataAccess implementation
+    * Removed cache-related complexity
+    * Direct database operations
+  - Testing:
+    * Updated tests to remove cache expectations
+    * Verified direct data access behavior
+    * Confirmed data consistency
+
+- Lesson Name Update Fix:
+  - Fixed issue with lesson names not updating immediately in unit list
+  - Implemented dual-document update pattern:
+    * Update lesson document with new name
+    * Update unit document's lessons array
+  - Enhanced cache invalidation strategy:
+    * Added forceReload parameter to loadCourse and loadUnitDetails
+    * Clear unit cache when forcing reload
+    * Immediate UI updates after lesson changes
+  - Code improvements:
+    * Simplified LessonEditor onSave callback
+    * Added type safety for lesson name updates
+    * Better error handling in data service
+  - Testing:
+    * Verified immediate UI updates
+    * Confirmed data consistency across documents
+    * Tested cache invalidation behavior
+
 - Unit Creation Fix:
   - Fixed issue with undefined lessonCount in unit creation
   - Added proper handling of order property for historical unit data
@@ -107,7 +158,7 @@
    - Improved testability and maintainability
 
 2. Performance Optimization
-   - Smart caching in UnitDataAccess
+   - Direct database access
    - Lazy loading for unit lessons
    - Load lesson details on demand
    - Efficient data patterns
@@ -146,7 +197,7 @@
 1. Testing Updates
    - Update test suite for new architecture
    - Add tests for data access layer
-   - Verify caching behavior
+   - Verify direct database access
    - Test error handling
 
 2. Documentation

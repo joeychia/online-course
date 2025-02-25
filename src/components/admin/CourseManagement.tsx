@@ -32,7 +32,7 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
 
   useEffect(() => {
     loadCourses();
-  }, []);
+  }, [selectedCourseId]); // Reload courses when returning from editor
 
   const loadCourses = async () => {
     try {

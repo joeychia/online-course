@@ -23,6 +23,7 @@ interface LessonEditorProps {
 }
 
 export const LessonEditor: React.FC<LessonEditorProps> = ({
+  unitId,
   lessonId,
   onClose,
   onSave
@@ -37,7 +38,12 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   const loadLesson = async () => {
     try {
       const loadedLesson = await getLesson(lessonId);
-      setLesson(loadedLesson);
+      if (loadedLesson) {
+        // Ensure unitId is set from props
+        setLesson({ ...loadedLesson, unitId });
+      } else {
+        setLesson(null);
+      }
     } catch (error) {
       console.error('Error loading lesson:', error);
       setLesson(null);
@@ -49,8 +55,8 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
 
     try {
       // Start with required fields
-      const { name, content, quizId } = lesson;
-      const updateData: Partial<Lesson> = { name, content, quizId };
+      const { name, content, quizId, unitId } = lesson;
+      const updateData: Partial<Lesson> = { name, content, quizId, unitId };
 
       // Only include video fields if they exist and are non-empty strings
       if (typeof lesson['video-title'] === 'string' && lesson['video-title'].length > 0) {
