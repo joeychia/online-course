@@ -220,7 +220,8 @@ describe('LessonEditor', () => {
         'video-title': TEST_DATA.VIDEO_TITLE + TEST_DATA.UPDATED_SUFFIX,
         "quizId": null,
         'video-url': TEST_DATA.VIDEO_URL + '/updated',
-        content: TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX
+        content: TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX,
+        unitId: 'unit_1'
       });
       expect(mockOnSave).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();
@@ -280,7 +281,8 @@ describe('LessonEditor', () => {
       expect(updateLesson).toHaveBeenCalledWith('lesson_1', {
         name: TEST_DATA.LESSON_NAME,
         content: TEST_DATA.CONTENT,
-        quizId: null
+        quizId: null,
+        unitId: 'unit_1'
       });
       expect(mockOnSave).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();

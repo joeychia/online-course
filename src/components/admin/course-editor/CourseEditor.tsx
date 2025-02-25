@@ -328,15 +328,20 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
         />
       )}
 
-      {selectedLesson && (
+      {selectedLesson && selectedUnitForLesson && (
         <LessonEditor
-          unitId={selectedUnitForLesson || ''}
+          unitId={selectedUnitForLesson}
           lessonId={selectedLesson}
           onClose={() => {
             setSelectedLesson(null);
             setSelectedUnitForLesson(null);
           }}
-          onSave={reloadCourse}
+          onSave={async () => {
+            // Reload course data
+            await reloadCourse();
+            // Also reload the unit details to update the lessons list
+            await loadUnitDetails(selectedUnitForLesson, true);
+          }}
         />
       )}
 

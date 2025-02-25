@@ -78,14 +78,6 @@ export class FirestoreService {
         return unitDataAccess.updateUnit(unitId, unitData);
     }
 
-    clearUnitCache(unitId: string) {
-        unitDataAccess.clearUnitCache(unitId);
-    }
-
-    clearAllUnitCache() {
-        unitDataAccess.clearAllUnitCache();
-    }
-
     // Lesson operations
     async getLessonsIdNameForUnit(unitId: string): Promise<Array<{ id: string; name: string }>> {
         const unit = await this.getUnitById(unitId);

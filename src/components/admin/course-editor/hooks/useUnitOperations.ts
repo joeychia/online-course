@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Course } from '../../../../types';
-import { createUnit, updateUnit, updateCourse, clearUnitCache } from '../../../../services/dataService';
+import { createUnit, updateUnit, updateCourse } from '../../../../services/dataService';
 
 interface UseUnitOperationsProps {
   courseId: string;
@@ -32,7 +32,6 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
       };
 
       // Create the unit document in Firestore
-      console.log(unitData)
       await createUnit(newUnitId, unitData);
 
       // Create minimal unit data for course update
@@ -63,9 +62,8 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
     setError(null);
     
     try {
-      // Update unit document and clear cache
+      // Update unit document
       await updateUnit(unitId, { name: newName.trim() });
-      clearUnitCache(unitId);
 
       // Update course units array with minimal data, preserving lessonCount
       const updatedUnits = course.units.map(u => 
@@ -89,9 +87,6 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
     setError(null);
 
     try {
-      // Clear unit cache before deletion
-      clearUnitCache(unitId);
-      
       // Update course with filtered units
       const updatedUnits = course.units.filter(unit => unit.id !== unitId);
       await updateCourse(courseId, { units: updatedUnits });
@@ -125,10 +120,9 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
       // Update course with new unit order
       await updateCourse(courseId, { units: updatedUnits });
       
-      // Update individual unit documents and clear their caches
+      // Update individual unit documents
       await Promise.all(
         updatedUnits.map(unit => {
-          clearUnitCache(unit.id);
           return updateUnit(unit.id, { order: unit.order });
         })
       );

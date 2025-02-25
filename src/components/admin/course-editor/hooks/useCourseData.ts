@@ -28,10 +28,10 @@ export const useCourseData = (courseId: string) => {
   }, [courseId]);
 
   // Load unit details when expanded
-  const loadUnitDetails = useCallback(async (unitId: string) => {
+  const loadUnitDetails = useCallback(async (unitId: string, forceReload: boolean = false) => {
     try {
-      // Check if already loaded
-      if (loadedUnits[unitId]) {
+      // Check if already loaded and not forcing reload
+      if (!forceReload && loadedUnits[unitId]) {
         return loadedUnits[unitId];
       }
 
@@ -51,16 +51,6 @@ export const useCourseData = (courseId: string) => {
       return null;
     }
   }, [loadedUnits]);
-
-  // Clear unit from cache (useful when unit is updated)
-  const clearUnitCache = useCallback((unitId: string) => {
-    setLoadedUnits(prev => {
-      const newCache = { ...prev };
-      delete newCache[unitId];
-      return newCache;
-    });
-    ds.clearUnitCache(unitId);
-  }, []);
 
   useEffect(() => {
     loadCourse();
@@ -88,7 +78,6 @@ export const useCourseData = (courseId: string) => {
     error,
     reloadCourse: loadCourse,
     loadUnitDetails,
-    clearUnitCache,
     updateUnitLessons
   };
 };

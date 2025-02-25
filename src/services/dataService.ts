@@ -18,16 +18,6 @@ export const getUnitWithLessons = async (unitId: string): Promise<Unit | null> =
   return await firestoreService.getUnitWithLessons(unitId);
 };
 
-// Clear unit cache
-export const clearUnitCache = (unitId: string): void => {
-  firestoreService.clearUnitCache(unitId);
-};
-
-// Clear all unit caches
-export const clearAllUnitCache = (): void => {
-  firestoreService.clearAllUnitCache();
-};
-
 export const getLesson = async (lessonId: string): Promise<Lesson | null> => {
   return await firestoreService.getLessonById(lessonId);
 };
@@ -141,4 +131,19 @@ export const createLesson = async (lessonId: string, lessonData: Lesson): Promis
 
 export const updateLesson = async (lessonId: string, lessonData: Partial<Lesson>): Promise<void> => {
   await firestoreService.updateLesson(lessonId, lessonData);
+  
+  // If name is being updated, also update the unit's lessons array
+  const name = lessonData.name;
+  const unitId = lessonData.unitId;
+  if (typeof name === 'string' && unitId) {
+    const unit = await firestoreService.getUnitWithLessons(unitId);
+    if (unit) {
+      const updatedLessons = unit.lessons.map(lesson => 
+        lesson.id === lessonId 
+          ? { ...lesson, name }
+          : lesson
+      );
+      await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
+    }
+  }
 };

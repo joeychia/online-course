@@ -10,7 +10,55 @@ The system follows a modern web application architecture with:
 ## Core Patterns
 
 ### Data Architecture
-1. Lesson Count Management
+1. View Synchronization
+   ```typescript
+   // Pattern: Component State Synchronization
+   // When data is updated in one view, ensure all affected views are refreshed:
+   
+   // 1. CourseEditor updates course
+   await updateCourse(courseId, { name: newName });
+   await reloadCourse(); // Refresh editor view
+   
+   // 2. CourseManagement listens for changes
+   useEffect(() => {
+     loadCourses(); // Reload course list
+   }, [selectedCourseId]); // Trigger on editor exit
+   ```
+   
+   Key patterns:
+   - Components listen for relevant state changes
+   - Reload data when returning to list views
+   - Maintain consistency across different views
+   - Clear stale data on navigation
+
+2. Data Synchronization
+   ```typescript
+   // Pattern: Dual-Document Update with Cache Invalidation
+   // When updating data that exists in multiple documents (e.g., lesson names),
+   // we must update all references and handle cache invalidation:
+   
+   // 1. Update primary document
+   await updateLesson(lessonId, { name: newName });
+   
+   // 2. Update references in parent documents
+   const unit = await getUnit(unitId);
+   const updatedLessons = unit.lessons.map(lesson =>
+     lesson.id === lessonId ? { ...lesson, name: newName } : lesson
+   );
+   await updateUnit(unitId, { lessons: updatedLessons });
+   
+   // 3. Force cache refresh with forceReload parameter
+   await reloadCourse(true);
+   await loadUnitDetails(unitId, true);
+   ```
+   
+   Key patterns:
+   - Maintain data consistency across documents
+   - Clear caches after updates
+   - Force reload of affected data
+   - Immediate UI updates with fresh data
+
+2. Lesson Count Management
    ```typescript
    // Course level - minimal unit data with count
    interface CourseUnit {
@@ -132,14 +180,14 @@ The system follows a modern web application architecture with:
 ### Service Layer Architecture
 1. Data Access Layer (services/dataAccess/)
    - CourseDataAccess: Handles course-specific Firestore operations
-   - UnitDataAccess: Manages unit and lesson data with caching
+   - UnitDataAccess: Direct unit and lesson data operations
    - Clear separation of database interactions
    - Focused responsibility per module
 
 2. Service Layer (services/)
    - firestoreService: Orchestrates data access operations
    - Delegates to appropriate data access modules
-   - Handles business logic and caching strategy
+   - Handles business logic
    - Example structure:
      ```typescript
      // Data Access Layer
@@ -150,7 +198,6 @@ The system follows a modern web application architecture with:
      }
 
      class UnitDataAccess {
-       private unitCache: Map<string, { data: Unit; timestamp: number }>;
        async getUnitWithLessons(unitId: string): Promise<Unit | null>;
        // ... other unit operations
      }
@@ -209,7 +256,7 @@ The system follows a modern web application architecture with:
 
 2. Data Loading
    - Lazy load unit details on expansion
-   - Cache loaded units in memory
+   - Direct Firestore queries
    - Clear loading states for feedback
    - Simple and intuitive loading pattern
 
@@ -234,7 +281,7 @@ The system follows a modern web application architecture with:
 1. Loading Optimization
    - Lazy loading for units
    - On-demand lesson loading
-   - Smart data caching
+   - Direct database queries
    - Minimal initial payload
 
 2. State Management
