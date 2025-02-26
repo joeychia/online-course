@@ -15,6 +15,31 @@ import { unitDataAccess } from './UnitDataAccess';
 import { db } from '../firestoreConfig';
 
 export class CourseDataAccess {
+    // Separate method for data migrations
+    async migrateCourseLessonData(courseId: string): Promise<void> {
+        const course = await this.getCourseById(courseId);
+        if (!course) return;
+
+        const needsMigration = course.units.some(unit => 
+            unit.lessonCount === undefined || unit.order === undefined
+        );
+
+        if (needsMigration) {
+            const updatedUnits = await Promise.all(
+                course.units.map(async (unit, index) => {
+                    const lessonCount = unit.lessonCount ?? await unitDataAccess.getUnitLessonsCount(unit.id);
+                    return {
+                        ...unit,
+                        lessonCount,
+                        order: unit.order ?? index
+                    };
+                })
+            );
+
+            await this.updateCourse(courseId, { units: updatedUnits });
+        }
+    }
+
     async getAllCourses(): Promise<Course[]> {
         const coursesRef = collection(db, 'courses');
         const snapshot = await getDocs(coursesRef);
@@ -52,21 +77,10 @@ export class CourseDataAccess {
 
     private async mapToCourse(id: string, data: DocumentData): Promise<Course> {
         const units = await Promise.all(
-            (data.units as Array<CourseUnit>).map(async unit => {
-                // For historical data without lessonCount or order, get/set defaults
+            (data.units as Array<CourseUnit>).map(async (unit, index) => {
+                // Use defaults without triggering updates
                 const lessonCount = unit.lessonCount ?? await unitDataAccess.getUnitLessonsCount(unit.id);
-                const order = unit.order ?? (data.units as Array<CourseUnit>).indexOf(unit);
-                
-                // If any required data was missing, update the course
-                if (!unit.lessonCount || unit.order === undefined) {
-                    await this.updateCourse(id, {
-                        units: (data.units as Array<CourseUnit>).map((u, index) => 
-                            u.id === unit.id 
-                                ? { ...u, lessonCount, order }
-                                : { ...u, order: u.order ?? index }
-                        )
-                    });
-                }
+                const order = unit.order ?? index;
 
                 return {
                     id: unit.id,
