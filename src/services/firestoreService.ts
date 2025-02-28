@@ -52,11 +52,6 @@ export class FirestoreService {
         await courseDataAccess.deleteCourse(courseId);
     }
 
-    // Unit operations delegated to UnitDataAccess
-    async getUnitWithLessons(unitId: string): Promise<Unit | null> {
-        return unitDataAccess.getUnitWithLessons(unitId);
-    }
-
     async getUnitById(unitId: string): Promise<Unit | null> {
         return unitDataAccess.getUnitWithLessons(unitId);
     }
@@ -80,12 +75,6 @@ export class FirestoreService {
     }
 
     // Lesson operations
-    async getLessonsIdNameForUnit(unitId: string): Promise<Array<{ id: string; name: string }>> {
-        const unit = await this.getUnitById(unitId);
-        if (!unit) return [];
-        return unit.lessons;
-    }
-
     async getLessonById(id: string): Promise<Lesson | null> {
         const docRef = doc(db, 'lessons', id);
         const docSnap = await getDoc(docRef);

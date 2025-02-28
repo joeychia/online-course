@@ -36,7 +36,7 @@ export const useCourseData = (courseId: string) => {
       }
 
       // Load unit details with lessons
-      const unitDetails = await ds.getUnitWithLessons(unitId);
+      const unitDetails = await ds.getUnit(unitId);
       if (unitDetails) {
         setLoadedUnits(prev => ({
           ...prev,

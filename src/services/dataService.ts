@@ -10,12 +10,7 @@ export const getCourse = async (courseId: string): Promise<Course | null> => {
 };
 
 export const getUnit = async (unitId: string): Promise<Unit | null> => {
-  return await firestoreService.getUnitWithLessons(unitId);
-};
-
-// Get unit details with lessons (lazy loading)
-export const getUnitWithLessons = async (unitId: string): Promise<Unit | null> => {
-  return await firestoreService.getUnitWithLessons(unitId);
+  return await firestoreService.getUnitById(unitId);
 };
 
 export const getLesson = async (lessonId: string): Promise<Lesson | null> => {
@@ -32,7 +27,9 @@ export const saveQuiz = async (quizData: Omit<Quiz, 'id'> & { id?: string }): Pr
 
 // Get only lesson IDs and names for navigation
 export const getLessonsIdNameForUnit = async (unitId: string): Promise<Array<{ id: string; name: string }>> => {
-  return await firestoreService.getLessonsIdNameForUnit(unitId);
+  const unit = await firestoreService.getUnitById(unitId);
+        if (!unit) return [];
+        return unit.lessons;
 };
 
 // Get only unit IDs and names for navigation
@@ -130,19 +127,22 @@ export const createLesson = async (lessonId: string, lessonData: Lesson): Promis
 };
 
 export const updateLesson = async (lessonId: string, lessonData: Partial<Lesson>): Promise<void> => {
+  console.log(lessonData, lessonId)
   await firestoreService.updateLesson(lessonId, lessonData);
   
   // If name is being updated, also update the unit's lessons array
   const name = lessonData.name;
   const unitId = lessonData.unitId;
   if (typeof name === 'string' && unitId) {
-    const unit = await firestoreService.getUnitWithLessons(unitId);
+    const unit = await firestoreService.getUnitById(unitId);
+    console.log("Unit before update", unit)
     if (unit) {
       const updatedLessons = unit.lessons.map(lesson => 
         lesson.id === lessonId 
           ? { ...lesson, name }
           : lesson
       );
+      console.log("Updated lessons", updatedLessons)
       await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
     }
   }

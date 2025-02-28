@@ -65,9 +65,9 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
       // Update unit document
       await updateUnit(unitId, { name: newName.trim() });
 
-      // Update course units array with minimal data, preserving lessonCount
+      // Update course units array with just the name
       const updatedUnits = course.units.map(u => 
-        u.id === unitId ? { ...u, name: newName.trim(), lessonCount: u.lessonCount } : u
+        u.id === unitId ? { ...u, name: newName.trim() } : u
       );
       await updateCourse(courseId, { units: updatedUnits });
       await reloadCourse();

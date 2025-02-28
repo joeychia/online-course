@@ -21,10 +21,10 @@ export class UnitDataAccess {
             name: data.name as string,
             description: data.description as string,
             order: data.order as number,
-            lessons: (data.lessons as Array<{ id: string; name: string; order: number; quizId?: string | null }>).map(lesson => ({
+            lessons: (data.lessons as Array<{ id: string; name: string; order: number; quizId?: string | null }>).map((lesson, index) => ({
                 id: lesson.id,
                 name: lesson.name,
-                order: lesson.order,
+                order: typeof lesson.order === 'number' ? lesson.order : index,
                 hasQuiz: !!lesson.quizId
             }))
         };

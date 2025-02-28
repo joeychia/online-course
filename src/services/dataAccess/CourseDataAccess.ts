@@ -83,11 +83,9 @@ export class CourseDataAccess {
                 const order = unit.order ?? index;
 
                 return {
-                    id: unit.id,
-                    name: unit.name,
+                    ...unit,
                     order,
-                    lessonCount,
-                    openDate: unit.openDate,
+                    lessonCount
                 };
             })
         );
