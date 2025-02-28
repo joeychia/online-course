@@ -1,5 +1,6 @@
 import { Box, Typography, Paper, Link, useTheme } from '@mui/material';
-import { UserProgress } from '../types';
+import { formatOpenDate, isFutureDate } from '../utils/dateUtils';
+import { CourseUnit, UserProgress } from '../types';
 import { useNavigate } from 'react-router-dom';
 import ReactCalendarHeatmap, { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
@@ -16,7 +17,7 @@ import { useEffect, useState } from 'react';
 interface CourseProgressProps {
   progress: Record<string, UserProgress>;
   courseId: string;
-  units: Array<{ id: string; name: string }>;
+  units: Array<CourseUnit>;
   unitLessons: { [key: string]: Array<{ id: string; name: string }> };
 }
 
@@ -32,7 +33,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
   const { t, language } = useTranslation();
   const theme = useTheme();
   const { fontSize } = useFontSize();
-  const [nextLesson, setNextLesson] = useState<{ id: string; name: string; unitName: String; unitId: string } | null>(null);
+  const [nextLesson, setNextLesson] = useState<{ id: string; name: string; unitName: String; unitId: string; openDate?: string } | null>(null);
   const [latestLessonData, setLatestLessonData] = useState<{ id: string; name: string; unitName: String; unitId: string } | null>(null);
 
   // Find the latest completed lesson
@@ -107,7 +108,8 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
             id: currentUnitLessons[lessonIndex + 1].id,
             name: currentUnitLessons[lessonIndex + 1].name,
             unitName: units[currentUnitIndex].name,
-            unitId: latestLessonData.unitId
+            unitId: latestLessonData.unitId,
+            openDate: units[currentUnitIndex].openDate
           });
           return;
         }
@@ -121,7 +123,8 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
               id: nextUnitLessons[0].id,
               name: nextUnitLessons[0].name,
               unitName: units[currentUnitIndex + 1].name,
-              unitId: nextUnit.id
+              unitId: nextUnit.id,
+              openDate: units[currentUnitIndex + 1].openDate
             });
             return;
           }
@@ -306,21 +309,32 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
               borderRadius: 1,
               border: 1,
               borderColor: theme.palette.mode === 'dark' ? 'primary.800' : 'primary.100',
-              boxShadow: 2,  // Added shadow
-              transition: 'transform 0.2s, box-shadow 0.2s',  // Added transition
-              '&:hover': {
+              boxShadow: 2,
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              opacity: nextLesson.openDate && isFutureDate(nextLesson.openDate) ? 0.7 : 1,
+              cursor: nextLesson.openDate && isFutureDate(nextLesson.openDate) ? 'not-allowed' : 'pointer',
+              '&:hover': nextLesson.openDate && isFutureDate(nextLesson.openDate) ? {} : {
                 transform: 'translateY(-2px)',
                 boxShadow: 4,
               }
             }}>
               <Typography variant="h6" color="primary" gutterBottom sx={{ fontSize: `calc(${fontSize}px * 1.25)` }}>
                 {t('nextUp')}
+                {nextLesson.openDate && new Date(nextLesson.openDate) > new Date() && (
+                  <Typography variant="caption" component="span" color="text.secondary" sx={{ ml: 1 }}>
+                    {t('opensAt', { date: formatOpenDate(nextLesson.openDate, language) })}
+                  </Typography>
+                )}
               </Typography>
               <Box>
                 <Link
                   component="button"
                   variant="h6"
-                  onClick={() => navigate(`/${courseId}/${nextLesson.unitId}/${nextLesson.id}`)}
+                  onClick={() => {
+                    if (!nextLesson.openDate || !isFutureDate(nextLesson.openDate)) {
+                      navigate(`/${courseId}/${nextLesson.unitId}/${nextLesson.id}`);
+                    }
+                  }}
                   sx={{ 
                     color: 'primary.main',
                     textAlign: 'left',
@@ -329,8 +343,9 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
                     mb: 0.5,
                     fontSize: `calc(${fontSize}px * 1.25)`,
                     '&:hover': {
-                      textDecoration: 'underline'
-                    }
+                      textDecoration: nextLesson.openDate && isFutureDate(nextLesson.openDate) ? 'none' : 'underline'
+                    },
+                    cursor: nextLesson.openDate && isFutureDate(nextLesson.openDate) ? 'not-allowed' : 'pointer'
                   }}
                 >
                   {convertChinese(`${nextLesson.unitName+" / "+nextLesson.name}`, language)}

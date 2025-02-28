@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isFutureDate, formatOpenDate } from '../utils/dateUtils';
 import { 
   Box, 
   Typography, 
@@ -19,7 +20,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
-import { Course } from '../types';
+import { Course, CourseUnit } from '../types';
 import { getLesson, getLessonsIdNameForUnit } from '../services/dataService';
 import { convertChinese } from '../utils/chineseConverter';
 import { useTranslation } from '../hooks/useTranslation';
@@ -64,7 +65,7 @@ export const TOOLBAR_HEIGHT = 62;
 
 interface NavPanelProps {
   course: Course;
-  units: Array<{ id: string; name: string }>;
+  units: Array<CourseUnit>;
   progress: { [key: string]: { completed: boolean; completedAt: string } };
   selectedUnitId?: string;
   selectedLessonId?: string;
@@ -72,7 +73,6 @@ interface NavPanelProps {
   isOpen: boolean;
   onToggle: () => void;
 }
-
 export default function NavPanel({ 
   course, 
   units, 
@@ -89,15 +89,18 @@ export default function NavPanel({
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>(
     units.reduce((acc, unit) => ({ 
       ...acc, 
-      [unit.id]: unit.id === selectedUnitId || !selectedUnitId
+      [unit.id]: unit.id === selectedUnitId
     }), {})
   );
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [nextLessonId, setNextLessonId] = useState<string | null>(null);
   const [nextUnitId, setNextUnitId] = useState<string | null>(null);
-    // Find the latest completed lesson
-    const latestLesson = Object.entries(progress)
+
+
+
+  // Find the latest completed lesson
+  const latestLesson = Object.entries(progress)
     .filter(([_, data]) => data.completed && data.completedAt)
     .sort((a, b) => {
       try {
@@ -148,7 +151,7 @@ export default function NavPanel({
 
   // Expand unit and scroll to next lesson when it's determined
   useEffect(() => {
-    if (nextUnitId) {
+    if (nextUnitId && (!units.find(u => u.id === nextUnitId)?.openDate || new Date(units.find(u => u.id === nextUnitId)!.openDate!) <= new Date())) {
       // Expand the unit containing the next lesson
       setExpandedUnits(prev => ({ ...prev, [nextUnitId]: true }));
 
@@ -351,15 +354,32 @@ export default function NavPanel({
           return (
             <Box key={unit.id}>
               <StyledUnitListItem 
-                onClick={() => toggleUnit(unit.id)}
+                onClick={() => (!unit.openDate || !isFutureDate(unit.openDate)) && toggleUnit(unit.id)}
                 selected={unit.id === selectedUnitId}
+                disabled={isFutureDate(unit.openDate)}
                 data-testid={`unit-button-${unit.id}`}
+                sx={{
+                  '&.Mui-disabled': {
+                    opacity: 0.7,
+                    cursor: 'not-allowed',
+                    bgcolor: 'action.disabledBackground'
+                  }
+                }}
               >
-                <ListItemText
-                  primary={convertChinese(unit.name, language)}
-                  sx={{ m: 0 }}
-                />
-                {expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />}
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
+                  <ListItemText
+                    primary={convertChinese(unit.name, language)}
+                    secondary={unit.openDate && new Date(unit.openDate) > new Date() ? 
+                      t('opensAt', { date: formatOpenDate(unit.openDate, language) }) : 
+                      undefined
+                    }
+                    sx={{ m: 0 }}
+                  />
+                  {unit.openDate && new Date(unit.openDate) > new Date() ? 
+                    <LockIcon color="disabled" fontSize="small" /> :
+                    (expandedUnits[unit.id] ? <ExpandLess /> : <ExpandMore />)
+                  }
+                </Stack>
               </StyledUnitListItem>
               <Collapse in={expandedUnits[unit.id]} timeout="auto">
                 <List component="div" disablePadding>

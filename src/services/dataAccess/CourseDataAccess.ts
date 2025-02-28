@@ -86,7 +86,8 @@ export class CourseDataAccess {
                     id: unit.id,
                     name: unit.name,
                     order,
-                    lessonCount
+                    lessonCount,
+                    openDate: unit.openDate,
                 };
             })
         );

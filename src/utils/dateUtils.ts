@@ -1,3 +1,13 @@
+export function isFutureDate(dateString?: string): boolean {
+  if (!dateString) return false;
+  try {
+    const date = new Date(dateString);
+    return date > new Date();
+  } catch {
+    return false;
+  }
+}
+
 export function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString);
@@ -16,4 +26,12 @@ export function formatDate(dateString: string): string {
   } catch {
     return 'Recently';
   }
-} 
+}
+
+export function formatOpenDate(dateString: string, language: 'zh-TW' | 'zh-CN'): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(language, {
+    month: 'short',
+    day: 'numeric',
+  });
+}

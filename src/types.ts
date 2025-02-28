@@ -4,6 +4,7 @@ export interface CourseUnit {
   name: string;
   order: number;
   lessonCount: number;
+  openDate?: string; // ISO date string for course availability
 }
 
 export interface Course {

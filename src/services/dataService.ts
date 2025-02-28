@@ -1,5 +1,5 @@
 import { firestoreService } from './firestoreService';
-import type { Course, Unit, Lesson, Quiz, Note, UserProfile, QuizHistory } from '../types';
+import type { Course, Unit, Lesson, Quiz, Note, UserProfile, QuizHistory, CourseUnit } from '../types';
 
 export const getAllCourses = async (): Promise<Course[]> => {
   return await firestoreService.getAllCourses();
@@ -36,7 +36,7 @@ export const getLessonsIdNameForUnit = async (unitId: string): Promise<Array<{ i
 };
 
 // Get only unit IDs and names for navigation
-export const getUnitsIdNameForCourse = async (courseId: string): Promise<Array<{ id: string; name: string }>> => {
+export const getUnitsIdNameForCourse = async (courseId: string): Promise<Array<CourseUnit>> => {
   return await firestoreService.getUnitsIdNameForCourse(courseId);
 };
 

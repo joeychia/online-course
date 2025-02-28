@@ -22,7 +22,8 @@ import type {
     Grade, 
     Note, 
     UserProfile, 
-    QuizHistory
+    QuizHistory,
+    CourseUnit
 } from '../types';
 import { withTimeout } from './utils';
 import { courseDataAccess } from './dataAccess/CourseDataAccess';
@@ -60,7 +61,7 @@ export class FirestoreService {
         return unitDataAccess.getUnitWithLessons(unitId);
     }
 
-    async getUnitsIdNameForCourse(courseId: string): Promise<Array<{ id: string; name: string }>> {
+    async getUnitsIdNameForCourse(courseId: string): Promise<Array<CourseUnit>> {
         const course = await this.getCourseById(courseId);
         if (!course) return [];
         return course.units;

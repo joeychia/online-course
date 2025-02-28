@@ -16,7 +16,7 @@ import { getLesson, getCourse, getUnitsIdNameForCourse, getLessonsIdNameForUnit,
 import { analyticsService } from '../services/analyticsService';
 import NavPanel from '../components/NavPanel';
 import { useState, useEffect } from 'react';
-import { Lesson, Course, UserProgress, Unit } from '../types';
+import { Lesson, Course, UserProgress, CourseUnit } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
@@ -35,7 +35,7 @@ export default function CourseView() {
   const { currentUser } = useAuth();
   const { t, language } = useTranslation();
   const [course, setCourse] = useState<Course | null>(null);
-  const [units, setUnits] = useState<Unit[]>([]);
+  const [units, setUnits] = useState<CourseUnit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
@@ -43,6 +43,7 @@ export default function CourseView() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   // Toggle drawer handler
@@ -77,7 +78,7 @@ export default function CourseView() {
 
         if (courseData) {
           setCourse(courseData);
-          setUnits(unitsData as Unit[]);
+          setUnits(unitsData);
           
           if (userData) {
             setUserProgress(userData.progress[courseId] || {});

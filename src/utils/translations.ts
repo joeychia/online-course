@@ -388,5 +388,9 @@ export const translations: Translations = {
   requiredQuestionsRemaining: {
     'zh-TW': '已完成 {{completed}}/{{total}}',
     'zh-CN': '已完成 {{completed}}/{{total}}'
+  },
+  opensAt: {
+    'zh-TW': '開放日期：{{date}}',
+    'zh-CN': '开放日期：{{date}}'
   }
 };

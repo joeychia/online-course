@@ -70,8 +70,8 @@ const mockProgress = {
 };
 
 const mockUnits = [
-  { id: 'unit1', name: 'Unit 1' },
-  { id: 'unit2', name: 'Unit 2' }
+  { id: 'unit1', name: 'Unit 1', order: 1, lessonCount: 3 },
+  { id: 'unit2', name: 'Unit 2', order: 2, lessonCount: 1 }
 ];
 
 const mockUnitLessons = {
