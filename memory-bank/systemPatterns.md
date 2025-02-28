@@ -102,6 +102,8 @@ The system follows a modern web application architecture with:
    - Courses: Container with ordered units, settings (unlockLessonIndex, token, enableNote)
    - Units: Ordered structure with lesson references
    - Lessons: Ordered content units with video and quiz support
+     * Order handling: Uses explicit order if defined, falls back to array index
+     * Ensures consistent ordering even with legacy data
    - Quizzes: Assessment components (single_choice, free_form)
    - Groups: Collaborative learning units
    - User Profiles: Progress, notes, quiz history, and timestamps
@@ -117,7 +119,31 @@ The system follows a modern web application architecture with:
    - Group-based access control
 
 ### Database Access Patterns
-1. Lazy Loading
+1. Order Field Handling
+   ```typescript
+   // Pattern: Fallback Order Values
+   // When handling ordered items (lessons, units), provide fallback for undefined order:
+   
+   interface OrderedItem {
+     id: string;
+     name: string;
+     order: number;
+   }
+   
+   // Implementation in data access layer:
+   items.map((item, index) => ({
+     ...item,
+     order: typeof item.order === 'number' ? item.order : index
+   }));
+   ```
+   
+   Key patterns:
+   - Preserve existing order values when present
+   - Use array index as fallback for undefined order
+   - Maintain consistent ordering across the system
+   - Handle legacy data gracefully
+
+2. Lazy Loading
    - Load minimal course data initially
    - Fetch unit details on demand
    - Load lessons when unit expanded

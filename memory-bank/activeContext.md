@@ -40,6 +40,34 @@
    - Group-based course access
 
 ## Recent Changes
+- Unit Name Update Fix:
+  - Fixed issue with undefined field error when updating unit names
+  - Simplified unit update operation to only modify necessary fields
+  - Removed potential undefined fields from update operation
+  - Benefits:
+    * Prevents Firestore errors from undefined values
+    * More focused data updates
+    * Better data consistency
+  - Testing:
+    * Verified unit name updates work correctly
+    * Confirmed no undefined field errors
+    * Tested data consistency after updates
+
+- Lesson Order Fix:
+  - Fixed issue with undefined order field in unit lessons
+  - Enhanced UnitDataAccess to handle missing order values:
+    * Uses existing order if defined
+    * Falls back to array index if order is undefined
+    * Ensures consistent lesson ordering
+  - Benefits:
+    * Prevents Firestore errors from undefined values
+    * Maintains backward compatibility with existing data
+    * Provides reliable lesson ordering
+  - Testing:
+    * Verified order preservation for existing lessons
+    * Confirmed fallback behavior for undefined orders
+    * Tested data consistency
+
 - Course Name Synchronization Fix:
   - Fixed issue with course name not updating in admin dashboard after edit
   - Enhanced CourseManagement component:

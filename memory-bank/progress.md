@@ -112,6 +112,19 @@
   - Slow admin dashboard and course editor loading
 
 ### Fixed Issues ✅
+- Unit name update error fixed:
+  - Resolved undefined field error when updating unit names
+  - Simplified unit update operation
+  - Improved data consistency in updates
+  - Verified fix through testing
+
+- Lesson order handling fixed:
+  - Resolved undefined order field issue in unit lessons
+  - Implemented fallback to array index when order is undefined
+  - Preserved existing order values when present
+  - Enhanced backward compatibility with legacy data
+  - Improved data consistency in lesson ordering
+
 - Course name synchronization fixed:
   - Resolved course name mismatch between admin dashboard and editor
   - Enhanced CourseManagement to reload courses after editor changes
