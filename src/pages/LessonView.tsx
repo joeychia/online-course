@@ -226,6 +226,13 @@ const LessonView: React.FC<LessonViewProps> = ({
     }
   };
 
+  const handleQuizClose = () => {
+    if (quizComplete) {
+      void onComplete(lesson.id);
+    }
+    setQuizOpen(false);
+  };
+
   const handleQuizSubmit = async (answers: Record<string, string>) => {
     if (!lesson || !currentUser || !quiz) return;
 
@@ -266,9 +273,6 @@ const LessonView: React.FC<LessonViewProps> = ({
         });
         await saveQuizHistory(quiz.id, currentUser.uid, lesson.courseId, lesson.id, answers, correct, total);
         setQuizComplete(true);
-        setQuizOpen(false);
-        // complete the lesson
-        onComplete(lesson.id);
     } catch (err) {
       console.error('Error submitting quiz:', err);
     }
@@ -420,14 +424,14 @@ const LessonView: React.FC<LessonViewProps> = ({
       {/* Quiz Modal */}
       <Dialog 
         open={quizOpen} 
-        onClose={() => setQuizOpen(false)}
+        onClose={handleQuizClose}
         maxWidth="md"
         fullWidth
       >
         <DialogTitle sx={{ m: 0, p: 2, pr: 6, position: 'relative' }}>
         {t('weeklyQuiz')}
           <IconButton
-            onClick={() => setQuizOpen(false)}
+            onClick={handleQuizClose}
             sx={{
               position: 'absolute',
               right: 8,
@@ -441,7 +445,7 @@ const LessonView: React.FC<LessonViewProps> = ({
           {quiz && <QuizView 
             quiz={quiz} 
             onSubmit={handleQuizSubmit}
-            onClose={() => setQuizOpen(false)}
+            onClose={handleQuizClose}
             readOnlyAnswers={quizHistory?.answers}
           />}
         </DialogContent>
