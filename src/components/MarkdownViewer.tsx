@@ -15,6 +15,7 @@ const MarkdownViewer = ({ content }: MarkdownViewerProps) => {
     <Box sx={{
       '& .toastui-editor-contents': {
         color: theme => theme.palette.text.primary,
+        fontFamily: theme => theme.typography.fontFamily,
         fontSize: fontSize,
         '& p': {
           color: theme => theme.palette.text.primary,

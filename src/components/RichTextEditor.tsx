@@ -55,7 +55,8 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
         color: theme => theme.palette.text.primary,
         '& h1, & h2, & h3, & h4, & h5, & h6, & p': {
           color: theme => theme.palette.text.primary,
-        }
+        },
+        fontFamily: theme => theme.typography.fontFamily,
       },
       '& .toastui-editor-ww-container': {
         backgroundColor: theme => theme.palette.background.paper,
