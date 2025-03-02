@@ -8,6 +8,7 @@ import {
     orderBy,
     setDoc,
     updateDoc,
+    deleteDoc,
     DocumentData,
     QueryDocumentSnapshot,
     addDoc,
@@ -26,34 +27,116 @@ import type {
     CourseUnit
 } from '../types';
 import { withTimeout } from './utils';
-import { courseDataAccess } from './dataAccess/CourseDataAccess';
-import { unitDataAccess } from './dataAccess/UnitDataAccess';
 import { db } from './firestoreConfig';
 
 export class FirestoreService {
-    // Course operations delegated to CourseDataAccess
+    // Course operations
+    async migrateCourseLessonData(courseId: string): Promise<void> {
+        const course = await this.getCourseById(courseId);
+        if (!course) return;
+
+        const needsMigration = course.units.some(unit => 
+            unit.lessonCount === undefined || unit.order === undefined
+        );
+
+        if (needsMigration) {
+            const updatedUnits = await Promise.all(
+                course.units.map(async (unit, index) => {
+                    const lessonCount = unit.lessonCount ?? await this.getUnitLessonsCount(unit.id);
+                    return {
+                        ...unit,
+                        lessonCount,
+                        order: unit.order ?? index
+                    };
+                })
+            );
+
+            await this.updateCourse(courseId, { units: updatedUnits });
+        }
+    }
+
     async getAllCourses(): Promise<Course[]> {
-        return courseDataAccess.getAllCourses();
+        const coursesRef = collection(db, 'courses');
+        const snapshot = await getDocs(coursesRef);
+        const courses = await Promise.all(
+            snapshot.docs.map(async (doc: QueryDocumentSnapshot<DocumentData>) => {
+                const data = doc.data();
+                return this.mapToCourse(doc.id, data);
+            })
+        );
+        return courses;
     }
 
     async getCourseById(id: string): Promise<Course | null> {
-        return courseDataAccess.getCourseById(id);
+        const docRef = doc(db, 'courses', id);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) return null;
+        return this.mapToCourse(docSnap.id, docSnap.data());
     }
 
     async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
-        return courseDataAccess.createCourse(courseData);
+        const courseCollection = collection(db, 'courses');
+        const docRef = await withTimeout(addDoc(courseCollection, courseData));
+        return docRef.id;
     }
 
     async updateCourse(courseId: string, courseData: Partial<Course>): Promise<void> {
-        await courseDataAccess.updateCourse(courseId, courseData);
+        const courseRef = doc(db, 'courses', courseId);
+        await withTimeout(updateDoc(courseRef, courseData));
     }
 
     async deleteCourse(courseId: string): Promise<void> {
-        await courseDataAccess.deleteCourse(courseId);
+        const courseRef = doc(db, 'courses', courseId);
+        await withTimeout(deleteDoc(courseRef));
     }
 
+    private async mapToCourse(id: string, data: DocumentData): Promise<Course> {
+        const units = await Promise.all(
+            (data.units as Array<CourseUnit>).map(async (unit, index) => {
+                const lessonCount = unit.lessonCount ?? await this.getUnitLessonsCount(unit.id);
+                const order = unit.order ?? index;
+
+                return {
+                    ...unit,
+                    order,
+                    lessonCount
+                };
+            })
+        );
+
+        return {
+            id,
+            name: data.name as string,
+            description: data.description as string,
+            units,
+            settings: data.settings as { unlockLessonIndex: number; token: string },
+            groupIds: data.groupIds as Record<string, boolean>,
+            isPublic: data.isPublic as boolean | undefined
+        };
+    }
+
+    // Unit operations
     async getUnitById(unitId: string): Promise<Unit | null> {
-        return unitDataAccess.getUnitWithLessons(unitId);
+        const docRef = doc(db, 'units', unitId);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) return null;
+
+        const data = docSnap.data();
+        const unit: Unit = {
+            id: docSnap.id,
+            courseId: data.courseId as string,
+            name: data.name as string,
+            description: data.description as string,
+            order: data.order as number,
+            lessons: (data.lessons as Array<{ id: string; name: string; order: number; quizId?: string | null }>).map((lesson, index) => ({
+                id: lesson.id,
+                name: lesson.name,
+                order: typeof lesson.order === 'number' ? lesson.order : index,
+                hasQuiz: !!lesson.quizId
+            }))
+        };
+
+        return unit;
     }
 
     async getUnitsIdNameForCourse(courseId: string): Promise<Array<CourseUnit>> {
@@ -63,15 +146,21 @@ export class FirestoreService {
     }
 
     async getUnitLessonsCount(unitId: string): Promise<number> {
-        return unitDataAccess.getUnitLessonsCount(unitId);
+        const docRef = doc(db, 'units', unitId);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) return 0;
+        const data = docSnap.data();
+        return (data.lessons as Array<any> || []).length;
     }
 
     async createUnit(unitId: string, unitData: Unit): Promise<void> {
-        return unitDataAccess.createUnit(unitId, unitData);
+        const unitRef = doc(db, 'units', unitId);
+        await withTimeout(setDoc(unitRef, unitData));
     }
 
     async updateUnit(unitId: string, unitData: Partial<Unit>): Promise<void> {
-        return unitDataAccess.updateUnit(unitId, unitData);
+        const unitRef = doc(db, 'units', unitId);
+        await withTimeout(updateDoc(unitRef, unitData));
     }
 
     // Lesson operations
