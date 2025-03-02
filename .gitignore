@@ -31,9 +31,8 @@ dist-ssr
 *.sln
 *.sw?
 
-# Firebase
-service-account-test.json
-service-account-prod.json
+# Firebase private key
+service-account*.json
 
 # Local test related files
 .test*
