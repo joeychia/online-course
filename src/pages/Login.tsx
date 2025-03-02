@@ -103,7 +103,20 @@ export default function Login() {
     const handleGoogleSignIn = async () => {
         try {
             setLoading(true);
-            const userCredential = await signInWithGoogle();
+            let userCredential;
+            try {
+                userCredential = await signInWithGoogle();
+            } catch (error) {
+                // Check if the error is related to missing initial state
+                if (error instanceof Error && 
+                    error.message.includes('missing initial state')) {
+                    // Retry with popup method
+                    userCredential = await signInWithGoogle();
+                } else {
+                    throw error;
+                }
+            }
+
             const userProfile = await firestoreService.getUserById(userCredential.uid);
             if (!userProfile) {
                 await firestoreService.createUser({
