@@ -1,16 +1,36 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { act } from '@testing-library/react';
 import NavPanel from '../components/NavPanel';
 import { Course } from '../types';
-import { getLessonsIdNameForUnit } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 
-// Mock dataService
-vi.mock('../services/dataService', () => ({
-  getLessonsIdNameForUnit: vi.fn(),
-  getLesson: vi.fn()
+// Mock firestoreService
+vi.mock('../services/firestoreService', () => ({
+  firestoreService: {
+    getLessonsIdNameForUnit: vi.fn(),
+    getLessonById: vi.fn(),
+    getUnitById: vi.fn()
+  }
 }));
+
+// Mock unit data
+const mockUnitData = {
+  id: '1',
+  name: '第一單元',
+  courseId: '1',
+  description: 'Test Unit Description',
+  order: 0,
+  lessons: [
+    { id: 'u1l1', name: '第一課', order: 0 },
+    { id: 'u1l2', name: '第二課', order: 1 }
+  ]
+};
+
+
+// Get the mocked firestoreService
+const mockedFirestoreService = firestoreService as any;
 
 // Mock useTranslation hook
 vi.mock('../hooks/useTranslation', () => ({
@@ -59,11 +79,6 @@ const mockProgress = {
   'u2l2': { completed: false, completedAt: '2024-01-04T10:00:00Z'  }
 };
 
-const mockGetLessons = vi.mocked(getLessonsIdNameForUnit);
-mockGetLessons.mockImplementation((unitId) => {
-  return Promise.resolve(unitId === '1' ? mockLessonsUnit1 : mockLessonsUnit2);
-});
-
 const renderWithRouter = async (ui: React.ReactElement) => {
   const result = render(
     <MemoryRouter>
@@ -82,6 +97,16 @@ const renderWithRouter = async (ui: React.ReactElement) => {
 };
 
 describe('NavPanel', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockedFirestoreService.getUnitById.mockImplementation((unitId: string) => {
+      return Promise.resolve(unitId === '1' ? mockUnitData : null);
+    });
+    mockedFirestoreService.getLessonsIdNameForUnit.mockImplementation((unitId: string) => {
+      return Promise.resolve(unitId === '1' ? mockLessonsUnit1 : mockLessonsUnit2);
+    });
+  });
+
   it('renders course name and description', async () => {
     const { drawer } = await renderWithRouter(
       <NavPanel

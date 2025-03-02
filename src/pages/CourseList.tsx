@@ -24,7 +24,6 @@ import LockIcon from '@mui/icons-material/Lock';
 import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Course } from '../types';
-import { getAllCourses, getUser } from '../services/dataService';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
@@ -96,8 +95,8 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
     const fetchData = async () => {
       try {
         const [coursesData, userProfileData] = await Promise.all([
-          getAllCourses(),
-          currentUser ? getUser(currentUser.uid) : null
+          firestoreService.getAllCourses(),
+          currentUser ? firestoreService.getUserById(currentUser.uid) : null
         ]);
         if (myCourses && userProfileData) {
           // Filter courses based on user's registeredCourses
@@ -164,7 +163,7 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
       // Token is correct, proceed with registration
       try {
         await firestoreService.registerCourse(currentUser.uid, courseToRegister.id);
-        const updatedProfile = await getUser(currentUser.uid);
+        const updatedProfile = await firestoreService.getUserById(currentUser.uid);
         setUserProfile(updatedProfile);
         setTokenDialogOpen(false);
         setTokenInput('');

@@ -3,16 +3,21 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CourseManagement } from '../components/admin/CourseManagement';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { FontSizeProvider } from '../contexts/FontSizeContext';
-import * as dataService from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { BrowserRouter } from 'react-router-dom';
 
-// Mock the dataService
-vi.mock('../services/dataService', () => ({
-  getAllCourses: vi.fn(),
-  createCourse: vi.fn(),
-  updateCourse: vi.fn(),
-  deleteCourse: vi.fn(),
+// Mock the firestoreService
+vi.mock('../services/firestoreService', () => ({
+  firestoreService: {
+    getAllCourses: vi.fn(),
+    createCourse: vi.fn(),
+    updateCourse: vi.fn(),
+    deleteCourse: vi.fn(),
+  }
 }));
+
+// Get the mocked firestoreService
+const mockedFirestoreService = firestoreService as any;
 
 const mockCourses = [
   {
@@ -50,7 +55,7 @@ const renderWithProviders = (ui: React.ReactElement) => {
 describe('CourseManagement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (dataService.getAllCourses as ReturnType<typeof vi.fn>).mockResolvedValue(mockCourses);
+    mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
   });
 
   it('loads and displays courses on mount', async () => {
@@ -72,7 +77,7 @@ describe('CourseManagement', () => {
     });
 
     it('creates a new course', async () => {
-      (dataService.createCourse as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'new_course' });
+      mockedFirestoreService.createCourse.mockResolvedValue('new_course');
       renderWithProviders(<CourseManagement />);
 
       // Open dialog
@@ -88,7 +93,7 @@ describe('CourseManagement', () => {
       fireEvent.click(screen.getByText('Create'));
 
       await waitFor(() => {
-        expect(dataService.createCourse).toHaveBeenCalled();
+        expect(mockedFirestoreService.createCourse).toHaveBeenCalled();
       });
     });
 
@@ -103,7 +108,7 @@ describe('CourseManagement', () => {
       fireEvent.click(screen.getByText('Create'));
 
       // createCourse should not be called
-      expect(dataService.createCourse).not.toHaveBeenCalled();
+      expect(mockedFirestoreService.createCourse).not.toHaveBeenCalled();
     });
   });
 
@@ -125,7 +130,7 @@ describe('CourseManagement', () => {
 
   describe('Error Handling', () => {
     it('handles course loading error', async () => {
-      (dataService.getAllCourses as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Failed to load'));
+      mockedFirestoreService.getAllCourses.mockRejectedValue(new Error('Failed to load'));
       renderWithProviders(<CourseManagement />);
 
       await waitFor(() => {

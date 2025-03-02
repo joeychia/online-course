@@ -21,7 +21,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { styled } from '@mui/material/styles';
 import { Course, CourseUnit } from '../types';
-import { getLesson, getLessonsIdNameForUnit } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { convertChinese } from '../utils/chineseConverter';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -120,11 +120,12 @@ export default function NavPanel({
 
       try {
         const [completedLessonId] = latestLesson;
-        const lesson = await getLesson(completedLessonId);
+        const lesson = await firestoreService.getLessonById(completedLessonId);
         if (!lesson) return;
 
         // Get avg ff ds fll lessons in the current unit
-        const currentUnitLessons = await getLessonsIdNameForUnit(lesson.unitId);
+        const unit = await firestoreService.getUnitById(lesson.unitId);
+        const currentUnitLessons = unit ? unit.lessons : [];
         const lessonIndex = currentUnitLessons.findIndex(l => l.id === completedLessonId);
         const currentUnitIndex = units.findIndex(u => u.id === lesson.unitId);
 
@@ -134,11 +135,12 @@ export default function NavPanel({
           setNextUnitId(lesson.unitId);
         } else if (currentUnitIndex !== -1 && currentUnitIndex < units.length - 1) {
           // Look for first lesson in next unit
-          const nextUnit = units[currentUnitIndex + 1];
-          const nextUnitLessons = await getLessonsIdNameForUnit(nextUnit.id);
+          const nextUnitInfo = units[currentUnitIndex + 1];
+          const nextUnitData = await firestoreService.getUnitById(nextUnitInfo.id);
+          const nextUnitLessons = nextUnitData ? nextUnitData.lessons : [];
           if (nextUnitLessons.length > 0) {
             setNextLessonId(nextUnitLessons[0].id);
-            setNextUnitId(nextUnit.id);
+            setNextUnitId(nextUnitInfo.id);
           }
         }
       } catch (error) {
@@ -172,7 +174,8 @@ export default function NavPanel({
         console.log(`[NavPanel] Starting to load lessons for unit ${unitId}`);
         try {
           setLoading(prev => ({ ...prev, [unitId]: true }));
-          const lessons = await getLessonsIdNameForUnit(unitId);
+          const unit = await firestoreService.getUnitById(unitId);
+          const lessons = unit ? unit.lessons : [];
           console.log(`[NavPanel] Successfully loaded ${lessons.length} lessons for unit ${unitId}:`, lessons.map(l => l.name));
           setUnitLessons(prev => ({ ...prev, [unitId]: lessons }));
         } catch (err) {

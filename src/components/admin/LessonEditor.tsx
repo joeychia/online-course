@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { Lesson } from '../../types';
-import { getLesson, updateLesson } from '../../services/dataService';
+import { firestoreService } from '../../services/firestoreService';
 import RichTextEditor from '../RichTextEditor';
 import QuizEditor from './QuizEditor';
 
@@ -37,7 +37,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
 
   const loadLesson = async () => {
     try {
-      const loadedLesson = await getLesson(lessonId);
+      const loadedLesson = await firestoreService.getLessonById(lessonId);
       if (loadedLesson) {
         // Ensure unitId is set from props
         setLesson({ ...loadedLesson, unitId });
@@ -66,7 +66,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
         updateData['video-url'] = lesson['video-url'];
       }
 
-      await updateLesson(lessonId, updateData);
+      await firestoreService.updateLesson(lessonId, updateData);
       onSave();
       onClose();
     } catch (error) {

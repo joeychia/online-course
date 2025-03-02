@@ -12,7 +12,7 @@ import {
   Typography
 } from '@mui/material';
 import { Course } from '../../types';
-import { createCourse, updateCourse, getAllCourses } from '../../services/dataService';
+import { firestoreService } from '../../services/firestoreService';
 import RichTextEditor from '../RichTextEditor';
 import { CourseListItem } from './CourseListItem';
 import { CourseEditor } from './CourseEditor';
@@ -36,7 +36,7 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
 
   const loadCourses = async () => {
     try {
-      const courseList = await getAllCourses();
+      const courseList = await firestoreService.getAllCourses();
       setCourses(courseList);
     } catch (error) {
       console.error('Error loading courses:', error);
@@ -52,12 +52,12 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
 
     try {
       if (editingCourse) {
-        await updateCourse(editingCourse.id, {
+        await firestoreService.updateCourse(editingCourse.id, {
           name: courseName,
           description: courseDescription,
         });
       } else {
-        await createCourse({
+        await firestoreService.createCourse({
           name: courseName,
           description: courseDescription,
           settings: { unlockLessonIndex: 1 },

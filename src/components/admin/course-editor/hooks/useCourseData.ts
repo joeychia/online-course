@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Course, Unit } from '../../../../types';
-import * as ds from '../../../../services/dataService';
+import { firestoreService } from '../../../../services/firestoreService';
 
 export const useCourseData = (courseId: string) => {
   const [course, setCourse] = useState<Course | null>(null);
@@ -13,7 +13,7 @@ export const useCourseData = (courseId: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const loadedCourse = await ds.getCourse(courseId);
+      const loadedCourse = await firestoreService.getCourseById(courseId);
       if (loadedCourse) {
         setCourse(loadedCourse);
       } else {
@@ -36,7 +36,7 @@ export const useCourseData = (courseId: string) => {
       }
 
       // Load unit details with lessons
-      const unitDetails = await ds.getUnit(unitId);
+      const unitDetails = await firestoreService.getUnitById(unitId);
       if (unitDetails) {
         setLoadedUnits(prev => ({
           ...prev,

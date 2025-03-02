@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import CourseProgress from '../components/CourseProgress';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { FontSizeProvider } from '../contexts/FontSizeContext';
-import { getLesson, getLessonsIdNameForUnit } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 
 // Mock react-calendar-heatmap
 vi.mock('react-calendar-heatmap', () => ({
@@ -16,11 +16,16 @@ vi.mock('react-tooltip', () => ({
   default: () => null
 }));
 
-// Mock dataService
-vi.mock('../services/dataService', () => ({
-  getLesson: vi.fn(),
-  getLessonsIdNameForUnit: vi.fn()
+// Mock firestoreService
+vi.mock('../services/firestoreService', () => ({
+  firestoreService: {
+    getLessonById: vi.fn(),
+    getLessonsIdNameForUnit: vi.fn()
+  }
 }));
+
+// Get the mocked firestoreService
+const mockedFirestoreService = firestoreService as any;
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -94,7 +99,7 @@ describe('CourseProgress', () => {
 
     // Mock getLesson and getLessonsIdNameForUnit
     // Mock getLesson with proper unit and lesson data
-    vi.mocked(getLesson).mockResolvedValue({
+    mockedFirestoreService.getLessonById.mockResolvedValue({
       id: 'lesson2',
       name: 'Lesson 2',
       unitId: 'unit1',
@@ -104,7 +109,7 @@ describe('CourseProgress', () => {
     });
 
     // Mock getLessonsIdNameForUnit with proper unit and lesson data
-    vi.mocked(getLessonsIdNameForUnit).mockImplementation((unitId) => {
+    mockedFirestoreService.getLessonsIdNameForUnit.mockImplementation((unitId: string) => {
       if (unitId === 'unit1') {
         return Promise.resolve([
           { id: 'lesson1', name: 'Lesson 1' },

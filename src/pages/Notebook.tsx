@@ -17,14 +17,13 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
-import { getNotesForUserCourse, getAllCourses } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { convertChinese } from '../utils/chineseConverter';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Course } from '../types';
 import MarkdownViewer from '../components/MarkdownViewer';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import QuizView from '../components/QuizView';
-import { firestoreService } from '../services/firestoreService';
 import type { Quiz } from '../types';
 
 interface Note {
@@ -77,7 +76,7 @@ export default function Notebook() {
   useEffect(() => {
     async function loadCourses() {
       try {
-        const coursesData = await getAllCourses();
+        const coursesData = await firestoreService.getAllCourses();
         setCourses(coursesData);
       } catch (err) {
         console.error('Error loading courses:', err);
@@ -96,7 +95,7 @@ export default function Notebook() {
         
         // Get notes and quiz history
         const [userNotes, quizHistories] = await Promise.all([
-          getNotesForUserCourse(currentUser.uid, courseId, startOfMonth, endOfMonth),
+          firestoreService.getNotesForUserCourse(currentUser.uid, courseId, startOfMonth, endOfMonth),
           firestoreService.getQuizHistoryForUserCourse(currentUser.uid, courseId, startOfMonth, endOfMonth)
         ]);
         // Convert quiz histories to note format

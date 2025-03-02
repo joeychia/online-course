@@ -19,15 +19,7 @@ import { Lesson, Quiz, QuizHistory } from '../types';
 import { analyticsService } from '../services/analyticsService';
 import RichTextEditor from '../components/RichTextEditor';
 import QuizView from '../components/QuizView';
-import { 
-  getQuiz, 
-  getUnit,
-  getNotesForLesson,
-  getQuizHistoryForUserLesson,
-  getLesson,
-  saveNote,
-  saveQuizHistory,
-} from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { useAuth } from '../hooks/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
 import { useTranslation } from '../hooks/useTranslation';
@@ -112,7 +104,7 @@ const LessonView: React.FC<LessonViewProps> = ({
     const fetchLesson = async () => {
       try {
         if (!lessonId) return;
-        const lessonData = await getLesson(lessonId);
+        const lessonData = await firestoreService.getLessonById(lessonId);
         if (!lessonData) {
           setError('Lesson not found');
           return;
@@ -131,7 +123,7 @@ const LessonView: React.FC<LessonViewProps> = ({
   useEffect(() => {
     async function trackView() {
       if (lesson?.unitId) {
-        const unit = await getUnit(lesson.unitId);
+        const unit = await firestoreService.getUnitById(lesson.unitId);
         if (unit) {
           void analyticsService.trackLessonView({
             courseId: lesson.courseId,
@@ -155,8 +147,8 @@ const LessonView: React.FC<LessonViewProps> = ({
       if (lesson?.quizId && currentUser) {
         try {
           const [quizData, historyData] = await Promise.all([
-            getQuiz(lesson.quizId),
-            getQuizHistoryForUserLesson(currentUser.uid, lesson.id)
+            firestoreService.getQuizById(lesson.quizId),
+            firestoreService.getQuizHistoryForUserLesson(currentUser.uid, lesson.id)
           ]);
 
           if (quizData) {
@@ -186,7 +178,7 @@ const LessonView: React.FC<LessonViewProps> = ({
     async function loadNote(): Promise<void> {
       if (!currentUser || !lesson) return;
       try {
-        const existingNote = await getNotesForLesson(currentUser.uid, lesson.id);
+        const existingNote = await firestoreService.getNoteForLesson(currentUser.uid, lesson.id);
         if (existingNote) {
           setNote(existingNote.text);
           setNoteLastUpdated(existingNote.updatedAt);
@@ -205,8 +197,8 @@ const LessonView: React.FC<LessonViewProps> = ({
     
     try {
       setIsSaving(true);
-      const unit = await getUnit(lesson.unitId);
-      await saveNote(currentUser.uid, lesson.id, lesson.courseId, note, lesson.name, unit!.name);
+      const unit = await firestoreService.getUnitById(lesson.unitId);
+      await firestoreService.saveNote(currentUser.uid, lesson.id, lesson.courseId, note, lesson.name, unit!.name);
       setNoteSaved(true);
 
       // If there's no quiz, complete the lesson
@@ -271,7 +263,17 @@ const LessonView: React.FC<LessonViewProps> = ({
         setQuizHistory({
           ...newQuizHistory,
         });
-        await saveQuizHistory(quiz.id, currentUser.uid, lesson.courseId, lesson.id, answers, correct, total);
+        await firestoreService.createQuizHistory(currentUser.uid, lesson.id, {
+          quizId: quiz.id,
+          userId: currentUser.uid,
+          courseId: lesson.courseId,
+          lessonId: lesson.id,
+          answers,
+          correct,
+          total,
+          score: (correct / total) * 100,
+          completedAt: new Date().toISOString()
+        });
         setQuizComplete(true);
     } catch (err) {
       console.error('Error submitting quiz:', err);

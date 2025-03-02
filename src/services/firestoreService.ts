@@ -145,6 +145,12 @@ export class FirestoreService {
         return course.units;
     }
 
+    async getLessonsIdNameForUnit(unitId: string): Promise<Array<{ id: string; name: string }>> {
+        const unit = await this.getUnitById(unitId);
+        if (!unit) return [];
+        return unit.lessons;
+    }
+
     async getUnitLessonsCount(unitId: string): Promise<number> {
         const docRef = doc(db, 'units', unitId);
         const docSnap = await getDoc(docRef);

@@ -26,7 +26,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFontSize } from '../contexts/FontSizeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../hooks/useTranslation';
-import { getUser } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 interface LayoutProps {
@@ -62,7 +62,7 @@ export default function Layout({ children }: LayoutProps) {
     const checkAdminStatus = async () => {
       try {
         if (currentUser?.uid) {
-          const userProfile = await getUser(currentUser.uid);
+          const userProfile = await firestoreService.getUserById(currentUser.uid);
           setIsAdmin(!!userProfile?.roles?.admin);
         }
       } catch (error) {

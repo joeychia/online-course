@@ -12,7 +12,6 @@ import {
   DialogActions,
 } from '@mui/material';
 import SegmentIcon from '@mui/icons-material/Segment';
-import { getLesson, getCourse, getUnitsIdNameForCourse, getLessonsIdNameForUnit, getUser, updateUserProgress } from '../services/dataService';
 import { analyticsService } from '../services/analyticsService';
 import NavPanel from '../components/NavPanel';
 import { useState, useEffect } from 'react';
@@ -71,9 +70,9 @@ export default function CourseView() {
 
       try {
         const [courseData, unitsData, userData] = await Promise.all([
-          getCourse(courseId),
-          getUnitsIdNameForCourse(courseId),
-          currentUser ? getUser(currentUser.uid) : null
+          firestoreService.getCourseById(courseId),
+          firestoreService.getUnitsIdNameForCourse(courseId),
+          currentUser ? firestoreService.getUserById(currentUser.uid) : null
         ]);
 
         if (courseData) {
@@ -97,7 +96,8 @@ export default function CourseView() {
     async function loadUnitLessons(unitId: string) {
       if (!unitLessons[unitId]) {
         try {
-          const lessons = await getLessonsIdNameForUnit(unitId);
+          const unit = await firestoreService.getUnitById(unitId);
+          const lessons = unit ? unit.lessons : [];
           setUnitLessons(prev => ({ ...prev, [unitId]: lessons }));
         } catch (err) {
           console.error(`Error loading lessons for unit ${unitId}:`, err);
@@ -116,7 +116,7 @@ export default function CourseView() {
       if (lessonId) {
         setLoading(true);
         try {
-          const lesson = await getLesson(lessonId);
+          const lesson = await firestoreService.getLessonById(lessonId);
           setCurrentLesson(lesson);
         } catch (err) {
           console.error('Error loading lesson:', err);
@@ -184,7 +184,7 @@ export default function CourseView() {
     }
 
     // save progress to firestore
-    await updateUserProgress(currentUser.uid, courseId, completedLessonId, true, completedAt, lessonName);
+    await firestoreService.updateUserProgress(currentUser.uid, courseId, completedLessonId, true, completedAt, lessonName);
 
     // Update local progress state
     setUserProgress(prev => ({

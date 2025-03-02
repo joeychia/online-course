@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Quiz, QuizQuestion, QuizOption } from '../../types';
-import { saveQuiz, getQuiz } from '../../services/dataService';
+import { firestoreService } from '../../services/firestoreService';
 import {
   Box,
   Typography,
@@ -163,7 +163,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
 
       try {
         console.debug('[QuizEditor] Loading quiz:', { quizId });
-        const quiz = await getQuiz(quizId);
+        const quiz = await firestoreService.getQuizById(quizId);
         if (quiz) {
           console.debug('[QuizEditor] Quiz loaded successfully:', { questionCount: quiz.questions.length });
           setSelectedQuiz(quiz);
@@ -190,7 +190,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
 
     try {
       console.debug('[QuizEditor] Saving quiz:', { quizId: selectedQuiz.id, questionCount: selectedQuiz.questions.length });
-      const savedQuizId = await saveQuiz(selectedQuiz);
+      const savedQuizId = await firestoreService.saveQuiz(selectedQuiz);
       if (onSave) {
         await onSave(savedQuizId);
       }

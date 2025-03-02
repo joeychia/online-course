@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LessonEditor } from '../components/admin/LessonEditor';
-import { getLesson, updateLesson } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import type { Lesson } from '../types';
 
 const TEST_DATA = {
@@ -16,10 +16,15 @@ const TEST_DATA = {
 } as const;
 
 // Mock services
-vi.mock('../services/dataService', () => ({
-  getLesson: vi.fn(),
-  updateLesson: vi.fn()
+vi.mock('../services/firestoreService', () => ({
+  firestoreService: {
+    getLessonById: vi.fn(),
+    updateLesson: vi.fn()
+  }
 }));
+
+// Get the mocked firestoreService
+const mockedFirestoreService = firestoreService as any;
 
 vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
@@ -55,8 +60,8 @@ describe('LessonEditor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getLesson).mockResolvedValue(mockLessonWithVideo);
-    vi.mocked(updateLesson).mockResolvedValue();
+    mockedFirestoreService.getLessonById.mockResolvedValue(mockLessonWithVideo);
+    mockedFirestoreService.updateLesson.mockResolvedValue();
   });
 
   it('loads and displays lesson data on mount', async () => {
@@ -69,7 +74,7 @@ describe('LessonEditor', () => {
       />
     );
 
-    expect(getLesson).toHaveBeenCalledWith('lesson_1');
+    expect(mockedFirestoreService.getLessonById).toHaveBeenCalledWith('lesson_1');
     await waitFor(() => {
       expect(screen.getByText(`Edit Lesson: ${TEST_DATA.LESSON_NAME}`)).toBeInTheDocument();
       expect(screen.getByLabelText('Lesson Name')).toHaveValue(TEST_DATA.LESSON_NAME);
@@ -102,7 +107,7 @@ describe('LessonEditor', () => {
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
-      expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
+      expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
         name: TEST_DATA.UPDATED_LESSON
       }));
     });
@@ -129,7 +134,7 @@ describe('LessonEditor', () => {
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
-      expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
+      expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
         'video-title': TEST_DATA.UPDATED_VIDEO
       }));
     });
@@ -156,7 +161,7 @@ describe('LessonEditor', () => {
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
-      expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
+      expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
         'video-url': TEST_DATA.VIDEO_URL + '/updated'
       }));
     });
@@ -183,7 +188,7 @@ describe('LessonEditor', () => {
       const saveButton = screen.getByText('Save');
       await user.click(saveButton);
 
-      expect(updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
+      expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson_1', expect.objectContaining({
         content: TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX
       }));
     });
@@ -215,7 +220,7 @@ describe('LessonEditor', () => {
       // Save changes
       await user.click(screen.getByText('Save'));
 
-      expect(updateLesson).toHaveBeenCalledWith('lesson_1', {
+      expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson_1', {
         name: TEST_DATA.LESSON_NAME + TEST_DATA.UPDATED_SUFFIX,
         'video-title': TEST_DATA.VIDEO_TITLE + TEST_DATA.UPDATED_SUFFIX,
         "quizId": null,
@@ -244,7 +249,7 @@ describe('LessonEditor', () => {
 
       await user.click(screen.getByText('Cancel'));
 
-      expect(updateLesson).not.toHaveBeenCalled();
+      expect(mockedFirestoreService.updateLesson).not.toHaveBeenCalled();
       expect(mockOnSave).not.toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();
     });
@@ -278,7 +283,7 @@ describe('LessonEditor', () => {
       await user.click(screen.getByText('Save'));
 
       // Verify save was successful
-      expect(updateLesson).toHaveBeenCalledWith('lesson_1', {
+      expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson_1', {
         name: TEST_DATA.LESSON_NAME,
         content: TEST_DATA.CONTENT,
         quizId: null,
@@ -292,7 +297,7 @@ describe('LessonEditor', () => {
   describe('Error Handling', () => {
     it('handles lesson loading error', async () => {
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-      vi.mocked(getLesson).mockRejectedValue(new Error('Failed to load lesson'));
+      mockedFirestoreService.getLessonById.mockRejectedValue(new Error('Failed to load lesson'));
 
       render(
         <LessonEditor
@@ -312,7 +317,7 @@ describe('LessonEditor', () => {
 
     it('handles save error', async () => {
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-      vi.mocked(updateLesson).mockRejectedValue(new Error('Failed to save lesson'));
+      mockedFirestoreService.updateLesson.mockRejectedValue(new Error('Failed to save lesson'));
 
       const user = userEvent.setup();
       render(

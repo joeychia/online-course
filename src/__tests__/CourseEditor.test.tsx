@@ -2,17 +2,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CourseEditor } from '../components/admin/CourseEditor';
-import { getCourse, updateCourse, createUnit, getUnit } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import type { Course } from '../types';
 
 // Mock services
-vi.mock('../services/dataService', () => ({
-  getCourse: vi.fn(),
-  updateCourse: vi.fn(),
-  createUnit: vi.fn(),
-  getUnit: vi.fn(),
-  updateUnit: vi.fn()
+vi.mock('../services/firestoreService', () => ({
+  firestoreService: {
+    getCourseById: vi.fn(),
+    updateCourse: vi.fn(),
+    createUnit: vi.fn(),
+    getUnitById: vi.fn(),
+    updateUnit: vi.fn()
+  }
 }));
+
+// Get the mocked firestoreService
+const mockedFirestoreService = firestoreService as any;
 
 vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
@@ -39,10 +44,10 @@ const mockCourse: Course = {
 describe('CourseEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getCourse).mockResolvedValue(mockCourse);
-    vi.mocked(updateCourse).mockResolvedValue();
-    vi.mocked(createUnit).mockResolvedValue();
-    vi.mocked(getUnit).mockResolvedValue({
+    mockedFirestoreService.getCourseById.mockResolvedValue(mockCourse);
+    mockedFirestoreService.updateCourse.mockResolvedValue();
+    mockedFirestoreService.createUnit.mockResolvedValue();
+    mockedFirestoreService.getUnitById.mockResolvedValue({
       id: 'unit_1',
       name: 'Unit 1',
       courseId: 'course_1',
@@ -55,7 +60,7 @@ describe('CourseEditor', () => {
   it('loads and displays course data on mount', async () => {
     render(<CourseEditor courseId="course_1" />);
 
-    expect(getCourse).toHaveBeenCalledWith('course_1');
+    expect(mockedFirestoreService.getCourseById).toHaveBeenCalledWith('course_1');
     await waitFor(() => {
       expect(screen.getByText('Test Course')).toBeInTheDocument();
       expect(screen.getByText('Unit 1')).toBeInTheDocument();
@@ -64,7 +69,7 @@ describe('CourseEditor', () => {
   });
 
   it('displays loading state before course data arrives', () => {
-    vi.mocked(getCourse).mockImplementation(() => new Promise(() => {}));
+    mockedFirestoreService.getCourseById.mockImplementation(() => new Promise(() => {}));
     render(<CourseEditor courseId="course_1" />);
 
     expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -74,7 +79,7 @@ describe('CourseEditor', () => {
   it('handles error when loading course fails', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     const error = new Error('Failed to load course');
-    vi.mocked(getCourse).mockRejectedValue(error);
+    mockedFirestoreService.getCourseById.mockRejectedValue(error);
     
     render(<CourseEditor courseId="course_1" />);
 
@@ -105,8 +110,8 @@ describe('CourseEditor', () => {
       const submitButton = screen.getByText('Add');
       fireEvent.click(submitButton);
 
-      expect(createUnit).not.toHaveBeenCalled();
-      expect(updateCourse).not.toHaveBeenCalled();
+      expect(mockedFirestoreService.createUnit).not.toHaveBeenCalled();
+      expect(mockedFirestoreService.updateCourse).not.toHaveBeenCalled();
     });
 
     it('successfully adds a new unit', async () => {
@@ -126,7 +131,7 @@ describe('CourseEditor', () => {
       await user.click(submitButton);
 
       // Verify createUnit was called first
-      expect(createUnit).toHaveBeenCalledWith(
+      expect(mockedFirestoreService.createUnit).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           name: 'New Unit',
@@ -138,7 +143,7 @@ describe('CourseEditor', () => {
       );
 
       // Then verify updateCourse was called
-      expect(updateCourse).toHaveBeenCalledWith('course_1', {
+      expect(mockedFirestoreService.updateCourse).toHaveBeenCalledWith('course_1', {
         units: expect.arrayContaining([
           expect.objectContaining({
             name: 'New Unit',
@@ -239,7 +244,7 @@ describe('CourseEditor', () => {
       const cancelButton = await screen.findByText('Cancel');
       await userEvent.click(cancelButton);
 
-      expect(updateCourse).not.toHaveBeenCalled();
+      expect(mockedFirestoreService.updateCourse).not.toHaveBeenCalled();
     });
   });
 

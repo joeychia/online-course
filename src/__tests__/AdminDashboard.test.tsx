@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AdminDashboard } from '../pages/AdminDashboard';
 import { useAuth } from '../hooks/useAuth';
-import { getUser } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { MemoryRouter } from 'react-router-dom';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { UserProfile } from '../types';
@@ -48,7 +48,15 @@ const mockUserProfile: UserProfile = {
 
 // Mock dependencies
 vi.mock('../hooks/useAuth');
-vi.mock('../services/dataService');
+// Mock firestoreService
+vi.mock('../services/firestoreService', () => ({
+  firestoreService: {
+    getUserById: vi.fn()
+  }
+}));
+
+// Get the mocked firestoreService
+const mockedFirestoreService = firestoreService as any;
 vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
   GoogleAuthProvider: vi.fn(() => ({}))
@@ -80,7 +88,7 @@ describe('AdminDashboard', () => {
       signUp: vi.fn(),
       resetPassword: vi.fn()
     });
-    vi.mocked(getUser).mockResolvedValue(null);
+    mockedFirestoreService.getUserById.mockResolvedValue(null);
 
     render(
       <MemoryRouter>
@@ -102,7 +110,7 @@ describe('AdminDashboard', () => {
       signUp: vi.fn(),
       resetPassword: vi.fn()
     });
-    vi.mocked(getUser).mockResolvedValue({
+    mockedFirestoreService.getUserById.mockResolvedValue({
       ...mockUserProfile,
       roles: { student: false, instructor: false, admin: false }
     });
@@ -129,7 +137,7 @@ describe('AdminDashboard', () => {
       signUp: vi.fn(),
       resetPassword: vi.fn()
     });
-    vi.mocked(getUser).mockResolvedValue({
+    mockedFirestoreService.getUserById.mockResolvedValue({
       ...mockUserProfile,
       name: 'Admin User',
       email: 'admin@example.com',
@@ -169,7 +177,7 @@ describe('AdminDashboard', () => {
     await waitFor(() => {
       expect(screen.getByTestId('navigate')).toBeInTheDocument();
     });
-    expect(vi.mocked(getUser)).not.toHaveBeenCalled();
+    expect(mockedFirestoreService.getUserById).not.toHaveBeenCalled();
   });
 
   it('handles error when fetching user profile', async () => {
@@ -183,7 +191,7 @@ describe('AdminDashboard', () => {
       signUp: vi.fn(),
       resetPassword: vi.fn()
     });
-    vi.mocked(getUser).mockRejectedValue(new Error('Failed to fetch user'));
+    mockedFirestoreService.getUserById.mockRejectedValue(new Error('Failed to fetch user'));
 
     render(
       <MemoryRouter>

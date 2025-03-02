@@ -2,7 +2,7 @@ import { render, cleanup, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CourseList from '../pages/CourseList';
-import { getAllCourses } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import type { Course, UserProfile } from '../types';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { AuthContextType } from '../contexts/AuthContext';
@@ -10,10 +10,15 @@ import { LanguageProvider } from '../contexts/LanguageContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { FontSizeProvider } from '../contexts/FontSizeContext';
 
-// Mock the dataService
-vi.mock('../services/dataService', () => ({
-  getAllCourses: vi.fn()
+// Mock the firestoreService
+vi.mock('../services/firestoreService', () => ({
+  firestoreService: {
+    getAllCourses: vi.fn()
+  }
 }));
+
+// Get the mocked firestoreService
+const mockedFirestoreService = firestoreService as any;
 
 // Create a mock function for useAuth
 const mockUseAuth = vi.fn() as unknown as ReturnType<typeof vi.fn> & { mockReturnValue: (value: AuthContextType) => void };
@@ -162,7 +167,7 @@ describe('CourseList', () => {
   };
 
   it('shows loading state initially', () => {
-    vi.mocked(getAllCourses).mockImplementation(() => new Promise(() => {}));
+    mockedFirestoreService.getAllCourses.mockImplementation(() => new Promise(() => {}));
     render(
       <ThemeProvider>
         <FontSizeProvider>
@@ -178,7 +183,7 @@ describe('CourseList', () => {
   });
 
   it('displays courses when loaded successfully', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
     expect(screen.getByText('Test Course 1')).toBeInTheDocument();
@@ -187,7 +192,7 @@ describe('CourseList', () => {
   });
 
   it('shows error message when loading fails', async () => {
-    vi.mocked(getAllCourses).mockRejectedValue(new Error('Failed to load'));
+    mockedFirestoreService.getAllCourses.mockRejectedValue(new Error('Failed to load'));
     render(
       <ThemeProvider>
         <FontSizeProvider>
@@ -204,7 +209,7 @@ describe('CourseList', () => {
   });
 
   it('shows sign in alert for unauthenticated users', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
     expect(screen.getByText('登入以訪問完整課程內容並追蹤您的學習進度。')).toBeInTheDocument();
@@ -212,7 +217,7 @@ describe('CourseList', () => {
   });
 
   it('shows lock icon on courses for unauthenticated users', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
     const lockChips = screen.getAllByRole('button', { name: '課程介紹' });
@@ -220,7 +225,7 @@ describe('CourseList', () => {
   });
 
   it('navigates to login when sign in button is clicked', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
     const signInButton = screen.getByRole('button', { name: '登入' });
@@ -229,7 +234,7 @@ describe('CourseList', () => {
   });
 
   it('shows "No courses available" when courses array is empty', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue([]);
+    mockedFirestoreService.getAllCourses.mockResolvedValue([]);
     render(
       <ThemeProvider>
         <FontSizeProvider>
@@ -246,7 +251,7 @@ describe('CourseList', () => {
   });
 
   it('shows course description button for each course', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
     const descriptionButtons = screen.getAllByRole('button', { name: '課程介紹' });
@@ -254,7 +259,7 @@ describe('CourseList', () => {
   });
 
   it('opens description dialog when description button is clicked', async () => {
-    vi.mocked(getAllCourses).mockResolvedValue(mockCourses);
+    mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
     const descriptionButton = screen.getAllByRole('button', { name: '課程介紹' })[0];

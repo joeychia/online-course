@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Course } from '../../../../types';
-import { createLesson, updateUnit, updateCourse, getUnit } from '../../../../services/dataService';
+import { firestoreService } from '../../../../services/firestoreService';
 import type { UnitLesson } from '../../../../types';
 
 interface UseLessonOperationsProps {
@@ -21,14 +21,14 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
     try {
       const newLessonId = `lesson_${Date.now()}`;
       // Get full unit data
-      const unit = await getUnit(unitId);
+      const unit = await firestoreService.getUnitById(unitId);
       if (!unit) {
         throw new Error('Unit not found');
       }
 
       const newOrder = unit.lessons.length;
 
-      await createLesson(newLessonId, {
+      await firestoreService.createLesson(newLessonId, {
         id: newLessonId,
         name: name.trim(),
         content: '',
@@ -45,7 +45,7 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
       };
       const updatedLessons = [...(unit.lessons || []), newLesson];
       // Update unit with new lesson
-      await updateUnit(unitId, { lessons: updatedLessons });
+      await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
       
       // Update course unit's lessonCount
       const updatedUnits = course.units.map(u => 
@@ -53,7 +53,7 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
           ? { ...u, lessonCount: updatedLessons.length }
           : u
       );
-      await updateCourse(course.id, { units: updatedUnits });
+      await firestoreService.updateCourse(course.id, { units: updatedUnits });
       
       await reloadCourse();
       return true;
@@ -73,7 +73,7 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
 
     try {
       // Get full unit data
-      const unit = await getUnit(unitId);
+      const unit = await firestoreService.getUnitById(unitId);
       if (!unit) {
         throw new Error('Unit not found');
       }
@@ -83,7 +83,7 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
         .map((lesson: UnitLesson, index: number) => ({ ...lesson, order: index }));
 
       // Update unit with filtered lessons
-      await updateUnit(unitId, { lessons: updatedLessons });
+      await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
       
       // Update course unit's lessonCount
       const updatedUnits = course.units.map(u => 
@@ -91,7 +91,7 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
           ? { ...u, lessonCount: updatedLessons.length }
           : u
       );
-      await updateCourse(course.id, { units: updatedUnits });
+      await firestoreService.updateCourse(course.id, { units: updatedUnits });
       
       await reloadCourse();
       return true;
@@ -115,7 +115,7 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
 
     try {
       // Get full unit data
-      const unit = await getUnit(unitId);
+      const unit = await firestoreService.getUnitById(unitId);
       if (!unit) {
         throw new Error('Unit not found');
       }
@@ -131,7 +131,7 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
       }));
 
       // Update unit with reordered lessons
-      await updateUnit(unitId, { lessons: updatedLessons });
+      await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
       
       // No need to update lessonCount since we're just reordering
       

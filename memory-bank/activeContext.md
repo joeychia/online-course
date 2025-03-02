@@ -40,6 +40,20 @@
    - Group-based course access
 
 ## Recent Changes
+
+- Service Layer Consolidation:
+  - Removed dataService.ts and associated data access files
+  - Merged all functionality into firestoreService.ts
+  - Benefits:
+    * Simplified service layer architecture
+    * Single source of truth for data operations
+    * Clearer data flow
+    * Reduced code complexity
+  - Testing:
+    * Updated all tests to use firestoreService
+    * Verified all functionality works correctly
+    * Confirmed no regressions
+
 - Unit Name Update Fix:
   - Fixed issue with undefined field error when updating unit names
   - Simplified unit update operation to only modify necessary fields
@@ -55,7 +69,7 @@
 
 - Lesson Order Fix:
   - Fixed issue with undefined order field in unit lessons
-  - Enhanced UnitDataAccess to handle missing order values:
+  - Enhanced unit operations to handle missing order values:
     * Uses existing order if defined
     * Falls back to array index if order is undefined
     * Ensures consistent lesson ordering
@@ -82,25 +96,6 @@
     * Confirmed data consistency
     * Tested navigation behavior
 
-- Unit Cache Layer Removal:
-  - Removed unit caching from UnitDataAccess:
-    * Eliminated unitCache Map and CACHE_TTL
-    * Simplified data access to direct Firestore queries
-    * Removed cache management methods
-  - Benefits:
-    * Reduced complexity in data layer
-    * Eliminated potential stale data issues
-    * Simplified state management
-    * More predictable data flow
-  - Code improvements:
-    * Streamlined UnitDataAccess implementation
-    * Removed cache-related complexity
-    * Direct database operations
-  - Testing:
-    * Updated tests to remove cache expectations
-    * Verified direct data access behavior
-    * Confirmed data consistency
-
 - Lesson Name Update Fix:
   - Fixed issue with lesson names not updating immediately in unit list
   - Implemented dual-document update pattern:
@@ -122,7 +117,7 @@
 - Unit Creation Fix:
   - Fixed issue with undefined lessonCount in unit creation
   - Added proper handling of order property for historical unit data
-  - Enhanced data consistency in CourseDataAccess:
+  - Enhanced data consistency:
     * Added fallback for missing order property
     * Improved handling of historical unit data
     * Added automatic updates for missing properties
@@ -139,7 +134,7 @@
     - Maintaining count consistency during lesson operations
   - Code cleanup:
     - Removed unused clearUnitCache from CourseEditor
-    - Removed unused mapToUnit method from UnitDataAccess
+    - Removed unused mapToUnit method
     - Optimized imports
 
 - Lesson Deletion Improvements:
@@ -148,41 +143,14 @@
   - Enhanced user feedback during deletion process
   - Improved state management for lesson operations
 
-- Service Layer Reorganization:
-  - Created new `services/dataAccess` directory
-  - Moved database operations to dedicated modules:
-    - CourseDataAccess: Course-specific operations
-    - UnitDataAccess: Unit and lesson operations with caching
-  - Updated firestoreService to delegate operations
-  - Enhanced systemPatterns.md with new architecture
-  - Improved code organization and maintainability
-
-- Previous Documentation Updates:
-  - Updated requirements.md to match TypeScript types
-  - Enhanced systemPatterns.md with data model features
-  - Documented ordering system for content
-  - Added note-taking system context
-  - Clarified settings and user tracking
-
-- Performance Improvements:
-  - Identified and addressed bottlenecks:
-    - Separate requests for unit details
-    - Loading all data at once
-    - No pagination or lazy loading
-  - Implemented optimizations:
-    - Moved to layered architecture
-    - Added unit data caching
-    - Improved data access patterns
-
 ## Active Decisions
 
 ### Technical Decisions
 1. Architecture Improvements
-   - Three-layer architecture:
-     - Data Access Layer: Direct database operations
-     - Service Layer: Business logic and orchestration
-     - API Layer: Clean interface for components
-   - Clear separation of concerns
+   - Simplified service layer:
+     - Single firestoreService for all database operations
+     - Direct database operations
+     - Clear interface for components
    - Improved testability and maintainability
 
 2. Performance Optimization
@@ -194,10 +162,9 @@
 3. Data Structure
    - Minimal course data with unit references
    - Complete unit data in separate documents
-   - Cached unit data with TTL
-   - Clear data flow through layers
+   - Clear data flow through service layer
 
-3. Testing Strategy
+4. Testing Strategy
    - Add performance benchmarks
    - Test with large datasets
    - Measure loading improvements
@@ -224,14 +191,14 @@
 ### Immediate Priorities
 1. Testing Updates
    - Update test suite for new architecture
-   - Add tests for data access layer
+   - Add tests for firestoreService
    - Verify direct database access
    - Test error handling
 
 2. Documentation
    - Update API documentation
    - Add architecture diagrams
-   - Document caching strategy
+   - Document data access patterns
    - Update development guides
 
 3. Testing & Validation
@@ -254,12 +221,6 @@
 ## Current Challenges
 
 ### Technical Challenges
-- Lesson Management:
-  - ✓ Fixed lesson deletion confirmation
-  - ✓ Fixed UI update after deletion
-  - ✓ Improved state management
-  - ✓ Enhanced user feedback
-
 1. Performance Optimization
    - Efficient lazy loading
    - Smart caching strategy
@@ -276,14 +237,6 @@
    - Performance benchmarking
    - Large dataset testing
    - Migration validation
-
-4. Testing Issues
-   - Unit deletion test failing in CourseEditor
-   - Dialog confirmation not triggering updateCourse
-   - Test improvements needed:
-     * Added proper test IDs to UnitItem
-     * Updated test to use userEvent
-     * Still investigating dialog interaction
 
 ### UX Challenges
 1. Loading Experience

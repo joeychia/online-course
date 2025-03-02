@@ -3,7 +3,7 @@ import { Box, Typography, Container } from '@mui/material';
 import { CourseManagement } from '../components/admin/CourseManagement';
 import { useAuth } from '../hooks/useAuth';
 import { Navigate, useParams } from 'react-router-dom';
-import { getUser } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { useState, useEffect } from 'react';
 
 export const AdminDashboard: React.FC = () => {
@@ -16,7 +16,7 @@ export const AdminDashboard: React.FC = () => {
     const checkAdminStatus = async () => {
       try {
         if (currentUser?.uid) {
-          const userProfile = await getUser(currentUser.uid);
+          const userProfile = await firestoreService.getUserById(currentUser.uid);
           setIsAdmin(!!userProfile?.roles?.admin);
         }
       } catch (error) {

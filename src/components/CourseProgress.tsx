@@ -11,7 +11,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
 import { TooltipDataAttrs } from 'react-calendar-heatmap';
 import { useFontSize } from '../contexts/FontSizeContext';
-import { getLesson, getLessonsIdNameForUnit } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { useEffect, useState } from 'react';
 
 interface CourseProgressProps {
@@ -61,7 +61,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
       const [completedLessonId] = latestLesson;
       
       try {
-        const completedLesson = await getLesson(completedLessonId);
+        const completedLesson = await firestoreService.getLessonById(completedLessonId);
         if (!completedLesson) {
           setLatestLessonData(null);
           return;
@@ -98,7 +98,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
 
       try {
         // Get all lessons in the current unit
-        const currentUnitLessons = await getLessonsIdNameForUnit(latestLessonData.unitId);
+        const currentUnitLessons = await firestoreService.getLessonsIdNameForUnit(latestLessonData.unitId);
         const lessonIndex = currentUnitLessons.findIndex(lesson => lesson.id === latestLessonData.id);
         const currentUnitIndex = units.findIndex(u => u.id === latestLessonData.unitId);
 
@@ -117,7 +117,7 @@ export default function CourseProgress({ progress, courseId, units }: CourseProg
         // If we're at the end of this unit, look for the first lesson of the next unit
         if (currentUnitIndex !== -1 && currentUnitIndex < units.length - 1) {
           const nextUnit = units[currentUnitIndex + 1];
-          const nextUnitLessons = await getLessonsIdNameForUnit(nextUnit.id);
+          const nextUnitLessons = await firestoreService.getLessonsIdNameForUnit(nextUnit.id);
           if (nextUnitLessons.length > 0) {
             setNextLesson({
               id: nextUnitLessons[0].id,

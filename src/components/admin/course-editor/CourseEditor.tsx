@@ -13,7 +13,7 @@ import { useCourseData } from './hooks/useCourseData';
 import { useUnitOperations } from './hooks/useUnitOperations';
 import { useLessonOperations } from './hooks/useLessonOperations';
 import { useCourseOperations } from './hooks/useCourseOperations';
-import { updateCourse, deleteCourse } from '../../../services/dataService';
+import { firestoreService } from '../../../services/firestoreService';
 import RichTextEditor from '../../RichTextEditor';
 import { Course } from '../../../types';
 
@@ -83,7 +83,7 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
     if (!course || !editingCourseName.trim()) return;
     
     try {
-      await updateCourse(course.id, {
+      await firestoreService.updateCourse(course.id, {
         name: editingCourseName,
         description: editingCourseDescription,
       });
@@ -98,7 +98,7 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
   const handleDeleteCourse = async (courseId: string) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       try {
-        await deleteCourse(courseId);
+        await firestoreService.deleteCourse(courseId);
         window.location.href = '/admin'; // Redirect to admin dashboard after deletion
       } catch (error) {
         console.error('Error deleting course:', error);
