@@ -77,7 +77,8 @@ describe('AdminDashboard', () => {
       signIn: vi.fn(),
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
-      signUp: vi.fn()
+      signUp: vi.fn(),
+      resetPassword: vi.fn()
     });
     vi.mocked(getUser).mockResolvedValue(null);
 
@@ -98,7 +99,8 @@ describe('AdminDashboard', () => {
       signIn: vi.fn(),
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
-      signUp: vi.fn()
+      signUp: vi.fn(),
+      resetPassword: vi.fn()
     });
     vi.mocked(getUser).mockResolvedValue({
       ...mockUserProfile,
@@ -124,7 +126,8 @@ describe('AdminDashboard', () => {
       signIn: vi.fn(),
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
-      signUp: vi.fn()
+      signUp: vi.fn(),
+      resetPassword: vi.fn()
     });
     vi.mocked(getUser).mockResolvedValue({
       ...mockUserProfile,
@@ -153,7 +156,8 @@ describe('AdminDashboard', () => {
       signIn: vi.fn(),
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
-      signUp: vi.fn()
+      signUp: vi.fn(),
+      resetPassword: vi.fn()
     });
 
     render(
@@ -176,7 +180,8 @@ describe('AdminDashboard', () => {
       signIn: vi.fn(),
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
-      signUp: vi.fn()
+      signUp: vi.fn(),
+      resetPassword: vi.fn()
     });
     vi.mocked(getUser).mockRejectedValue(new Error('Failed to fetch user'));
 

@@ -10,7 +10,8 @@ import {
     Divider,
     Stack,
     Link,
-    Alert
+    Snackbar,
+    Alert,
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { useAuth } from '../hooks/useAuth';
@@ -23,24 +24,40 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success' as 'success' | 'error'
+    });
     const navigate = useNavigate();
-    const { signIn, signUp, signInWithGoogle } = useAuth();
+    const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
     const { t } = useTranslation();
+
+    const handleCloseSnackbar = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
+
+    const showMessage = (message: string, severity: 'success' | 'error' = 'error') => {
+        setSnackbar({
+            open: true,
+            message,
+            severity
+        });
+    };
 
     const validateForm = () => {
         if (!email || !password) {
-            setError(t('fillRequiredFields'));
+            showMessage(t('fillRequiredFields'));
             return false;
         }
         if (isSignUp) {
             if (password !== confirmPassword) {
-                setError(t('passwordsNotMatch'));
+                showMessage(t('passwordsNotMatch'));
                 return false;
             }
             if (password.length < 6) {
-                setError(t('passwordTooShort'));
+                showMessage(t('passwordTooShort'));
                 return false;
             }
         }
@@ -52,11 +69,9 @@ export default function Login() {
         if (!validateForm()) return;
 
         try {
-            setError('');
             setLoading(true);
             if (isSignUp) {
                 const userCredential = await signUp(email, password);
-                // Create user profile in Firestore
                 await firestoreService.createUser({
                     id: userCredential.uid,
                     email: userCredential.email || email,
@@ -78,7 +93,8 @@ export default function Login() {
             navigate('/');
         } catch (err) {
             console.error(err);
-            setError(isSignUp ? t('failedToCreateAccount') : t('failedToSignIn'));
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            showMessage(isSignUp ? `${t('failedToCreateAccount')} ${errorMessage}` : `${t('failedToSignIn')} ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -86,10 +102,8 @@ export default function Login() {
 
     const handleGoogleSignIn = async () => {
         try {
-            setError('');
             setLoading(true);
             const userCredential = await signInWithGoogle();
-            // Check if user profile exists, create if it doesn't
             const userProfile = await firestoreService.getUserById(userCredential.uid);
             if (!userProfile) {
                 await firestoreService.createUser({
@@ -110,8 +124,9 @@ export default function Login() {
             }
             navigate('/');
         } catch (err) {
-            setError(t('failedToSignIn'));
             console.error(err);
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            showMessage(`${t('failedToSignIn')} ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -119,7 +134,7 @@ export default function Login() {
 
     const toggleMode = () => {
         setIsSignUp(!isSignUp);
-        setError('');
+        setSnackbar(prev => ({ ...prev, open: false }));
     };
 
     return (
@@ -129,15 +144,6 @@ export default function Login() {
                     <Typography variant="h4" component="h1" align="center" gutterBottom>
                         {isSignUp ? t('createAccount') : t('signIn')}
                     </Typography>
-                    
-                    {error && (
-                        <Alert 
-                            severity="error"
-                            sx={{ mt: 2, mb: 2 }}
-                        >
-                            {error}
-                        </Alert>
-                    )}
 
                     <form onSubmit={handleEmailSignIn}>
                         <Stack spacing={2}>
@@ -145,7 +151,9 @@ export default function Login() {
                                 <TextField
                                     label={t('name')}
                                     fullWidth
+                                    variant="filled"
                                     value={name}
+                                    required
                                     onChange={(e) => setName(e.target.value)}
                                 />
                             )}
@@ -153,6 +161,7 @@ export default function Login() {
                                 label={t('email')}
                                 type="email"
                                 fullWidth
+                                variant="filled"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -161,15 +170,21 @@ export default function Login() {
                                 label={t('password')}
                                 type="password"
                                 fullWidth
+                                variant="filled"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
+                            {!isSignUp && (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                </Box>
+                            )}
                             {isSignUp && (
                                 <TextField
                                     label={t('confirmPassword')}
                                     type="password"
                                     fullWidth
+                                    variant="filled"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
@@ -187,15 +202,45 @@ export default function Login() {
                         </Stack>
                     </form>
 
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        <Link
-                            component="button"
-                            variant="body2"
-                            onClick={toggleMode}
-                            sx={{ cursor: 'pointer' }}
-                        >
-                            {isSignUp ? t('haveAccount') : t('noAccount')}
-                        </Link>
+                    <Box sx={{ mt: 2, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 2, flexDirection: 'column' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+                            <Link
+                                component="button"
+                                variant="body2"
+                                onClick={toggleMode}
+                                sx={{ cursor: 'pointer' }}
+                            >
+                                {isSignUp ? t('haveAccount') : t('noAccount')}
+                            </Link>
+                            {!isSignUp && (
+                                <Link
+                                    component="button"
+                                    variant="body2"
+                                    onClick={async (e) => {
+                                        e.preventDefault();
+                                        if (!email) {
+                                            showMessage(t('emailRequiredForPasswordReset'));
+                                            return;
+                                        }
+                                        try {
+                                            setLoading(true);
+                                            await resetPassword(email);
+                                            showMessage(t('resetPasswordSuccess'), 'success');
+                                        } catch (err) {
+                                            console.error(err);
+                                            const errorMessage = err instanceof Error ? err.message : String(err);
+                                            showMessage(`${t('failedToResetPassword')} ${errorMessage}`);
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }}
+                                    sx={{ cursor: 'pointer' }}
+                                    disabled={loading}
+                                >
+                                    {t('forgotPassword')}
+                                </Link>
+                            )}
+                        </Box>
                     </Box>
 
                     <Divider sx={{ my: 3 }}>{t('or')}</Divider>
@@ -211,6 +256,21 @@ export default function Login() {
                     </Button>
                 </Paper>
             </Box>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 }

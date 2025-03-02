@@ -295,6 +295,23 @@ export const translations: Translations = {
     'zh-TW': '使用Google帳號繼續',
     'zh-CN': '使用Google账号继续'
   },
+  forgotPassword: {
+    'zh-TW': '忘記密碼？',
+    'zh-CN': '忘记密码？'
+  },
+  resetPasswordSuccess: {
+    'zh-TW': '重設密碼的連結已發送到您的電子郵件。如未收到，請檢查垃圾郵件資料夾。',
+    'zh-CN': '重设密码的链接已发送到您的电子邮件。如未收到，请检查垃圾邮件文件夹。'
+  },
+  failedToResetPassword: {
+    'zh-TW': '重設密碼失敗。請稍後再試。',
+    'zh-CN': '重设密码失败。请稍后再试。'
+  },
+  emailRequiredForPasswordReset: {
+    'zh-TW': '請輸入電子郵件以重設密碼。',
+    'zh-CN': '请输入电子邮件以重设密码。'
+  },
+
 
   // Quiz View
   correct: {

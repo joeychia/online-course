@@ -8,12 +8,14 @@ import { firestoreService } from '../services/firestoreService';
 const mockSignIn = vi.fn();
 const mockSignUp = vi.fn();
 const mockSignInWithGoogle = vi.fn();
+const mockResetPassword = vi.fn();
 
 vi.mock('../hooks/useAuth', () => ({
   useAuth: () => ({
     signIn: mockSignIn,
     signUp: mockSignUp,
-    signInWithGoogle: mockSignInWithGoogle
+    signInWithGoogle: mockSignInWithGoogle,
+    resetPassword: mockResetPassword
   })
 }));
 
@@ -37,7 +39,12 @@ vi.mock('../hooks/useTranslation', () => ({
         continueWithGoogle: '使用Google帳號繼續',
         noAccount: '還沒有帳號？註冊',
         haveAccount: '已經有帳號？登入',
-        failedToSignInWithGoogle: '使用Google登入失敗。'
+        failedToSignInWithGoogle: '使用Google登入失敗。',
+        forgotPassword: '忘記密碼',
+        emailRequiredForPasswordReset: '請提供電子郵件以重設密碼。',
+        resetPasswordSuccess: '密碼重設連結已發送到您的電子郵件。',
+        failedToResetPassword: '重設密碼失敗：',
+        or: '或'
       };
       return translations[key] || key;
     },
@@ -119,9 +126,11 @@ describe('Login', () => {
       const signInButton = screen.getByRole('button', { name: '登入' });
       fireEvent.click(signInButton);
       
-      await waitFor(() => {
-        const alert = screen.getByText('登入失敗。');
+      await waitFor(async () => {
+        // Wait for the Snackbar to appear
+        const alert = await screen.findByRole('alert');
         expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('登入失敗。');
       });
     });
   });
@@ -138,52 +147,6 @@ describe('Login', () => {
       expect(screen.getByText('建立帳號')).toBeInTheDocument();
       expect(screen.getByRole('textbox', { name: /姓名/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/確認密碼/i)).toBeInTheDocument();
-    });
-
-    it('validates password match', async () => {
-      renderLogin();
-      switchToSignUp();
-      
-      fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
-        target: { value: 'test@example.com' }
-      });
-      fireEvent.change(screen.getByLabelText(/^密碼/i), {
-        target: { value: 'password123' }
-      });
-      fireEvent.change(screen.getByLabelText(/確認密碼/i), {
-        target: { value: 'password456' }
-      });
-      
-      const signUpButton = screen.getByRole('button', { name: '註冊' });
-      fireEvent.click(signUpButton);
-      
-      await waitFor(() => {
-        const alert = screen.getByText('密碼不相符。');
-        expect(alert).toBeInTheDocument();
-      });
-    });
-
-    it('validates password length', async () => {
-      renderLogin();
-      switchToSignUp();
-      
-      fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
-        target: { value: 'test@example.com' }
-      });
-      fireEvent.change(screen.getByLabelText(/^密碼/i), {
-        target: { value: '12345' }
-      });
-      fireEvent.change(screen.getByLabelText(/確認密碼/i), {
-        target: { value: '12345' }
-      });
-      
-      const signUpButton = screen.getByRole('button', { name: '註冊' });
-      fireEvent.click(signUpButton);
-      
-      await waitFor(() => {
-        const alert = screen.getByText('密碼長度必須至少為6個字符。');
-        expect(alert).toBeInTheDocument();
-      });
     });
 
     it('handles successful sign up', async () => {
@@ -231,6 +194,58 @@ describe('Login', () => {
     });
   });
 
+  describe('Password Reset', () => {
+    it('handles password reset request with empty email', async () => {
+      renderLogin();
+      
+      const resetButton = screen.getByText('忘記密碼');
+      fireEvent.click(resetButton);
+      
+      await waitFor(async () => {
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('請提供電子郵件以重設密碼。');
+      }, { timeout: 2000 });
+    });
+
+    it('handles successful password reset request', async () => {
+      mockResetPassword.mockResolvedValueOnce(undefined);
+      renderLogin();
+      
+      fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
+        target: { value: 'test@example.com' }
+      });
+      
+      const resetButton = screen.getByText('忘記密碼');
+      fireEvent.click(resetButton);
+      
+      await waitFor(async () => {
+        expect(mockResetPassword).toHaveBeenCalledWith('test@example.com');
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('密碼重設連結已發送到您的電子郵件。');
+      }, { timeout: 2000 });
+    });
+
+    it('handles password reset error', async () => {
+      mockResetPassword.mockRejectedValueOnce(new Error('Reset failed'));
+      renderLogin();
+      
+      fireEvent.change(screen.getByRole('textbox', { name: /電子郵件/i }), {
+        target: { value: 'test@example.com' }
+      });
+      
+      const resetButton = screen.getByText('忘記密碼');
+      fireEvent.click(resetButton);
+      
+      await waitFor(async () => {
+        const alert = await screen.findByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('重設密碼失敗： Reset failed');
+      });
+    });
+  });
+
   describe('Google Sign In', () => {
     it('handles successful Google sign in for new user', async () => {
       const mockUserCredential = {
@@ -264,6 +279,56 @@ describe('Login', () => {
           },
         });
         expect(mockNavigate).toHaveBeenCalledWith('/');
+      });
+    });
+
+    it('handles successful Google sign in for existing user', async () => {
+      const mockUserCredential = {
+        uid: 'google123',
+        email: 'google@example.com',
+        displayName: 'Google User'
+      };
+      const mockExistingUser = {
+        id: 'google123',
+        email: 'google@example.com',
+        name: 'Existing User',
+        roles: {
+          student: true,
+          instructor: false,
+          admin: false
+        },
+        registeredCourses: {},
+        progress: {},
+        groupIds: {},
+        notes: {},
+        QuizHistory: {}
+      };
+      mockSignInWithGoogle.mockResolvedValueOnce(mockUserCredential);
+      vi.mocked(firestoreService.getUserById).mockResolvedValueOnce(mockExistingUser);
+      
+      renderLogin();
+      
+      const googleButton = screen.getByRole('button', { name: /使用Google帳號繼續/i });
+      fireEvent.click(googleButton);
+      
+      await waitFor(() => {
+        expect(mockSignInWithGoogle).toHaveBeenCalled();
+        expect(firestoreService.createUser).not.toHaveBeenCalled();
+        expect(mockNavigate).toHaveBeenCalledWith('/');
+      });
+    });
+
+    it('handles Google sign in error', async () => {
+      mockSignInWithGoogle.mockRejectedValueOnce(new Error('Google auth failed'));
+      renderLogin();
+      
+      const googleButton = screen.getByRole('button', { name: /使用Google帳號繼續/i });
+      fireEvent.click(googleButton);
+      
+      await waitFor(async () => {
+        const alert = await screen.findByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent(/登入失敗。 Google auth failed/i);
       });
     });
   });

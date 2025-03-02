@@ -6,7 +6,8 @@ import {
     onAuthStateChanged,
     type User as FirebaseUser,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    sendPasswordResetEmail
 } from 'firebase/auth';
 import { app } from './firebaseConfig';
 
@@ -40,6 +41,10 @@ class AuthService {
     getCurrentUser(): FirebaseUser | null {
         return auth.currentUser;
     }
+
+    async resetPassword(email: string): Promise<void> {
+        await sendPasswordResetEmail(auth, email);
+    }
 }
 
-export const authService = new AuthService(); 
+export const authService = new AuthService();
