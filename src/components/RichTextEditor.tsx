@@ -75,6 +75,7 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
         toolbarItems={[
           ['heading', 'bold'],
           ['ul', 'ol', 'task'],
+          ['link'],
           ['scrollSync'],
         ]}
         theme={isDarkMode ? 'dark' : 'light'}
