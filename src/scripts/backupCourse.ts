@@ -15,7 +15,7 @@ interface BackupData {
 }
 
 // Read service account JSON
-const serviceAccountPath = join(process.cwd(), 'service-account.json');
+const serviceAccountPath = join(process.cwd(), 'service-account-test.json');
 if (!existsSync(serviceAccountPath)) {
     console.error('Service account file not found!');
     console.log('\nTo use this script, you need to:');
@@ -58,23 +58,25 @@ export async function backupCourse(courseId: string) {
         backupData.courses[courseId] = courseDoc.data() as Course;
         console.log(`Retrieved course: ${backupData.courses[courseId].name}`);
 
-        // Get all units for the course
-        const unitsSnapshot = await db.collection('units')
-            .where('courseId', '==', courseId)
-            .get();
-
-        // Get all lessons for each unit
-        for (const unitDoc of unitsSnapshot.docs) {
-            const unitId = unitDoc.id;
+        // Get units directly using unit IDs from course data
+        for (const unitInfo of backupData.courses[courseId].units) {
+            const unitId = unitInfo.id;
+            const unitDoc = await db.doc(`units/${unitId}`).get();
+            if (!unitDoc.exists) {
+                console.warn(`Unit ${unitId} not found, skipping...`);
+                continue;
+            }
             backupData.units[unitId] = unitDoc.data() as Unit;
             console.log(`Retrieved unit: ${backupData.units[unitId].name}`);
 
-            const lessonsSnapshot = await db.collection('lessons')
-                .where('unitId', '==', unitId)
-                .get();
-
-            for (const lessonDoc of lessonsSnapshot.docs) {
-                const lessonId = lessonDoc.id;
+            // Get lessons directly using lesson IDs from unit data
+            for (const lessonInfo of backupData.units[unitId].lessons) {
+                const lessonId = lessonInfo.id;
+                const lessonDoc = await db.doc(`lessons/${lessonId}`).get();
+                if (!lessonDoc.exists) {
+                    console.warn(`Lesson ${lessonId} not found, skipping...`);
+                    continue;
+                }
                 const lessonData = lessonDoc.data() as Lesson;
                 backupData.lessons[lessonId] = lessonData;
                 console.log(`Retrieved lesson: ${lessonData.name}`);
@@ -138,12 +140,14 @@ async function backupAllCourses() {
         const courseDoc = await db.doc(`courses/${course.id}`).get();
         consolidatedData.courses[course.id] = courseDoc.data() as Course;
 
-        const unitsSnapshot = await db.collection('units')
-            .where('courseId', '==', course.id)
-            .get();
-
-        for (const unitDoc of unitsSnapshot.docs) {
-            const unitId = unitDoc.id;
+        // Get units directly from course data
+        for (const unitInfo of consolidatedData.courses[course.id].units) {
+            const unitId = unitInfo.id;
+            const unitDoc = await db.doc(`units/${unitId}`).get();
+            if (!unitDoc.exists) {
+                console.warn(`Unit ${unitId} not found, skipping...`);
+                continue;
+            }
             consolidatedData.units[unitId] = unitDoc.data() as Unit;
 
             const lessonsSnapshot = await db.collection('lessons')
