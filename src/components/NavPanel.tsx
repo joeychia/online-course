@@ -89,7 +89,7 @@ export default function NavPanel({
   const [expandedUnits, setExpandedUnits] = useState<{ [key: string]: boolean }>(
     units.reduce((acc, unit) => ({ 
       ...acc, 
-      [unit.id]: unit.id === selectedUnitId
+      [unit.id]: unit.id === selectedUnitId && (!unit.openDate || !isFutureDate(unit.openDate))
     }), {})
   );
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
@@ -153,19 +153,23 @@ export default function NavPanel({
 
   // Expand unit and scroll to next lesson when it's determined
   useEffect(() => {
-    if (nextUnitId && (!units.find(u => u.id === nextUnitId)?.openDate || new Date(units.find(u => u.id === nextUnitId)!.openDate!) <= new Date())) {
-      // Expand the unit containing the next lesson
-      setExpandedUnits(prev => ({ ...prev, [nextUnitId]: true }));
+    if (nextUnitId) {
+      const nextUnit = units.find(u => u.id === nextUnitId);
+      // Only expand if the unit exists and its open date is not in the future
+      if (nextUnit && (!nextUnit.openDate || !isFutureDate(nextUnit.openDate))) {
+        // Expand the unit containing the next lesson
+        setExpandedUnits(prev => ({ ...prev, [nextUnitId]: true }));
 
-      // Scroll the unit into view after a short delay to ensure the expansion is complete
-      setTimeout(() => {
-        const unitElement = document.querySelector(`[data-testid="unit-button-${nextUnitId}"]`);
-        if (unitElement) {
-          unitElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 300);
+        // Scroll the unit into view after a short delay to ensure the expansion is complete
+        setTimeout(() => {
+          const unitElement = document.querySelector(`[data-testid="unit-button-${nextUnitId}"]`);
+          if (unitElement) {
+            unitElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 300);
+      }
     }
-  }, [nextUnitId, nextLessonId]);
+  }, [nextUnitId, nextLessonId, units]);
 
   // Load lessons for selected unit only
   useEffect(() => {
@@ -276,11 +280,15 @@ export default function NavPanel({
                 size="small"
                 variant="outlined"
                 onClick={() => {
+                  const unit = units[index * 30];
                   const unitElement = document.querySelector(
-                    `[data-testid="unit-button-${units[index * 30].id}"]`
+                    `[data-testid="unit-button-${unit.id}"]`
                   );
                   if (unitElement) {
-                    setExpandedUnits(prev => ({ ...prev, [units[index * 30].id]: true }));
+
+                    if (!unit.openDate || !isFutureDate(unit.openDate)) {
+                      setExpandedUnits(prev => ({ ...prev, [unit.id]: true }));
+                    }
                     setTimeout(() => {
                       const unitElement = document.querySelector(`[data-testid="unit-button-${units[index * 30].id}"]`);
                       if (unitElement) {
