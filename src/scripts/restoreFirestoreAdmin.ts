@@ -16,7 +16,7 @@ interface BackupData {
 }
 
 // Check and guide for service account file
-const serviceAccountPath = join(process.cwd(), 'service-account-prod.json');
+const serviceAccountPath = join(process.cwd(), 'service-account-test.json');
 if (!existsSync(serviceAccountPath)) {
     console.error('Service account file not found!');
     console.log('\nTo use this script, you need to:');
@@ -64,32 +64,38 @@ function listBackupFiles(): string[] {
 export async function restoreFromBackup(backupFilePath: string) {
     try {
         console.log('Starting Firestore restoration from backup...');
-        console.log('Using project:', process.env.VITE_FIREBASE_PROJECT_ID);
+        console.log('Using project:', serviceAccount.project_id);
         console.log('Using backup file:', backupFilePath);
 
         const backupData = JSON.parse(
             readFileSync(backupFilePath, 'utf-8')
         ) as BackupData;
 
-        // Add courses
-        for (const [id, course] of Object.entries(backupData.courses)) {
-            await db.doc(`courses/${id}`).set(course);
-            console.log(`Restored course: ${course.name}`);
+        // Add courses (optional)
+        if (backupData.courses) {
+            for (const [id, course] of Object.entries(backupData.courses)) {
+                await db.doc(`courses/${id}`).set(course);
+                console.log(`Restored course: ${course.name}`);
+            }
         }
 
-        // Add units
-        for (const [id, unit] of Object.entries(backupData.units)) {
-            await db.doc(`units/${id}`).set(unit);
-            console.log(`Restored unit: ${unit.name}`);
+        // Add units (optional)
+        if (backupData.units) {
+            for (const [id, unit] of Object.entries(backupData.units)) {
+                await db.doc(`units/${id}`).set(unit);
+                console.log(`Restored unit: ${unit.name}`);
+            }
+        }
+        
+        // Add lessons (optional)
+        if (backupData.lessons) {
+            for (const [id, lesson] of Object.entries(backupData.lessons)) {
+                await db.doc(`lessons/${id}`).set(lesson);
+                console.log(`Restored lesson: ${lesson.name}`);
+            }
         }
 
-        // Add lessons
-        for (const [id, lesson] of Object.entries(backupData.lessons)) {
-            await db.doc(`lessons/${id}`).set(lesson);
-            console.log(`Restored lesson: ${lesson.name}`);
-        }
-
-        // Add quizzes
+        // Add quizzes (optional)
         if (backupData.quizzes) {
             for (const [id, quiz] of Object.entries(backupData.quizzes)) {
                 await db.doc(`quizzes/${id}`).set(quiz);
