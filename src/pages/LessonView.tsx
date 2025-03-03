@@ -506,6 +506,7 @@ const LessonView: React.FC<LessonViewProps> = ({
             value={note}
             onChange={setNote}
             placeholder={t('writeNotesHere')}
+            enableMarkdown={false}
           />
         </Paper>
       ) : (!quiz && 

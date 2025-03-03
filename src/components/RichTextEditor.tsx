@@ -8,9 +8,10 @@ interface RichTextEditorProps {
   value: string;
   onChange: (markdown: string) => void;
   placeholder?: string;
+  enableMarkdown?: boolean;
 }
 
-const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: RichTextEditorProps) => {
+const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...', enableMarkdown = true }: RichTextEditorProps) => {
   const editorRef = useRef<Editor>(null);
   const { isDarkMode } = useTheme();
 
@@ -58,6 +59,9 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
         },
         fontFamily: theme => theme.typography.fontFamily,
       },
+      '& .toastui-editor-main-container .ProseMirror': {
+        color: theme => theme.palette.text.primary,
+      },
       '& .toastui-editor-ww-container': {
         backgroundColor: theme => theme.palette.background.paper,
       },
@@ -70,17 +74,15 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Start writing...' }: R
         previewStyle="vertical"
         height="400px"
         initialEditType="wysiwyg"
-        useCommandShortcut={true}
         onChange={handleChange}
         toolbarItems={[
           ['heading', 'bold'],
           ['ul', 'ol', 'task'],
           ['link'],
-          ['scrollSync'],
         ]}
         theme={isDarkMode ? 'dark' : 'light'}
         autofocus={false}
-        hideModeSwitch={true}
+        hideModeSwitch={!enableMarkdown}
       />
     </Box>
   );
