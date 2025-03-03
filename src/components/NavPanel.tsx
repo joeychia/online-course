@@ -24,6 +24,7 @@ import { Course, CourseUnit } from '../types';
 import { firestoreService } from '../services/firestoreService';
 import { convertChinese } from '../utils/chineseConverter';
 import { useTranslation } from '../hooks/useTranslation';
+import { useAuth } from '../hooks/useAuth';
 
 const StyledListItem = styled(ListItemButton)(({ theme }) => ({
   '&.Mui-selected': {
@@ -96,6 +97,8 @@ export default function NavPanel({
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [nextLessonId, setNextLessonId] = useState<string | null>(null);
   const [nextUnitId, setNextUnitId] = useState<string | null>(null);
+  const { currentUser } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
 
 
 
@@ -156,7 +159,7 @@ export default function NavPanel({
     if (nextUnitId) {
       const nextUnit = units.find(u => u.id === nextUnitId);
       // Only expand if the unit exists and its open date is not in the future
-      if (nextUnit && (!nextUnit.openDate || !isFutureDate(nextUnit.openDate))) {
+      if (nextUnit && (!isAdmin || !nextUnit.openDate || !isFutureDate(nextUnit.openDate))) {
         // Expand the unit containing the next lesson
         setExpandedUnits(prev => ({ ...prev, [nextUnitId]: true }));
 
@@ -198,12 +201,34 @@ export default function NavPanel({
       }
     });
   }, [expandedUnits]); // Removed loading from dependencies
+  
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        if (currentUser?.uid) {
+          const userProfile = await firestoreService.getUserById(currentUser.uid);
+          setIsAdmin(!!userProfile?.roles?.admin);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+    console.log('isAdmin:', isAdmin);
+  }, [currentUser]);
 
   const toggleUnit = (unitId: string) => {
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
   };
 
   const isLessonAccessible = (lessonIndex: number, previousLessonId: string | null) => {
+    // Admin users can access all lessons
+    if (isAdmin) {
+      return true;
+    }
+
     // If course has unlockLessonIndex, make that lesson accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
       if(lessonIndex === course.settings.unlockLessonIndex) {
@@ -286,7 +311,7 @@ export default function NavPanel({
                   );
                   if (unitElement) {
 
-                    if (!unit.openDate || !isFutureDate(unit.openDate)) {
+                    if (!isAdmin || !unit.openDate || !isFutureDate(unit.openDate)) {
                       setExpandedUnits(prev => ({ ...prev, [unit.id]: true }));
                     }
                     setTimeout(() => {
@@ -365,9 +390,9 @@ export default function NavPanel({
           return (
             <Box key={unit.id}>
               <StyledUnitListItem 
-                onClick={() => (!unit.openDate || !isFutureDate(unit.openDate)) && toggleUnit(unit.id)}
+                onClick={() => (isAdmin || !unit.openDate || !isFutureDate(unit.openDate)) && toggleUnit(unit.id)}
                 selected={unit.id === selectedUnitId}
-                disabled={isFutureDate(unit.openDate)}
+                disabled={!isAdmin && isFutureDate(unit.openDate)}
                 data-testid={`unit-button-${unit.id}`}
                 sx={{
                   '&.Mui-disabled': {

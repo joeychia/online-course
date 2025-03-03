@@ -5,6 +5,7 @@ import { act } from '@testing-library/react';
 import NavPanel from '../components/NavPanel';
 import { Course } from '../types';
 import { firestoreService } from '../services/firestoreService';
+import { AuthContext } from '../contexts/AuthContext';
 
 // Mock firestoreService
 vi.mock('../services/firestoreService', () => ({
@@ -28,6 +29,48 @@ const mockUnitData = {
   ]
 };
 
+// Mock auth context
+const mockAuthContext = {
+  currentUser: {
+    uid: 'test-user',
+    email: 'test@example.com',
+    displayName: 'Test User',
+    emailVerified: false,
+    isAnonymous: false,
+    metadata: {
+      creationTime: Date.now().toString(),
+      lastSignInTime: Date.now().toString()
+    },
+    providerData: [],
+    refreshToken: '',
+    tenantId: null,
+    delete: vi.fn(),
+    getIdToken: vi.fn(),
+    getIdTokenResult: vi.fn(),
+    reload: vi.fn(),
+    toJSON: vi.fn(),
+    phoneNumber: null,
+    photoURL: null,
+    providerId: 'firebase'
+  },
+  userProfile: {
+    id: 'test-user',
+    name: 'Test User',
+    email: 'test@example.com',
+    roles: { student: true, instructor: false, admin: false },
+    progress: {},
+    registeredCourses: {},
+    groupIds: {},
+    notes: {},
+    QuizHistory: {}
+  },
+  loading: false,
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  signInWithGoogle: vi.fn(),
+  signUp: vi.fn(),
+  resetPassword: vi.fn()
+};
 
 // Get the mocked firestoreService
 const mockedFirestoreService = firestoreService as any;
@@ -79,11 +122,15 @@ const mockProgress = {
   'u2l2': { completed: false, completedAt: '2024-01-04T10:00:00Z'  }
 };
 
+
+
 const renderWithRouter = async (ui: React.ReactElement) => {
   const result = render(
-    <MemoryRouter>
-      {ui}
-    </MemoryRouter>
+    <AuthContext.Provider value={mockAuthContext}>
+      <MemoryRouter>
+        {ui}
+      </MemoryRouter>
+    </AuthContext.Provider>
   );
 
   // Wait for initial render
