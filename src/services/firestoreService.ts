@@ -30,31 +30,6 @@ import { withTimeout } from './utils';
 import { db } from './firestoreConfig';
 
 export class FirestoreService {
-    // Course operations
-    async migrateCourseLessonData(courseId: string): Promise<void> {
-        const course = await this.getCourseById(courseId);
-        if (!course) return;
-
-        const needsMigration = course.units.some(unit => 
-            unit.lessonCount === undefined || unit.order === undefined
-        );
-
-        if (needsMigration) {
-            const updatedUnits = await Promise.all(
-                course.units.map(async (unit, index) => {
-                    const lessonCount = unit.lessonCount ?? await this.getUnitLessonsCount(unit.id);
-                    return {
-                        ...unit,
-                        lessonCount,
-                        order: unit.order ?? index
-                    };
-                })
-            );
-
-            await this.updateCourse(courseId, { units: updatedUnits });
-        }
-    }
-
     async getAllCourses(): Promise<Course[]> {
         const coursesRef = collection(db, 'courses');
         const snapshot = await getDocs(coursesRef);
@@ -91,18 +66,19 @@ export class FirestoreService {
     }
 
     private async mapToCourse(id: string, data: DocumentData): Promise<Course> {
-        const units = await Promise.all(
-            (data.units as Array<CourseUnit>).map(async (unit, index) => {
-                const lessonCount = unit.lessonCount ?? await this.getUnitLessonsCount(unit.id);
-                const order = unit.order ?? index;
-
-                return {
-                    ...unit,
-                    order,
-                    lessonCount
-                };
-            })
-        );
+    const units = await Promise.all(
+        (data.units as Array<CourseUnit>).map(async (unit) => {
+            const lessonCount = unit.lessonCount ?? await this.getUnitLessonsCount(unit.id);
+            
+            // Only include the fields we want
+            return {
+                id: unit.id,
+                name: unit.name,
+                lessonCount,
+                openDate: unit.openDate
+            };
+        })
+    );
 
         return {
             id,
@@ -127,13 +103,17 @@ export class FirestoreService {
             courseId: data.courseId as string,
             name: data.name as string,
             description: data.description as string,
-            order: data.order as number,
-            lessons: (data.lessons as Array<{ id: string; name: string; order: number; quizId?: string | null }>).map((lesson, index) => ({
-                id: lesson.id,
-                name: lesson.name,
-                order: typeof lesson.order === 'number' ? lesson.order : index,
-                hasQuiz: !!lesson.quizId
-            }))
+            lessons: (data.lessons as Array<{ id: string; name: string; order?: number; quizId?: string | null }>).map((lesson) => {
+                // Remove order field if it exists in the data
+                const { order, ...lessonWithoutOrder } = lesson;
+                
+                return {
+                    ...lessonWithoutOrder,
+                    id: lesson.id,
+                    name: lesson.name,
+                    hasQuiz: !!lesson.quizId
+                };
+            })
         };
 
         return unit;
@@ -180,7 +160,6 @@ export class FirestoreService {
             name: data.name as string,
             content: data.content as string,
             unitId: data.unitId as string,
-            order: data.order as number,
             quizId: data.quizId as string | null,
             'video-title': data['video-title'] as string | undefined,
             'video-url': data['video-url'] as string | undefined

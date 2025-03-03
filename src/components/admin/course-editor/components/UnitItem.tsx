@@ -25,7 +25,7 @@ interface UnitItemProps {
   id: string;
   name: string;
   index: number;
-  lessons: Array<{ id: string; name: string; order: number }>;
+  lessons: Array<{ id: string; name: string; hasQuiz: boolean }>;
   lessonCount: number;
   isExpanded: boolean;
   isLoading: boolean;
@@ -233,9 +233,7 @@ export const UnitItem: React.FC<UnitItemProps> = ({
                     ref={droppableProvided.innerRef}
                     {...droppableProvided.droppableProps}
                   >
-                    {lessons
-                      .sort((a, b) => a.order - b.order)
-                      .map((lesson, lessonIndex) => (
+                    {lessons.map((lesson, lessonIndex) => (
                         <LessonItem
                           key={lesson.id}
                           id={lesson.id}

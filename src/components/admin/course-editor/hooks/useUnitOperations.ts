@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Course } from '../../../../types';
+import { Course, CourseUnit } from '../../../../types';
 import { firestoreService } from '../../../../services/firestoreService';
 
 interface UseUnitOperationsProps {
@@ -8,9 +8,31 @@ interface UseUnitOperationsProps {
   reloadCourse: () => Promise<void>;
 }
 
+interface UnitDataInput {
+  id: string;
+  name: string;
+  lessonCount: number;
+  openDate?: string;
+}
+
 export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOperationsProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // Helper function to clean unit data
+  const cleanUnitData = (unit: UnitDataInput): CourseUnit => {
+    const cleanUnit: CourseUnit = {
+      id: unit.id,
+      name: unit.name,
+      lessonCount: unit.lessonCount
+    };
+    
+    if (unit.openDate !== undefined) {
+      cleanUnit.openDate = unit.openDate;
+    }
+    
+    return cleanUnit;
+  };
 
   const addUnit = useCallback(async (name: string) => {
     if (!course || !name.trim()) return false;
@@ -19,7 +41,6 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
 
     try {
       const newUnitId = `unit_${Date.now()}`;
-      const newOrder = course.units.length;
       
       // Create unit document data
       const unitData = {
@@ -27,23 +48,22 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
         name: name.trim(),
         description: '',
         lessons: [],
-        courseId,
-        order: newOrder
+        courseId
       };
 
       // Create the unit document in Firestore
       await firestoreService.createUnit(newUnitId, unitData);
 
-      // Create minimal unit data for course update
-      const newCourseUnit = {
+      // Create clean unit data for course update
+      const newCourseUnit = cleanUnitData({
         id: newUnitId,
         name: name.trim(),
-        order: newOrder,
         lessonCount: 0
-      };
+      });
 
-      // Update the course's units array
-      const updatedUnits = [...(course.units || []), newCourseUnit];
+      // Update the course's units array with clean data
+      const updatedUnits = [...(course.units || [])].map(cleanUnitData);
+      updatedUnits.push(newCourseUnit);
       await firestoreService.updateCourse(courseId, { units: updatedUnits });
       await reloadCourse();
       return true;
@@ -65,9 +85,12 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
       // Update unit document
       await firestoreService.updateUnit(unitId, { name: newName.trim() });
 
-      // Update course units array with just the name
+      // Update course units array with clean data
       const updatedUnits = course.units.map(u => 
-        u.id === unitId ? { ...u, name: newName.trim() } : u
+        u.id === unitId ? cleanUnitData({
+          ...u,
+          name: newName.trim()
+        }) : cleanUnitData(u)
       );
       await firestoreService.updateCourse(courseId, { units: updatedUnits });
       await reloadCourse();
@@ -87,8 +110,10 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
     setError(null);
 
     try {
-      // Update course with filtered units
-      const updatedUnits = course.units.filter(unit => unit.id !== unitId);
+      // Update course with filtered and cleaned units
+      const updatedUnits = course.units
+        .filter(unit => unit.id !== unitId)
+        .map(cleanUnitData);
       await firestoreService.updateCourse(courseId, { units: updatedUnits });
       await reloadCourse();
       return true;
@@ -111,22 +136,11 @@ export const useUnitOperations = ({ courseId, course, reloadCourse }: UseUnitOpe
       const [removed] = newUnits.splice(sourceIndex, 1);
       newUnits.splice(destinationIndex, 0, removed);
 
-      // Update order for all affected units
-      const updatedUnits = newUnits.map((unit, index) => ({
-        ...unit,
-        order: index
-      }));
+      // Clean all unit data
+      const cleanUnits = newUnits.map(cleanUnitData);
 
       // Update course with new unit order
-      await firestoreService.updateCourse(courseId, { units: updatedUnits });
-      
-      // Update individual unit documents
-      await Promise.all(
-        updatedUnits.map(unit => {
-          return firestoreService.updateUnit(unit.id, { order: unit.order });
-        })
-      );
-
+      await firestoreService.updateCourse(courseId, { units: cleanUnits });
       await reloadCourse();
       return true;
     } catch (err) {

@@ -2,7 +2,6 @@
 export interface CourseUnit {
   id: string;
   name: string;
-  order: number;
   lessonCount: number;
   openDate?: string; // ISO date string for course availability
 }
@@ -27,14 +26,12 @@ export interface Unit {
   courseId: string;
   name: string;
   description: string;
-  order: number;
   lessons: UnitLesson[];
 }
 
 export interface UnitLesson {
   id: string;
   name: string;
-  order: number;
   hasQuiz: boolean;
 }
 
@@ -43,7 +40,6 @@ export interface Lesson {
   unitId: string;
   name: string;
   content: string;
-  order: number;
   "video-title"?: string;
   "video-url"?: string;
   quizId: string | null;
