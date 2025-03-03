@@ -194,7 +194,6 @@ describe('FirestoreService', () => {
             id: 'unit1',
             name: 'Test Unit',
             description: 'Test Unit Description',
-            order: 1,
             lessons: [],
             courseId: 'course1'
         };
@@ -207,7 +206,6 @@ describe('FirestoreService', () => {
                     data: () => ({
                         name: 'Test Unit',
                         description: 'Test Unit Description',
-                        order: 1,
                         lessons: [],
                         courseId: 'course1'
                     })
@@ -243,7 +241,6 @@ describe('FirestoreService', () => {
             name: 'Test Lesson',
             content: 'Test Content',
             unitId: 'unit1',
-            order: 1,
             quizId: null,
             'video-title': undefined,
             'video-url': undefined
@@ -258,7 +255,6 @@ describe('FirestoreService', () => {
                         name: 'Test Lesson',
                         content: 'Test Content',
                         unitId: 'unit1',
-                        order: 1,
                         quizId: null,
                         'video-title': undefined,
                         'video-url': undefined

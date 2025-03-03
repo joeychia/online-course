@@ -149,10 +149,9 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
     if (!selectedUnitForLesson) return false;
     const success = await addLesson(selectedUnitForLesson, name);
     if (success) {
-      // Get the current unit's lessons to determine the new lesson's order
+      // Get the current unit
       const unit = loadedUnits[selectedUnitForLesson];
       if (unit) {
-        const newOrder = unit.lessons.length;
         // Add the new lesson to the UI immediately
         updateUnitLessons(selectedUnitForLesson, unit => ({
           ...unit,
@@ -161,7 +160,6 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
             {
               id: `lesson_${Date.now()}`, // Same ID generation as in useLessonOperations
               name: name.trim(),
-              order: newOrder,
               hasQuiz: false
             }
           ]
@@ -208,9 +206,15 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
       success = await reorderUnits(source.index, destination.index);
     } else if (type === 'lesson') {
       success = await reorderLessons(source.droppableId, source.index, destination.index);
+      if (success) {
+        // Force reload the unit details to update the lessons list in UI
+        await loadUnitDetails(source.droppableId, true);
+      }
     }
 
-    if (success) setShowSuccess(true);
+    if (success) {
+      setShowSuccess(true);
+    }
   };
 
   return (

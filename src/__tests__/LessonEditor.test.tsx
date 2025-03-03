@@ -48,7 +48,6 @@ const mockLessonWithVideo: Lesson = {
   unitId: 'unit1',
   name: TEST_DATA.LESSON_NAME,
   content: TEST_DATA.CONTENT,
-  order: 0,
   'video-title': TEST_DATA.VIDEO_TITLE,
   'video-url': TEST_DATA.VIDEO_URL,
   quizId: null
@@ -223,9 +222,9 @@ describe('LessonEditor', () => {
       expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson_1', {
         name: TEST_DATA.LESSON_NAME + TEST_DATA.UPDATED_SUFFIX,
         'video-title': TEST_DATA.VIDEO_TITLE + TEST_DATA.UPDATED_SUFFIX,
-        "quizId": null,
         'video-url': TEST_DATA.VIDEO_URL + '/updated',
         content: TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX,
+        quizId: null,
         unitId: 'unit_1'
       });
       expect(mockOnSave).toHaveBeenCalled();

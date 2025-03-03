@@ -56,9 +56,7 @@ export const UnitList: React.FC<UnitListProps> = ({
       <Droppable droppableId="units" type="unit">
         {(droppableProvided) => (
           <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
-            {course.units
-              .sort((a, b) => a.order - b.order)
-              .map((unit, index) => {
+            {course.units.map((unit, index) => {
                 const loadedUnit = loadedUnits[unit.id];
                 const isLoading = expandedUnits.includes(unit.id) && !loadedUnit;
 

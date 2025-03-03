@@ -32,7 +32,6 @@ const mockCourse: Course = {
     {
       id: 'unit_1',
       name: 'Unit 1',
-      order: 0,
       lessonCount: 0
     }
   ],
@@ -52,7 +51,6 @@ describe('CourseEditor', () => {
       name: 'Unit 1',
       courseId: 'course_1',
       description: 'Test Unit Description',
-      order: 0,
       lessons: []
     });
   });
@@ -137,8 +135,7 @@ describe('CourseEditor', () => {
           name: 'New Unit',
           description: '',
           lessons: [],
-          courseId: 'course_1',
-          order: expect.any(Number)
+          courseId: 'course_1'
         })
       );
 
@@ -147,8 +144,7 @@ describe('CourseEditor', () => {
         units: expect.arrayContaining([
           expect.objectContaining({
             name: 'New Unit',
-            lessonCount: 0,
-            order: expect.any(Number)
+            lessonCount: 0
           })
         ])
       });
