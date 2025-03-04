@@ -36,7 +36,7 @@ export default function Help() {
     },
     {
       question: '如何追蹤我的學習進度？',
-      answer: '您的學習進度會自動追蹤並顯示在課程儀表板中。'
+      answer: '您的學習進度會自動追蹤並顯示在【我的筆記】中。'
     },
     {
       question: '我可以在課程中做筆記嗎？',
@@ -105,13 +105,7 @@ export default function Help() {
             <Box sx={{ ml: 2 }}>
               <Typography paragraph>
                 電子郵件：
-                <Link href="mailto:support@example.com">support@example.com</Link>
-              </Typography>
-              <Typography paragraph>
-                電話：+1 (123) 456-7890
-              </Typography>
-              <Typography>
-                營業時間：週一至週五，上午 9:00 至下午 5:00（東部標準時間）
+                <Link href="mailto:support@example.com">edu@eccseattle.org</Link>
               </Typography>
             </Box>
           </Box>
