@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1976d2" />
+    <meta name="description" content="An online learning platform with course management and note-taking features" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ECC在線課程</title>
     <!-- Google Analytics -->
@@ -19,5 +22,18 @@
   <body style="margin:0">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/serviceWorker.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful');
+            })
+            .catch(err => {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
