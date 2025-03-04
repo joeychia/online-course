@@ -19,7 +19,9 @@ const TEST_DATA = {
 vi.mock('../services/firestoreService', () => ({
   firestoreService: {
     getLessonById: vi.fn(),
-    updateLesson: vi.fn()
+    updateLesson: vi.fn(),
+    getUnitById: vi.fn(),
+    updateUnit: vi.fn()
   }
 }));
 
@@ -53,6 +55,26 @@ const mockLessonWithVideo: Lesson = {
   quizId: null
 };
 
+// Mock unit with lessons
+const mockUnit = {
+  id: 'unit1',
+  name: 'Test Unit',
+  courseId: 'course1',
+  description: 'Test unit description',
+  lessons: [
+    {
+      id: 'lesson1',
+      name: TEST_DATA.LESSON_NAME,
+      hasQuiz: false
+    },
+    {
+      id: 'lesson2',
+      name: 'Another Lesson',
+      hasQuiz: false
+    }
+  ]
+};
+
 describe('LessonEditor', () => {
   const mockOnClose = vi.fn();
   const mockOnSave = vi.fn();
@@ -61,6 +83,8 @@ describe('LessonEditor', () => {
     vi.clearAllMocks();
     mockedFirestoreService.getLessonById.mockResolvedValue(mockLessonWithVideo);
     mockedFirestoreService.updateLesson.mockResolvedValue();
+    mockedFirestoreService.getUnitById.mockResolvedValue(mockUnit);
+    mockedFirestoreService.updateUnit.mockResolvedValue();
   });
 
   it('loads and displays lesson data on mount', async () => {
@@ -227,6 +251,67 @@ describe('LessonEditor', () => {
         quizId: null,
         unitId: 'unit_1'
       });
+      expect(mockOnSave).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+
+    it('updates lesson name in both lesson document and unit lessons array', async () => {
+      const user = userEvent.setup();
+      
+      // Set up specific mocks for this test
+      mockedFirestoreService.getLessonById.mockResolvedValue({
+        ...mockLessonWithVideo,
+        id: 'lesson1',
+        unitId: 'unit1'
+      });
+      
+      render(
+        <LessonEditor
+          unitId="unit1"
+          lessonId="lesson1"
+          onClose={mockOnClose}
+          onSave={mockOnSave}
+        />
+      );
+
+      // Wait for form to load
+      await waitFor(() => {
+        expect(screen.getByLabelText('Lesson Name')).toBeInTheDocument();
+      });
+
+      // Update lesson name
+      const nameInput = screen.getByLabelText('Lesson Name');
+      await user.clear(nameInput);
+      await user.type(nameInput, TEST_DATA.UPDATED_LESSON);
+
+      // Save changes
+      await user.click(screen.getByText('Save'));
+
+      // Verify lesson document was updated
+      expect(mockedFirestoreService.updateLesson).toHaveBeenCalledWith('lesson1', expect.objectContaining({
+        name: TEST_DATA.UPDATED_LESSON
+      }));
+
+      // Verify unit was fetched
+      expect(mockedFirestoreService.getUnitById).toHaveBeenCalledWith('unit1');
+
+      // Verify unit's lessons array was updated with the new lesson name
+      expect(mockedFirestoreService.updateUnit).toHaveBeenCalledWith('unit1', {
+        lessons: [
+          {
+            id: 'lesson1',
+            name: TEST_DATA.UPDATED_LESSON,
+            hasQuiz: false
+          },
+          {
+            id: 'lesson2',
+            name: 'Another Lesson',
+            hasQuiz: false
+          }
+        ]
+      });
+
+      // Verify callbacks were called
       expect(mockOnSave).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();
     });

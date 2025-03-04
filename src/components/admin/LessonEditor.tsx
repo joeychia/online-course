@@ -66,7 +66,25 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
         updateData['video-url'] = lesson['video-url'];
       }
 
+      // Update the lesson document
       await firestoreService.updateLesson(lessonId, updateData);
+      
+      // Also update the lesson name in the parent unit's lessons array
+      if (unitId) {
+        const unit = await firestoreService.getUnitById(unitId);
+        if (unit) {
+          // Find and update the lesson in the unit's lessons array
+          const updatedLessons = unit.lessons.map(lessonItem => 
+            lessonItem.id === lessonId 
+              ? { ...lessonItem, name: name } 
+              : lessonItem
+          );
+          
+          // Update the unit with the modified lessons array
+          await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
+        }
+      }
+      
       onSave();
       onClose();
     } catch (error) {
