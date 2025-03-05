@@ -8,6 +8,27 @@
     <meta name="description" content="An online learning platform with course management and note-taking features" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ECC在線課程</title>
+    <style>
+      .loading-spinner {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(25, 118, 210, 0.3);
+        border-radius: 50%;
+        border-top-color: #1976d2;
+        animation: spin 1s ease-in-out infinite;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      @keyframes spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+      #root:not(:empty) + .loading-spinner {
+        display: none;
+      }
+    </style>
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
     <script>
@@ -21,6 +42,7 @@
   </head>
   <body style="margin:0">
     <div id="root"></div>
+    <div class="loading-spinner"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
