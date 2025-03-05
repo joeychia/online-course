@@ -71,6 +71,7 @@ export interface QuizHistory {
   completedAt: string;
   correct: number;
   total: number;
+  title?: string; // Unit name
 }
 
 export interface UserProgress {

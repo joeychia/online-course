@@ -248,6 +248,10 @@ const LessonView: React.FC<LessonViewProps> = ({
           score
         });
 
+        // Get unit name for quiz history title
+        const unit = await firestoreService.getUnitById(lesson.unitId);
+        const unitName = unit ? unit.name : '';
+
         // Update quiz history state with the new submission
         const newQuizHistory = {
           quizId: quiz.id,
@@ -258,22 +262,13 @@ const LessonView: React.FC<LessonViewProps> = ({
           correct,
           total,
           score: (correct / total) * 100,
-          completedAt: new Date().toISOString()
+          completedAt: new Date().toISOString(),
+          title: unitName
         };
         setQuizHistory({
           ...newQuizHistory,
         });
-        await firestoreService.createQuizHistory(currentUser.uid, lesson.id, {
-          quizId: quiz.id,
-          userId: currentUser.uid,
-          courseId: lesson.courseId,
-          lessonId: lesson.id,
-          answers,
-          correct,
-          total,
-          score: (correct / total) * 100,
-          completedAt: new Date().toISOString()
-        });
+        await firestoreService.createQuizHistory(currentUser.uid, lesson.id, newQuizHistory);
         setQuizComplete(true);
     } catch (err) {
       console.error('Error submitting quiz:', err);
