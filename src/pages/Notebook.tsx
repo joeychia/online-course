@@ -23,8 +23,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Course } from '../types';
 import MarkdownViewer from '../components/MarkdownViewer';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import QuizView from '../components/QuizView';
-import type { Quiz } from '../types';
+
 
 interface Note {
   text: string;
@@ -32,14 +31,6 @@ interface Note {
   unitName: string;
   updatedAt: string;
   weekGroup?: string; // Added for weekly grouping
-  isQuiz?: boolean;
-  quizId?: string;
-  quizHistory?: {
-    answers: { [key: string]: string };
-    score: number;
-    correct: number;
-    total: number;
-  };
 }
 
 export default function Notebook() {
@@ -57,21 +48,7 @@ export default function Notebook() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [groupedNotes, setGroupedNotes] = useState<{ [key: string]: Note[] }>({});
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-  
-  useEffect(() => {
-    async function loadQuizData() {
-      if (selectedNote?.quizId) {
-        try {
-          const quizData = await firestoreService.getQuizById(selectedNote.quizId);
-          setQuiz(quizData);
-        } catch (err) {
-          console.error('Error loading quiz:', err);
-        }
-      }
-    }
-    void loadQuizData();
-  }, [selectedNote]);
+
 
   useEffect(() => {
     async function loadCourses() {
@@ -93,33 +70,10 @@ export default function Notebook() {
         const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
         const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
         
-        // Get notes and quiz history
-        const [userNotes, quizHistories] = await Promise.all([
-          firestoreService.getNotesForUserCourse(currentUser.uid, courseId, startOfMonth, endOfMonth),
-          firestoreService.getQuizHistoryForUserCourse(currentUser.uid, courseId, startOfMonth, endOfMonth)
-        ]);
-        // Convert quiz histories to note format
-        const quizNotes = quizHistories.map(history => ({
-          text: `分数: ${history.correct}/${history.total}`,
-          lessonName: '结果',
-          unitName: '测验',
-          updatedAt: history.completedAt,
-          isQuiz: true,
-          quizId: history.quizId,
-          quizHistory: {
-            answers: history.answers,
-            score: history.score,
-            correct: history.correct,
-            total: history.total
-          }
-        }));
-
-        // Combine notes and quiz histories
-        let combinedNotes = [...userNotes, ...quizNotes];
-      
+        const userNotes = await firestoreService.getNotesForUserCourse(currentUser.uid, courseId, startOfMonth, endOfMonth);
 
         // Group notes by week
-        const grouped = combinedNotes.reduce((acc: { [key: string]: Note[] }, note) => {
+        const grouped = userNotes.reduce((acc: { [key: string]: Note[] }, note) => {
           const noteDate = new Date(note.updatedAt);
           const weekStart = new Date(noteDate);
           weekStart.setDate(noteDate.getDate() - noteDate.getDay());
@@ -339,39 +293,13 @@ export default function Notebook() {
             <Grid container spacing={3}>
               {weekNotes.map((note, index) => {
                 const getCardStyle = (theme: { palette: { mode: string; }; }) => {
-                  if (note.isQuiz) {
-                    // Exam paper style for quiz notes
-                    return {
-                      backgroundColor: theme.palette.mode === 'dark' ? '#2c2c2c' : '#fff9f0',
-                      backgroundImage: theme.palette.mode === 'dark'
-                        ? 'linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px)'
-                        : 'linear-gradient(rgba(66, 66, 66, 0.1) 1px, transparent 1px)',
-                      backgroundSize: '100% 25px',
-                      boxShadow: theme.palette.mode === 'dark'
-                        ? '2px 2px 5px rgba(0,0,0,0.3)'
-                        : '2px 2px 5px rgba(0,0,0,0.1)',
-                      position: 'relative',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        borderStyle: 'solid',
-                        borderWidth: '0 20px 20px 0',
-                        borderColor: theme.palette.mode === 'dark'
-                          ? '#3d3d3d transparent transparent transparent'
-                          : '#f0e6d6 transparent transparent transparent',
-                        transition: 'all 0.2s ease'
-                      }
-                    };
-                  } else {
+                  
                     const hue = Math.random() * 360;
                     return {
                       backgroundColor: theme.palette.mode === 'dark'
                         ? `hsl(${hue}, 30%, 25%)`
                         : `hsl(${hue}, 70%, 90%)`
                     };
-                  }
                 };
                 const plainTextPreview = getPlainTextPreview(note.text);
 
@@ -443,14 +371,6 @@ export default function Notebook() {
                   </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
-                  {selectedNote.isQuiz && selectedNote.quizHistory ? (
-                    quiz && <QuizView
-                      quiz={quiz}
-                      onSubmit={() => {}}
-                      onClose={() => setSelectedNote(null)}
-                      readOnlyAnswers={selectedNote.quizHistory.answers}
-                    />
-                  ) : (
                     <Box sx={{
                       '& .toastui-editor-contents': {
                         fontSize: 'var(--font-size-body)',
@@ -458,7 +378,6 @@ export default function Notebook() {
                     }}>
                       <MarkdownViewer content={convertChinese(selectedNote.text, language)} />
                     </Box>
-                  )}
                 </DialogContent>
               </>
             )}

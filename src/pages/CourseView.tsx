@@ -248,6 +248,15 @@ export default function CourseView() {
                 units={units}
                 unitLessons={unitLessons}
               />
+              <Box sx={{ mt: 'auto', m:1, textAlign: 'left' }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => navigate(`/quiz/${courseId}`)}
+                >
+                  {t('seeQuizResults')}
+                </Button>
+              </Box>
             </Box>
             <Box sx={{ mt: 'auto', m:1, textAlign: 'left' }}>
               <Button

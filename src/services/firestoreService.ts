@@ -242,7 +242,8 @@ export class FirestoreService {
                 answers: data.answers as Record<string, string>,
                 completedAt: data.completedAt as string,
                 correct: data.correct as number,
-                total: data.total as number
+                total: data.total as number,
+                title: data.title as string | undefined,
             };
         });
     }

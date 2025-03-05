@@ -209,6 +209,10 @@ export const translations: Translations = {
     'zh-TW': '您確定要退出此課程嗎？您的進度將被保存，但您需要重新註冊才能繼續。',
     'zh-CN': '您确定要退出此课程吗？您的进度将被保存，但您需要重新注册才能继续。'
   },
+  seeQuizResults: {
+    'zh-TW': '查看測驗結果',
+    'zh-CN': '查看测验结果'
+  },
   congratulationsTitle: {
     'zh-TW': '恭喜您完成本課程！',
     'zh-CN': '恭喜您完成本课程！'
@@ -409,5 +413,17 @@ export const translations: Translations = {
   opensAt: {
     'zh-TW': '開放日期：{{date}}',
     'zh-CN': '开放日期：{{date}}'
+  },
+  unit: {
+    'zh-TW': '單元',
+    'zh-CN': '单元'
+  },
+  score: {
+    'zh-TW': '分數',
+    'zh-CN': '分数'
+  },
+  date: {
+    'zh-TW': '日期',
+    'zh-CN': '日期'
   }
 };

@@ -23,8 +23,7 @@ vi.mock('../services/firestoreService', () => ({
   firestoreService: {
     getAllCourses: vi.fn(),
     getNotesForUserCourse: vi.fn(),
-    getQuizById: vi.fn(),
-    getQuizHistoryForUserCourse: vi.fn()
+
   }
 }));
 
@@ -89,35 +88,7 @@ const mockNotes = [
   },
 ];
 
-const mockQuizHistories = [
-  {
-    quizId: 'quiz1',
-    userId: 'test-user',
-    courseId: 'course1',
-    lessonId: 'lesson1',
-    correct: 8,
-    total: 10,
-    lessonName: '測驗課時1',
-    unitName: '測驗單元1',
-    completedAt: '2024-01-03T00:00:00.000Z',
-    answers: { '0': '1', '1': '2' },
-    score: 80
-  }
-];
 
-const mockQuiz = {
-  id: 'quiz1',
-  questions: [
-    {
-      text: '問題1',
-      type: 'single_choice' as const,
-      options: [
-        { text: '選項1', isCorrect: false },
-        { text: '選項2', isCorrect: true }
-      ]
-    }
-  ]
-};
 
 describe('Notebook Component', () => {
   beforeEach(() => {
@@ -132,8 +103,7 @@ describe('Notebook Component', () => {
     }));
     mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     mockedFirestoreService.getNotesForUserCourse.mockResolvedValue(mockNotes);
-    mockedFirestoreService.getQuizHistoryForUserCourse.mockResolvedValue(mockQuizHistories);
-    mockedFirestoreService.getQuizById.mockResolvedValue(mockQuiz);
+
   });
 
   afterEach(() => {
@@ -191,7 +161,7 @@ describe('Notebook Component', () => {
   it('shows no notes message when notes array is empty', async () => {
     vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
     mockedFirestoreService.getNotesForUserCourse.mockResolvedValue([]);
-    mockedFirestoreService.getQuizHistoryForUserCourse.mockResolvedValue([]);
+
     renderNotebook(['/notebook/course1']);
     await waitFor(() => {
       expect(screen.getByText('尚未有筆記')).toBeInTheDocument();
@@ -244,36 +214,12 @@ describe('Notebook Component', () => {
     });
   });
 
-  it('displays quiz history in notes list', async () => {
-    vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
-    renderNotebook(['/notebook/course1']);
-    
-    await waitFor(() => {
-      expect(screen.getByText('測驗 / 結果')).toBeInTheDocument();
-      expect(screen.getByText('分数: 8/10')).toBeInTheDocument();
-    });
-  });
 
-  it('opens quiz view dialog when clicking on a quiz note', async () => {
-    vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
-    renderNotebook(['/notebook/course1']);
-    
-    await waitFor(() => {
-      expect(screen.getByText('測驗 / 結果')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('測驗 / 結果'));
-    
-    await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(mockedFirestoreService.getQuizById).toHaveBeenCalledWith('quiz1');
-    });
-  });
 
   it('shows no notes message when notes array is empty', async () => {
     vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
     mockedFirestoreService.getNotesForUserCourse.mockResolvedValue([]);
-    mockedFirestoreService.getQuizHistoryForUserCourse.mockResolvedValue([]);
+
     renderNotebook(['/notebook/course1']);
     await waitFor(() => {
       expect(screen.getByText('尚未有筆記')).toBeInTheDocument();
@@ -311,7 +257,7 @@ describe('Notebook Component', () => {
   it('shows no notes message when notes array is empty', async () => {
     vi.mocked(useParams).mockReturnValue({ courseId: 'course1' });
     mockedFirestoreService.getNotesForUserCourse.mockResolvedValue([]);
-    mockedFirestoreService.getQuizHistoryForUserCourse.mockResolvedValue([]);
+
     renderNotebook(['/notebook/course1']);
     await waitFor(() => {
       expect(screen.getByText('尚未有筆記')).toBeInTheDocument();
