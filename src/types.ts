@@ -65,6 +65,7 @@ export interface QuizHistory {
   quizId: string;
   userId: string;
   courseId: string;
+  unitId: string;
   lessonId: string;
   answers: Record<string, string>;
   score: number;

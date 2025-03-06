@@ -12,6 +12,7 @@ import { FontSizeProvider } from './contexts/FontSizeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import QuizResults from './pages/QuizResults';
+import AdminQuizResults from './pages/AdminQuizResults';
 
 import WeChatBrowserWarning from './components/WeChatBrowserWarning';
 
@@ -126,6 +127,13 @@ function App() {
                     <ProtectedRoute>
                       <Layout>
                         <Notebook />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/quiz/:courseId" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <AdminQuizResults />
                       </Layout>
                     </ProtectedRoute>
                   } />

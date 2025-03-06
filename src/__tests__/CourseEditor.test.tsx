@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { CourseEditor } from '../components/admin/CourseEditor';
 import { firestoreService } from '../services/firestoreService';
 import type { Course } from '../types';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock services
 vi.mock('../services/firestoreService', () => ({
@@ -23,6 +24,24 @@ vi.mock('firebase/auth', () => ({
   getAuth: vi.fn(() => ({})),
   GoogleAuthProvider: vi.fn(() => ({}))
 }));
+
+// Mock useNavigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  };
+});
+
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(
+    <MemoryRouter>
+      {ui}
+    </MemoryRouter>
+  );
+};
 
 const mockCourse: Course = {
   id: 'course_1',
@@ -91,7 +110,7 @@ describe('CourseEditor', () => {
 
   describe('Adding units', () => {
     it('opens add unit dialog when clicking Add Unit button', async () => {
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       const addButton = await screen.findByText('Add Unit');
       fireEvent.click(addButton);
@@ -100,7 +119,7 @@ describe('CourseEditor', () => {
     });
 
     it('handles empty unit name', async () => {
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       const addButton = await screen.findByText('Add Unit');
       fireEvent.click(addButton);
@@ -114,7 +133,7 @@ describe('CourseEditor', () => {
 
     it('successfully adds a new unit', async () => {
       const user = userEvent.setup();
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       // Open dialog
       const addButton = await screen.findByText('Add Unit');
@@ -152,7 +171,7 @@ describe('CourseEditor', () => {
 
     it('closes dialog and clears input after adding unit', async () => {
       const user = userEvent.setup();
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       // Open dialog and add unit
       const addButton = await screen.findByText('Add Unit');
@@ -177,7 +196,7 @@ describe('CourseEditor', () => {
 
   describe('Deleting units', () => {
     it('shows confirmation dialog when deleting unit', async () => {
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       // Wait for course data to load and unit to appear
       await waitFor(() => {
@@ -202,7 +221,7 @@ describe('CourseEditor', () => {
     // 4. Consider potential race conditions in state updates
     /*
     it('deletes unit when confirmed', async () => {
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       // Wait for course data to load and unit to appear
       await waitFor(() => {
@@ -227,7 +246,7 @@ describe('CourseEditor', () => {
     */
 
     it('does not delete unit when canceled', async () => {
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       // Wait for course data to load and unit to appear
       await waitFor(() => {
@@ -246,13 +265,13 @@ describe('CourseEditor', () => {
 
   describe('Drag and Drop functionality', () => {
     it('reorders units when dragged', async () => {
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       // TODO: Implement drag and drop test
     });
 
     it('updates backend after unit reordering', async () => {
-      render(<CourseEditor courseId="course_1" />);
+      renderWithRouter(<CourseEditor courseId="course_1" />);
 
       // TODO: Implement reordering persistence test
     });

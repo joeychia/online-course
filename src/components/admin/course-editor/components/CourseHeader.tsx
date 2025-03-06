@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -10,6 +11,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { CourseSettings } from './CourseSettings';
 import { Course } from '../../../../types';
 
@@ -33,13 +35,26 @@ export const CourseHeader: React.FC<CourseHeaderProps> = ({
   onDeleteCourse
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <>
       <Box>
         <Box mb={3}>
-          <Typography variant="h4" sx={{ fontWeight: 500, mb: 2 }}>
-            {course?.name || (isLoading ? 'Loading...' : 'Course not found')}
-          </Typography>
+          <Box display="flex" alignItems="center" gap={2} justifyContent="space-between">
+            <Typography variant="h4" sx={{ fontWeight: 500 }}>
+              {course?.name || (isLoading ? 'Loading...' : 'Course not found')}
+            </Typography>
+            {course && (
+              <Button
+                startIcon={<AssessmentIcon />}
+                variant="outlined"
+                onClick={() => navigate(`/admin/quiz/${course.id}`)}
+                disabled={isSaving}
+              >
+                View Quiz Results
+              </Button>
+            )}
+          </Box>
           <Divider />
         </Box>
         

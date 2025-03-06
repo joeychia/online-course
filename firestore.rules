@@ -43,25 +43,14 @@ service cloud.firestore {
       }
     }
 
-    // Allow users to read and write their own grades
-    match /grades/{gradeId} {
-      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
-    }
-
-    // Allow users to read and write their quiz history
-    match /quizHistory/{historyId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow create: if request.auth != null 
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.keys().hasAll(['userId', 'courseId', 'lessonId', 'answers', 'correct', 'total', 'completedAt']);
+    // Allow admin users to query quiz histories across all users
+    match /{path=**}/quizHistory/{historyId} {
+      allow read: if request.auth != null && isAdmin();
     }
 
     function isAdmin() {
       return  request.auth.token.admin == true || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.admin == true;
     }
 
-    function hasRole(role) {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles[role] == true;
-    }
   }
 }

@@ -13,7 +13,8 @@ import {
     QueryDocumentSnapshot,
     addDoc,
     limit,
-    QueryConstraint
+    QueryConstraint,
+    collectionGroup
 } from 'firebase/firestore';
 import type { 
     Course, 
@@ -214,6 +215,36 @@ export class FirestoreService {
     }
 
     // Quiz History operations
+    async getQuizHistoriesByUnitIds(unitIds: string[]): Promise<QuizHistory[]> {
+        if (!unitIds.length) return [];
+
+        // Use a collection group query to directly query all quizHistory subcollections
+        const quizHistoryCollectionGroup = collectionGroup(db, 'quizHistory');
+        const q = query(
+            quizHistoryCollectionGroup, 
+            where('unitId', 'in', unitIds)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        return snapshot.docs.map((doc): QuizHistory => {
+            const data = doc.data();
+            return {
+                userId: data.userId as string,
+                lessonId: data.lessonId as string,
+                unitId: data.unitId as string,
+                score: data.score as number,
+                quizId: data.quizId as string,
+                courseId: data.courseId as string,
+                answers: data.answers as Record<string, string>,
+                completedAt: data.completedAt as string,
+                correct: data.correct as number,
+                total: data.total as number,
+                title: data.title as string | undefined,
+            };
+        });
+    }
+
     async getQuizHistoryForUserCourse(userId: string, courseId: string, startDate?: Date, endDate?: Date): Promise<QuizHistory[]> {
         const quizHistoryRef = collection(db, `users/${userId}/quizHistory`);
         let constraints: QueryConstraint[] = [
@@ -236,6 +267,7 @@ export class FirestoreService {
             return {
                 userId: data.userId as string,
                 lessonId: data.lessonId as string,
+                unitId: data.unitId as string,
                 score: data.score as number,
                 quizId: data.quizId as string,
                 courseId: data.courseId as string,
@@ -261,6 +293,7 @@ export class FirestoreService {
             quizId: data.quizId as string,
             lessonId: data.lessonId as string,
             courseId: data.courseId as string,
+            unitId: data.unitId as string,
             answers: data.answers as Record<string, string>,
             completedAt: data.completedAt as string,
             correct: data.correct as number,

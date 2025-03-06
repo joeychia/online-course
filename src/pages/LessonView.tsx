@@ -257,6 +257,7 @@ const LessonView: React.FC<LessonViewProps> = ({
           quizId: quiz.id,
           userId: currentUser.uid,
           courseId: lesson.courseId,
+          unitId: lesson.unitId,
           lessonId: lesson.id,
           answers,
           correct,
