@@ -1,7 +1,7 @@
 {
-  "name": "ECC Online Classes",
-  "short_name": "ECC Online Classes",
-  "description": "ECC online learning platform with course management and note-taking features",
+  "name": "ECC線上課程",
+  "short_name": "ECC線上課程",
+  "description": "ECC線上課程平台",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

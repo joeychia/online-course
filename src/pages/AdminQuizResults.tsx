@@ -16,10 +16,6 @@ import {
   Checkbox,
   Button,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
@@ -33,8 +29,6 @@ export default function AdminQuizResults() {
   const { t } = useTranslation();
   
   const [loading, setLoading] = useState(true);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
   const [buttonLoading, setButtonLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
@@ -50,10 +44,6 @@ export default function AdminQuizResults() {
     };
 
   const [quizResults, setQuizResults] = useState<Array<QuizResult>|null>(null);
-
-  const handleCourseChange = (event: any) => {
-    setSelectedCourse(event.target.value);
-  };
 
   useEffect(() => {
     async function loadCourseData() {
@@ -193,24 +183,6 @@ export default function AdminQuizResults() {
           {course?.name} - {t('quizResults')}
         </Typography>
       </Box>
-
-      <FormControl fullWidth sx={{ mb: 3 }}>
-        <InputLabel id="course-select-label">Select Course</InputLabel>
-        <Select
-          labelId="course-select-label"
-          id="course-select"
-          value={selectedCourse}
-          label="Select Course"
-          onChange={handleCourseChange}
-          aria-label="Select Course"
-        >
-          {courses.map((course) => (
-            <MenuItem key={course.id} value={course.id}>
-              {course.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
 
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
