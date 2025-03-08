@@ -7,8 +7,9 @@ const STATIC_ASSETS = [
   '/index.html',
   '/manifest.json',
   '/favicon.ico',
-  '/icons/icon-72x72.png',
-  '/icons/icon-144x144.png'
+  '/icons/favicon-96x96.png',
+  '/icons/web-app-manifest-192x192.png',
+  '/icons/web-app-manifest-512x512.png'
 ];
 
 // Function to clean up old caches
