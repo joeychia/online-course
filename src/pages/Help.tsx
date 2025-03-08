@@ -41,6 +41,20 @@ export default function Help() {
     {
       question: '我可以在課程中做筆記嗎？',
       answer: '是的，每堂課都有內建的筆記功能，可自動儲存您的筆記。'
+    },
+    {
+      question: '網站有App嗎？',
+      answer: '本網站可以安裝為App使用，請依照您使用的手機瀏覽器選擇安裝步驟：\
+\
+手機版Chrome瀏覽器：\
+1. 點擊右上角選單按鈕\
+2. 在選單中點擊「加到主畫面」選項\
+3. 點擊「安裝」按鈕即可完成\
+\
+手機版Safari瀏覽器：\
+1. 點擊底部工具列的「分享」按鈕 \
+2. 在分享選單中，向上滑動並點擊「加入主畫面」選項 \
+3. 點擊右上角的「新增」按鈕即可完成安裝'
     }
   ];
 
@@ -54,7 +68,7 @@ export default function Help() {
         {/* New User Guide Section */}
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h5" gutterBottom>
-            新手指南
+           {convertChinese('新手指南', language)}
           </Typography>
           <Box sx={{ mt: 2 }}>
             {newUserGuide.map((item, index) => (
@@ -73,7 +87,7 @@ export default function Help() {
         {/* FAQ Section */}
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h5" gutterBottom>
-            常見問題
+          {convertChinese('常見問題', language)}
           </Typography>
           <Box sx={{ mt: 2 }}>
             {faq.map((item, index) => (
@@ -96,15 +110,15 @@ export default function Help() {
         {/* Contact Section */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h5" gutterBottom>
-            聯絡我們
+          {convertChinese('新手指南', language)}
           </Typography>
           <Box sx={{ mt: 2 }}>
             <Typography paragraph>
-              如需進一步協助，請聯絡我們：
+          {convertChinese('如需進一步協助，請聯絡我們：', language)}
             </Typography>
             <Box sx={{ ml: 2 }}>
               <Typography paragraph>
-                電子郵件：
+          {convertChinese('電子郵件：', language)}
                 <Link href="mailto:support@example.com">edu@eccseattle.org</Link>
               </Typography>
             </Box>
