@@ -6,7 +6,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { firestoreService } from '../services/firestoreService';
 import { useState, useEffect } from 'react';
 
-export const AdminDashboard: React.FC = () => {
+const AdminDashboard: React.FC = () => {
   const { currentUser } = useAuth();
   const { courseId } = useParams();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -59,3 +59,5 @@ export const AdminDashboard: React.FC = () => {
     </Container>
   );
 };
+
+export default AdminDashboard;

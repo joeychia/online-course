@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { AdminDashboard } from '../pages/AdminDashboard';
+import AdminDashboard from '../pages/AdminDashboard';
 import { useAuth } from '../hooks/useAuth';
 import { firestoreService } from '../services/firestoreService';
 import { MemoryRouter } from 'react-router-dom';

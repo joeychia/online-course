@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import Layout from './components/Layout';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
 import Login from './pages/Login';
-import { AdminDashboard } from './pages/AdminDashboard';
 import Notebook from './pages/Notebook';
 import Help from './pages/Help';
 import { useAuth } from './hooks/useAuth';
@@ -12,7 +12,10 @@ import { FontSizeProvider } from './contexts/FontSizeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import QuizResults from './pages/QuizResults';
-import AdminQuizResults from './pages/AdminQuizResults';
+
+// Lazy load admin-related components
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminQuizResults = lazy(() => import('./pages/AdminQuizResults'));
 
 import WeChatBrowserWarning from './components/WeChatBrowserWarning';
 
@@ -98,14 +101,18 @@ function App() {
                   <Route path="/admin" element={
                     <ProtectedRoute>
                       <Layout>
-                        <AdminDashboard />
+                        <Suspense fallback={<div>Loading admin dashboard...</div>}>
+                          <AdminDashboard />
+                        </Suspense>
                       </Layout>
                     </ProtectedRoute>
                   } />
                   <Route path="/admin/courses/:courseId" element={
                     <ProtectedRoute>
                       <Layout>
-                        <AdminDashboard />
+                        <Suspense fallback={<div>Loading admin dashboard...</div>}>
+                          <AdminDashboard />
+                        </Suspense>
                       </Layout>
                     </ProtectedRoute>
                   } />
@@ -133,7 +140,9 @@ function App() {
                   <Route path="/admin/quiz/:courseId" element={
                     <ProtectedRoute>
                       <Layout>
-                        <AdminQuizResults />
+                        <Suspense fallback={<div>Loading admin quiz results...</div>}>
+                          <AdminQuizResults />
+                        </Suspense>
                       </Layout>
                     </ProtectedRoute>
                   } />

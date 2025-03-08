@@ -10,6 +10,17 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'mui-vendor': ['@mui/material', '@mui/icons-material'],
+          'admin': [
+            './src/pages/AdminDashboard.tsx',
+            './src/pages/AdminQuizResults.tsx',
+            './src/components/admin/CourseEditor.tsx',
+            './src/components/admin/CourseListItem.tsx',
+            './src/components/admin/CourseManagement.tsx',
+            './src/components/admin/LessonEditor.tsx',
+            './src/components/admin/LessonList.tsx',
+            './src/components/admin/QuizEditor.tsx',
+            './src/components/admin/StudentsQuizResults.tsx'
+          ],
         },
       },
     },
