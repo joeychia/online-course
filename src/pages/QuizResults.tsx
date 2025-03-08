@@ -39,7 +39,6 @@ export default function QuizResults() {
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [selectedHistory, setSelectedHistory] = useState<QuizHistory | null>(null);
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [courseName, setCourseName] = useState('');
 
   useEffect(() => {
@@ -70,16 +69,6 @@ export default function QuizResults() {
 
     void loadData();
   }, [courseId, currentUser]);
-
-  useEffect(() => {
-    async function checkAdminStatus() {
-      if (currentUser) {
-        const profile = await firestoreService.getUserById(currentUser.uid);
-        setIsAdmin(profile?.roles?.admin || false);
-      }
-    }
-    void checkAdminStatus();
-  }, [currentUser]);
 
   const handleDownloadCSV = () => {
     if (!userProfile) return;
@@ -143,7 +132,7 @@ export default function QuizResults() {
 
 
 
-      {isAdmin && userProfile && (
+      {userProfile && quizHistories.length > 0 && (
         <Button
           variant="contained"
           color="primary"
@@ -165,7 +154,12 @@ export default function QuizResults() {
         </Paper>
       )}
 
-      <TableContainer component={Paper}>
+      {quizHistories.length === 0 && (
+        <Typography variant="body1" gutterBottom>
+          {t('No results.')}
+        </Typography>
+      )}
+      {quizHistories.length > 0 && <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
@@ -176,7 +170,7 @@ export default function QuizResults() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {quizHistories.length && quizHistories.map((history) => (
+            {quizHistories.map((history) => (
               <TableRow 
                 key={`${history.quizId}-${history.completedAt}`}
                 onClick={async () => {
@@ -210,7 +204,7 @@ export default function QuizResults() {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer>}
 
       <Dialog 
         open={quizDialogOpen} 
