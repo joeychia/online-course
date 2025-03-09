@@ -128,4 +128,38 @@
      }
      ```
 
+### UI Component Patterns
+1. Shared Component Architecture
+   - Reusable components across different views
+   - Consistent user experience
+   - Reduced code duplication
+   - Example structure:
+     ```typescript
+     interface CourseCardProps {
+       course: Course;
+       onPrimaryAction: () => void;
+       primaryActionText: string;
+       language?: 'zh-TW' | 'zh-CN';
+       showDescriptionButton?: boolean;
+     }
+     
+     // Used in both admin and user views with different configurations
+     const CourseCard: React.FC<CourseCardProps> = ({
+       course,
+       onPrimaryAction,
+       primaryActionText,
+       language = 'zh-TW',
+       showDescriptionButton = true,
+     }) => {
+       // Component implementation
+     };
+     ```
+   
+   Key patterns:
+   - Flexible props to support different use cases
+   - Consistent styling across the application
+   - Encapsulated functionality (e.g., description dialog)
+   - Clear separation of concerns
+   - Configurable actions based on context
+
 [Rest of the file remains unchanged...]

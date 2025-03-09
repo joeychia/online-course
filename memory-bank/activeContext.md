@@ -11,6 +11,7 @@
    - Course settings implementation
    - Fix dark mode contrast problem
    - Simplified ordering using array indices
+   - Reusable CourseCard component for admin and user views
 
 2. User Features
    - Authentication system
@@ -41,6 +42,24 @@
    - Group-based course access
 
 ## Recent Changes
+
+- Course Card Reuse (Completed):
+  - Created shared CourseCard component
+  - Updated CourseList.tsx to use the component
+  - Updated CourseManagement.tsx to use the component
+  - Added translation support for "manageCourse" button text
+  - Updated tests to work with the new component
+  - Benefits achieved:
+    * Improved UI consistency between admin and user views
+    * Reduced code duplication
+    * Better maintainability
+    * Consistent user experience
+    * Proper internationalization using translation system
+  - Implementation details:
+    * Created flexible CourseCard component with configurable actions
+    * Used translation system for button text
+    * Updated tests to select buttons by position rather than text
+    * Fixed TypeScript errors and unused imports
 
 - Order Field Removal:
   - Removed order fields from all data structures:
@@ -76,8 +95,6 @@
     * Verified all functionality works correctly
     * Confirmed no regressions
 
-[Previous changes remain unchanged...]
-
 ## Active Decisions
 
 ### Technical Decisions
@@ -88,6 +105,7 @@
      - Clear interface for components
    - Improved testability and maintainability
    - Array-based ordering for units and lessons
+   - Reusable UI components across different views
 
 2. Performance Optimization
    - Direct database access
@@ -107,5 +125,4 @@
    - Test with large datasets
    - Measure loading improvements
    - Verify ordering functionality
-
-[Rest of the file remains unchanged...]
+   - Test component reuse across different contexts
