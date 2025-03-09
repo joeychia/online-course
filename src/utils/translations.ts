@@ -394,6 +394,10 @@ export const translations: Translations = {
     'zh-TW': '管理員',
     'zh-CN': '管理员'
   },
+  manageCourse: {
+    'zh-TW': '管理課程',
+    'zh-CN': '管理课程'
+  },
   quickJump: {
     'zh-TW': '快速跳轉',
     'zh-CN': '快速跳转'

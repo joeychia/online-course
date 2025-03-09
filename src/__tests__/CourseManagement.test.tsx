@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { CourseManagement } from '../components/admin/CourseManagement';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { FontSizeProvider } from '../contexts/FontSizeContext';
+import { LanguageProvider } from '../contexts/LanguageContext';
 import { firestoreService } from '../services/firestoreService';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -15,6 +16,16 @@ vi.mock('../services/firestoreService', () => ({
     deleteCourse: vi.fn(),
   }
 }));
+
+// Mock useNavigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  };
+});
 
 // Get the mocked firestoreService
 const mockedFirestoreService = firestoreService as any;
@@ -45,7 +56,9 @@ const renderWithProviders = (ui: React.ReactElement) => {
     <BrowserRouter>
       <ThemeProvider>
         <FontSizeProvider>
-          {ui}
+          <LanguageProvider>
+            {ui}
+          </LanguageProvider>
         </FontSizeProvider>
       </ThemeProvider>
     </BrowserRouter>
@@ -113,18 +126,26 @@ describe('CourseManagement', () => {
   });
 
   describe('Navigation', () => {
-    it('switches between course list and editor', async () => {
+    it('navigates to course editor when course is clicked', async () => {
       renderWithProviders(<CourseManagement />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Course 1')).toBeInTheDocument();
       });
 
-      // Click on a course card
-      fireEvent.click(screen.getByText('Test Course 1'));
+      // Find the course card for Test Course 1
+      const courseCards = screen.getAllByText('Test Course 1');
+      const courseCard = courseCards[0].closest('.MuiCard-root');
+      
+      // Make sure courseCard is not null
+      expect(courseCard).not.toBeNull();
+      
+      // Find the primary action button (the second button) within this specific card
+      const manageButton = within(courseCard as HTMLElement).getAllByRole('button')[1];
+      fireEvent.click(manageButton);
 
       // Should navigate to course editor
-      expect(window.location.pathname).toMatch(/\/admin\/courses\/.+/);
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/courses/course_1');
     });
   });
 

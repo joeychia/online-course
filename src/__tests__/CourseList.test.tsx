@@ -216,12 +216,12 @@ describe('CourseList', () => {
     expect(screen.getByRole('button', { name: '登入' })).toBeInTheDocument();
   });
 
-  it('shows lock icon on courses for unauthenticated users', async () => {
+  it('shows description buttons for courses', async () => {
     mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
-    const lockChips = screen.getAllByRole('button', { name: '課程介紹' });
-    expect(lockChips).toHaveLength(mockCourses.length);
+    const descriptionButtons = screen.getAllByRole('button', { name: '查看介紹' });
+    expect(descriptionButtons).toHaveLength(mockCourses.length);
   });
 
   it('navigates to login when sign in button is clicked', async () => {
@@ -250,19 +250,19 @@ describe('CourseList', () => {
     expect(await screen.findByText('目前沒有可用的課程')).toBeInTheDocument();
   });
 
-  it('shows course description button for each course', async () => {
+  it('shows register course buttons for each course', async () => {
     mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
-    const descriptionButtons = screen.getAllByRole('button', { name: '課程介紹' });
-    expect(descriptionButtons).toHaveLength(mockCourses.length);
+    const registerButtons = screen.getAllByRole('button', { name: '註冊課程' });
+    expect(registerButtons).toHaveLength(mockCourses.length);
   });
 
   it('opens description dialog when description button is clicked', async () => {
     mockedFirestoreService.getAllCourses.mockResolvedValue(mockCourses);
     await renderComponent();
 
-    const descriptionButton = screen.getAllByRole('button', { name: '課程介紹' })[0];
+    const descriptionButton = screen.getAllByRole('button', { name: '查看介紹' })[0];
     fireEvent.click(descriptionButton);
 
     expect(screen.getByText('Description 1')).toBeInTheDocument();

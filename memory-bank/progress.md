@@ -4,12 +4,18 @@
 
 ### Admin Features
 1. Course Management
+   - UI Component Reuse:
+     * Created reusable CourseCard component
+     * Replaced admin view cards with shared component
+     * Added translation support for button text
+     * Updated tests for new component structure
+     * Maintained all existing functionality
+     * Improved UI consistency across user and admin views
    - Lesson count improvements:
      * Fixed display of lesson counts in unit list
      * Implemented proper count persistence
      * Enhanced data consistency between unit and course levels
      * Optimized code by removing unused functions
-   - Create/edit/delete courses
    - Create/edit/delete courses
    - Create/edit/delete units
    - Create/edit/delete lessons
@@ -29,7 +35,7 @@
    - Clarified settings and user tracking features
    - Aligned memory bank with current implementation
 
-2. Content Management
+3. Content Management
    - Markdown content support
    - Video content integration
    - Image support

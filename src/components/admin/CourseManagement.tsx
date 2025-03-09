@@ -14,7 +14,8 @@ import {
 import { Course } from '../../types';
 import { firestoreService } from '../../services/firestoreService';
 import RichTextEditor from '../RichTextEditor';
-import { CourseListItem } from './CourseListItem';
+import CourseCard from '../CourseCard';
+import { useTranslation } from '../../hooks/useTranslation';
 import { CourseEditor } from './CourseEditor';
 
 interface CourseManagementProps {
@@ -23,6 +24,7 @@ interface CourseManagementProps {
 
 export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCourseId }) => {
   const navigate = useNavigate();
+  const { t, language } = useTranslation();
   const [courses, setCourses] = useState<Course[]>([]);
   const [open, setOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -126,13 +128,16 @@ export const CourseManagement: React.FC<CourseManagementProps> = ({ initialCours
 
           <Grid container spacing={3} data-testid="course-grid">
             {courses.map((course) => (
-              <Grid item xs={12} key={course.id}>
-                <CourseListItem
+              <Grid item xs={12} sm={6} md={4} key={course.id}>
+                <CourseCard
                   course={course}
-                  onSelect={() => {
+                  onPrimaryAction={() => {
                     setSelectedCourseId(course.id);
                     navigate(`/admin/courses/${course.id}`);
                   }}
+                  primaryActionText={t('manageCourse')}
+                  language={language}
+                  showDescriptionButton={true}
                 />
               </Grid>
             ))}
