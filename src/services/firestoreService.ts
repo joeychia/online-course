@@ -29,41 +29,78 @@ import type {
 } from '../types';
 import { withTimeout } from './utils';
 import { db } from './firestoreConfig';
+import { performanceService } from './performanceService';
 
 export class FirestoreService {
     async getAllCourses(): Promise<Course[]> {
-        const coursesRef = collection(db, 'courses');
-        const snapshot = await getDocs(coursesRef);
-        const courses = await Promise.all(
-            snapshot.docs.map(async (doc: QueryDocumentSnapshot<DocumentData>) => {
-                const data = doc.data();
-                return this.mapToCourse(doc.id, data);
-            })
-        );
-        return courses;
+        const traceId = performanceService.traceFirestoreRead('courses', 'list');
+        try {
+            const coursesRef = collection(db, 'courses');
+            const snapshot = await getDocs(coursesRef);
+            const courses = await Promise.all(
+                snapshot.docs.map(async (doc: QueryDocumentSnapshot<DocumentData>) => {
+                    const data = doc.data();
+                    return this.mapToCourse(doc.id, data);
+                })
+            );
+            performanceService.recordMetric(traceId, 'documents_count', courses.length);
+            performanceService.stopTrace(traceId);
+            return courses;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async getCourseById(id: string): Promise<Course | null> {
-        const docRef = doc(db, 'courses', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) return null;
-        return this.mapToCourse(docSnap.id, docSnap.data());
+        const traceId = performanceService.traceFirestoreRead('courses', 'get');
+        try {
+            const docRef = doc(db, 'courses', id);
+            const docSnap = await getDoc(docRef);
+            const result = !docSnap.exists() ? null : await this.mapToCourse(docSnap.id, docSnap.data());
+            performanceService.stopTrace(traceId);
+            return result;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async createCourse(courseData: Omit<Course, 'id'>): Promise<string> {
-        const courseCollection = collection(db, 'courses');
-        const docRef = await withTimeout(addDoc(courseCollection, courseData));
-        return docRef.id;
+        const traceId = performanceService.traceFirestoreWrite('courses', 'create');
+        try {
+            const courseCollection = collection(db, 'courses');
+            const docRef = await withTimeout(addDoc(courseCollection, courseData));
+            performanceService.stopTrace(traceId);
+            return docRef.id;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async updateCourse(courseId: string, courseData: Partial<Course>): Promise<void> {
-        const courseRef = doc(db, 'courses', courseId);
-        await withTimeout(updateDoc(courseRef, courseData));
+        const traceId = performanceService.traceFirestoreWrite('courses', 'update');
+        try {
+            const courseRef = doc(db, 'courses', courseId);
+            await withTimeout(updateDoc(courseRef, courseData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async deleteCourse(courseId: string): Promise<void> {
-        const courseRef = doc(db, 'courses', courseId);
-        await withTimeout(deleteDoc(courseRef));
+        const traceId = performanceService.traceFirestoreDelete('courses');
+        try {
+            const courseRef = doc(db, 'courses', courseId);
+            await withTimeout(deleteDoc(courseRef));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     private async mapToCourse(id: string, data: DocumentData): Promise<Course> {
@@ -94,30 +131,81 @@ export class FirestoreService {
 
     // Unit operations
     async getUnitById(unitId: string): Promise<Unit | null> {
-        const docRef = doc(db, 'units', unitId);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) return null;
+        const traceId = performanceService.traceFirestoreRead('units', 'get');
+        try {
+            const docRef = doc(db, 'units', unitId);
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) {
+                performanceService.stopTrace(traceId);
+                return null;
+            }
 
-        const data = docSnap.data();
-        const unit: Unit = {
-            id: docSnap.id,
-            courseId: data.courseId as string,
-            name: data.name as string,
-            description: data.description as string,
-            lessons: (data.lessons as Array<{ id: string; name: string; order?: number; quizId?: string | null }>).map((lesson) => {
-                // Remove order field if it exists in the data
-                const { order, ...lessonWithoutOrder } = lesson;
-                
-                return {
-                    ...lessonWithoutOrder,
-                    id: lesson.id,
-                    name: lesson.name,
-                    hasQuiz: !!lesson.quizId
-                };
-            })
-        };
+            const data = docSnap.data();
+            const unit: Unit = {
+                id: docSnap.id,
+                courseId: data.courseId as string,
+                name: data.name as string,
+                description: data.description as string,
+                lessons: (data.lessons as Array<{ id: string; name: string; order?: number; quizId?: string | null }>).map((lesson) => {
+                    const { order, ...lessonWithoutOrder } = lesson;
+                    return {
+                        ...lessonWithoutOrder,
+                        id: lesson.id,
+                        name: lesson.name,
+                        hasQuiz: !!lesson.quizId
+                    };
+                })
+            };
+            performanceService.stopTrace(traceId);
+            return unit;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
 
-        return unit;
+    async getUnitLessonsCount(unitId: string): Promise<number> {
+        const traceId = performanceService.traceFirestoreRead('units', 'get');
+        try {
+            const docRef = doc(db, 'units', unitId);
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) {
+                performanceService.stopTrace(traceId);
+                return 0;
+            }
+            const data = docSnap.data();
+            const count = (data.lessons as Array<any> || []).length;
+            performanceService.recordMetric(traceId, 'lessons_count', count);
+            performanceService.stopTrace(traceId);
+            return count;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async createUnit(unitId: string, unitData: Unit): Promise<void> {
+        const traceId = performanceService.traceFirestoreWrite('units', 'create');
+        try {
+            const unitRef = doc(db, 'units', unitId);
+            await withTimeout(setDoc(unitRef, unitData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async updateUnit(unitId: string, unitData: Partial<Unit>): Promise<void> {
+        const traceId = performanceService.traceFirestoreWrite('units', 'update');
+        try {
+            const unitRef = doc(db, 'units', unitId);
+            await withTimeout(updateDoc(unitRef, unitData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async getUnitsIdNameForCourse(courseId: string): Promise<Array<CourseUnit>> {
@@ -132,61 +220,121 @@ export class FirestoreService {
         return unit.lessons;
     }
 
-    async getUnitLessonsCount(unitId: string): Promise<number> {
-        const docRef = doc(db, 'units', unitId);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) return 0;
-        const data = docSnap.data();
-        return (data.lessons as Array<any> || []).length;
-    }
-
-    async createUnit(unitId: string, unitData: Unit): Promise<void> {
-        const unitRef = doc(db, 'units', unitId);
-        await withTimeout(setDoc(unitRef, unitData));
-    }
-
-    async updateUnit(unitId: string, unitData: Partial<Unit>): Promise<void> {
-        const unitRef = doc(db, 'units', unitId);
-        await withTimeout(updateDoc(unitRef, unitData));
-    }
 
     // Lesson operations
-    async getLessonById(id: string): Promise<Lesson | null> {
-        const docRef = doc(db, 'lessons', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) return null;
-        const data = docSnap.data();
-        return {
-            id: docSnap.id,
-            name: data.name as string,
-            content: data.content as string,
-            unitId: data.unitId as string,
-            quizId: data.quizId as string | null,
-            'video-title': data['video-title'] as string | undefined,
-            'video-url': data['video-url'] as string | undefined
-        };
+    async getLessonById(lessonId: string): Promise<Lesson | null> {
+        const traceId = performanceService.traceFirestoreRead('lessons', 'get');
+        try {
+            const docRef = doc(db, 'lessons', lessonId);
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) {
+                performanceService.stopTrace(traceId);
+                return null;
+            }
+            const data = docSnap.data();
+            performanceService.stopTrace(traceId);
+            return {
+                id: docSnap.id,
+                ...data
+            } as Lesson;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async createLesson(lessonId: string, lessonData: Lesson): Promise<void> {
-        const lessonRef = doc(db, 'lessons', lessonId);
-        await withTimeout(setDoc(lessonRef, lessonData));
+        const traceId = performanceService.traceFirestoreWrite('lessons', 'create');
+        try {
+            const lessonRef = doc(db, 'lessons', lessonId);
+            await withTimeout(setDoc(lessonRef, lessonData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async updateLesson(lessonId: string, lessonData: Partial<Lesson>): Promise<void> {
-        const lessonRef = doc(db, 'lessons', lessonId);
-        await withTimeout(updateDoc(lessonRef, lessonData));
+        const traceId = performanceService.traceFirestoreWrite('lessons', 'update');
+        try {
+            const lessonRef = doc(db, 'lessons', lessonId);
+            await withTimeout(updateDoc(lessonRef, lessonData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async deleteLesson(lessonId: string): Promise<void> {
+        const traceId = performanceService.traceFirestoreDelete('lessons');
+        try {
+            const lessonRef = doc(db, 'lessons', lessonId);
+            await withTimeout(deleteDoc(lessonRef));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     // Quiz operations
-    async getQuizById(id: string): Promise<Quiz | null> {
-        const docRef = doc(db, 'quizzes', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) return null;
-        const data = docSnap.data();
-        return {
-            id: docSnap.id,
-            questions: data.questions as Quiz['questions']
-        };
+    async getQuizById(quizId: string): Promise<Quiz | null> {
+        const traceId = performanceService.traceFirestoreRead('quizzes', 'get');
+        try {
+            const docRef = doc(db, 'quizzes', quizId);
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) {
+                performanceService.stopTrace(traceId);
+                return null;
+            }
+            const data = docSnap.data();
+            performanceService.stopTrace(traceId);
+            return {
+                id: docSnap.id,
+                ...data
+            } as Quiz;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async createQuiz(quizId: string, quizData: Quiz): Promise<void> {
+        const traceId = performanceService.traceFirestoreWrite('quizzes', 'create');
+        try {
+            const quizRef = doc(db, 'quizzes', quizId);
+            await withTimeout(setDoc(quizRef, quizData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async updateQuiz(quizId: string, quizData: Partial<Quiz>): Promise<void> {
+        const traceId = performanceService.traceFirestoreWrite('quizzes', 'update');
+        try {
+            const quizRef = doc(db, 'quizzes', quizId);
+            await withTimeout(updateDoc(quizRef, quizData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async deleteQuiz(quizId: string): Promise<void> {
+        const traceId = performanceService.traceFirestoreDelete('quizzes');
+        try {
+            const quizRef = doc(db, 'quizzes', quizId);
+            await withTimeout(deleteDoc(quizRef));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async saveQuiz(quizData: Omit<Quiz, 'id'> & { id?: string }): Promise<string> {
@@ -317,10 +465,93 @@ export class FirestoreService {
     }
 
     // User operations
-    async getUserById(id: string): Promise<UserProfile | null> {
-        const docRef = doc(db, 'users', id);
-        const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as UserProfile : null;
+    async getUserById(userId: string): Promise<UserProfile | null> {
+        const traceId = performanceService.traceFirestoreRead('users', 'get');
+        try {
+            const docRef = doc(db, 'users', userId);
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) {
+                performanceService.stopTrace(traceId);
+                return null;
+            }
+            const data = docSnap.data();
+            performanceService.stopTrace(traceId);
+            return {
+                id: docSnap.id,
+                ...data
+            } as UserProfile;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async updateUserProfile(userId: string, userData: Partial<UserProfile>): Promise<void> {
+        const traceId = performanceService.traceFirestoreWrite('users', 'update');
+        try {
+            const userRef = doc(db, 'users', userId);
+            await withTimeout(updateDoc(userRef, userData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async getNotesByUserId(userId: string): Promise<Note[]> {
+        const traceId = performanceService.traceFirestoreQuery('notes', 1);
+        try {
+            const notesRef = collection(db, 'notes');
+            const q = query(notesRef, where('userId', '==', userId));
+            const snapshot = await getDocs(q);
+            const notes = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Note[];
+            performanceService.recordMetric(traceId, 'documents_count', notes.length);
+            performanceService.stopTrace(traceId);
+            return notes;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async createNote(noteData: Omit<Note, 'id'>): Promise<string> {
+        const traceId = performanceService.traceFirestoreWrite('notes', 'create');
+        try {
+            const notesRef = collection(db, 'notes');
+            const docRef = await withTimeout(addDoc(notesRef, noteData));
+            performanceService.stopTrace(traceId);
+            return docRef.id;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async updateNote(noteId: string, noteData: Partial<Note>): Promise<void> {
+        const traceId = performanceService.traceFirestoreWrite('notes', 'update');
+        try {
+            const noteRef = doc(db, 'notes', noteId);
+            await withTimeout(updateDoc(noteRef, noteData));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+
+    async deleteNote(noteId: string): Promise<void> {
+        const traceId = performanceService.traceFirestoreDelete('notes');
+        try {
+            const noteRef = doc(db, 'notes', noteId);
+            await withTimeout(deleteDoc(noteRef));
+            performanceService.stopTrace(traceId);
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
     }
 
     async createUser(user: UserProfile): Promise<void> {
