@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import { vi, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { getPerformance, trace } from './mocks/firebasePerformance';
 
 // Cleanup after each test
 afterEach(() => {
@@ -32,3 +33,9 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Mock Firebase Performance
+vi.mock('@firebase/performance', () => ({
+  getPerformance,
+  trace
+}));
