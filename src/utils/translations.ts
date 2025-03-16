@@ -24,6 +24,10 @@ export const translations: Translations = {
   },
   // Layout
   appTitle: {
+    'zh-TW': 'ECC在線課程',
+    'zh-CN': 'ECC在线课程'
+  },
+  homepage: {
     'zh-TW': '首頁',
     'zh-CN': '首页'
   },
@@ -106,8 +110,8 @@ export const translations: Translations = {
     'zh-CN': '下一课'
   },
   selectCourse: {
-    'zh-TW': '選擇課程',
-    'zh-CN': '选择课程'
+    'zh-TW': '請選擇課程',
+    'zh-CN': '请选择课程'
   },
   // Course List
   availableCourses: {

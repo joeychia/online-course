@@ -136,7 +136,7 @@ export default function Layout({ children }: LayoutProps) {
         <Toolbar 
           sx={{ 
             display: 'flex', 
-            justifyContent: 'space-between', 
+            justifyContent: 'flex-start', 
             px: { xs: 1, sm: 2 },
             height: 62,
             minHeight: 52,
@@ -148,81 +148,54 @@ export default function Layout({ children }: LayoutProps) {
             scrollbarWidth: 'none'
           }}
         >
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 0 }}>           
             <Button
               color="inherit"
               onClick={handleMenuClick}
               sx={menuButtonStyles}
             >
               <MenuIcon sx={{ fontSize: '1.75rem' }} />
-              <span>{t('menu')}</span>
             </Button>
-            <Menu
-              anchorEl={menuAnchorEl}
-              open={Boolean(menuAnchorEl)}
-              onClose={handleMenuClose}
-              onClick={handleMenuClose}
+            <Button
+              component={RouterLink}
+              to="/"
+              color="inherit"
+              sx={{
+                ...menuButtonStyles,
+                fontSize: { xs: '1.2rem', sm: '1.4rem' },
+                fontWeight: 500,
+                ml: 1
+              }}
             >
-              <Box sx={{ minWidth: 200 }}>
+              {t('appTitle')}
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, justifyContent: 'flex-end' }}>
+            {currentUser && (
+              <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
                 <Button
                   component={RouterLink}
-                  to="/"
+                  to="/mycourses"
                   color="inherit"
-                  fullWidth
-                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                  startIcon={null}
+                  sx={menuButtonStyles}
                 >
-                  <HomeIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
-                  <span>{t('appTitle')}</span>
+                  <SchoolIcon sx={{ fontSize: '1.75rem' }} />
+                  <span>{t('myCourses')}</span>
                 </Button>
                 <Button
                   component={RouterLink}
-                  to="/help"
+                  to={"/notebook"}
                   color="inherit"
-                  fullWidth
-                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                  startIcon={null}
+                  sx={menuButtonStyles}
                 >
-                  <HelpOutlineIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
-                  <span>{t('help')}</span>
+                  <MenuBookIcon sx={{ fontSize: '1.75rem' }} />
+                  <span>{t('myNotes')}</span>
                 </Button>
-                {isAdmin && (
-                  <Button
-                    component={RouterLink}
-                    to="/admin"
-                    color="inherit"
-                    fullWidth
-                    sx={{ justifyContent: 'flex-start', py: 1 }}
-                  >
-                    <AdminPanelSettingsIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
-                    <span>{t('admin')}</span>
-                  </Button>
-                )}
               </Box>
-            </Menu>
-
-              {currentUser && (
-                <>
-                  <Button
-                    component={RouterLink}
-                    to="/mycourses"
-                    color="inherit"
-                    startIcon={null}
-                    sx={menuButtonStyles}
-                  >
-                    <SchoolIcon sx={{ fontSize: '1.75rem' }} />
-                    <span>{t('myCourses')}</span>
-                  </Button>
-                  <Button
-                    component={RouterLink}
-                    to={"/notebook"}
-                    color="inherit"
-                    startIcon={null}
-                    sx={menuButtonStyles}
-                  >
-                    <MenuBookIcon sx={{ fontSize: '1.75rem' }} />
-                    <span>{t('myNotes')}</span>
-                  </Button>
-                </>
-              )}
-
+            )}
             <Button
               color="inherit"
               onClick={handleSettingsMenu}
@@ -230,8 +203,77 @@ export default function Layout({ children }: LayoutProps) {
               sx={menuButtonStyles}
             >
               <SettingsIcon sx={{ fontSize: '1.75rem' }} />
-              <span>{t('settings')}</span>
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'block' } }}>{t('settings')}</Box>
             </Button>
+          </Box>
+
+          <Menu
+            anchorEl={menuAnchorEl}
+            open={Boolean(menuAnchorEl)}
+            onClose={handleMenuClose}
+            onClick={handleMenuClose}
+          >
+            <Box sx={{ minWidth: 200 }}>
+              <Button
+                component={RouterLink}
+                to="/"
+                color="inherit"
+                fullWidth
+                sx={{ justifyContent: 'flex-start', py: 1 }}
+              >
+                <HomeIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                <span>{t('homepage')}</span>
+              </Button>
+              {currentUser && (
+                <Box sx={{ display: { sm: 'none' } }}>
+                  <Button
+                    component={RouterLink}
+                    to="/mycourses"
+                    color="inherit"
+                    fullWidth
+                    sx={{ justifyContent: 'flex-start', py: 1 }}
+                  >
+                    <SchoolIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                    <span>{t('myCourses')}</span>
+                  </Button>
+                  <Button
+                    component={RouterLink}
+                    to="/notebook"
+                    color="inherit"
+                    fullWidth
+                    sx={{ justifyContent: 'flex-start', py: 1 }}
+                  >
+                    <MenuBookIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                    <span>{t('myNotes')}</span>
+                  </Button>
+                </Box>
+              )}
+              <Button
+                component={RouterLink}
+                to="/help"
+                color="inherit"
+                fullWidth
+                sx={{ justifyContent: 'flex-start', py: 1 }}
+              >
+                <HelpOutlineIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                <span>{t('help')}</span>
+              </Button>
+              {isAdmin && (
+                <Button
+                  component={RouterLink}
+                  to="/admin"
+                  color="inherit"
+                  fullWidth
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                >
+                  <AdminPanelSettingsIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                  <span>{t('admin')}</span>
+                </Button>
+              )}
+            </Box>
+          </Menu>
+
+
             <Menu
               anchorEl={settingsAnchorEl}
               open={Boolean(settingsAnchorEl)}

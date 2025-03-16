@@ -178,7 +178,7 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
       )}
       
       <Typography variant="h4" gutterBottom>
-        {myCourses? t('selectCourse') : t('availableCourses')}
+        {myCourses? t('myCourses') : t('availableCourses')}
       </Typography>
 
       <Grid container spacing={3}>
