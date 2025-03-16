@@ -414,6 +414,10 @@ export const translations: Translations = {
     'zh-TW': '目錄',
     'zh-CN': '目录'
   },
+  maxUnitsSelected: {
+    'zh-TW': '最多只能選擇 {{count}} 個單元',
+    'zh-CN': '最多只能选择 {{count}} 个单元'
+  },
   requiredQuestionsRemaining: {
     'zh-TW': '已完成 {{completed}}/{{total}}',
     'zh-CN': '已完成 {{completed}}/{{total}}'

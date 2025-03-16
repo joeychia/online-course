@@ -12,11 +12,15 @@ import {
   TableRow,
   CircularProgress,
   Alert,
-  FormControlLabel,
-  Checkbox,
   Button,
   Grid,
   Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Snackbar,
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
@@ -32,16 +36,18 @@ export default function AdminQuizResults() {
   const [loading, setLoading] = useState(true);
   const [buttonLoading, setButtonLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [course, setCourse] = useState<Course | null>(null);
   const [units, setUnits] = useState<CourseUnit[]>([]);
   const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
-    type QuizResult = {
-        userName: string;
-        userEmail: string;
-        unitName: string;
-        score: number;
-        freeFormAnswer: string;
-    };
+  const [startUnitId, setStartUnitId] = useState<string>('');
+  const [endUnitId, setEndUnitId] = useState<string>('');
+  type QuizResult = {
+    userName: string;
+    userEmail: string;
+    scores: Record<string, number>;
+    freeFormAnswers: Record<string, string>;
+  };
 
   const [quizResults, setQuizResults] = useState<Array<QuizResult>|null>(null);
 
@@ -71,19 +77,71 @@ export default function AdminQuizResults() {
     void loadCourseData();
   }, [courseId, currentUser]);
 
-  const handleUnitToggle = (unitId: string) => {
-    const newSelectedUnits = new Set(selectedUnits);
-    if (selectedUnits.has(unitId)) {
-      newSelectedUnits.delete(unitId);
-    } else {
-      if (selectedUnits.size >= 30) {
-        setError(t('maxUnitsSelected', { count: 30 }));
-        return;
-      }
-      newSelectedUnits.add(unitId);
+  const handleStartUnitChange = (event: SelectChangeEvent) => {
+    const newStartUnitId = event.target.value;
+    setStartUnitId(newStartUnitId);
+    updateSelectedUnitsRange(newStartUnitId, endUnitId);
+    // Reset quiz results when selection changes
+    setQuizResults(null);
+  };
+
+  const handleEndUnitChange = (event: SelectChangeEvent) => {
+    const newEndUnitId = event.target.value;
+    setEndUnitId(newEndUnitId);
+    updateSelectedUnitsRange(startUnitId, newEndUnitId);
+    // Reset quiz results when selection changes
+    setQuizResults(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+    setError(null);
+  };
+
+  const updateSelectedUnitsRange = (start: string, end: string) => {
+    if (!start || !end) {
+      // If either dropdown is not selected, don't update the selection
+      setError(null);
+      setSelectedUnits(new Set());
+      return;
     }
+
+    // Find the indices of the start and end units
+    const startIndex = units.findIndex(unit => unit.id === start);
+    const endIndex = units.findIndex(unit => unit.id === end);
+
+    if (startIndex === -1 || endIndex === -1) {
+      setError(t('invalidUnitRange'));
+      setSnackbarOpen(true);
+      setSelectedUnits(new Set());
+      return;
+    }
+
+    // Ensure start is before end
+    const [lowerIndex, upperIndex] = startIndex <= endIndex 
+      ? [startIndex, endIndex] 
+      : [endIndex, startIndex];
+
+    // Get all units in the range
+    const unitsInRange = units.slice(lowerIndex, upperIndex + 1);
+    
+    // Check if the range exceeds the maximum allowed units
+    if (unitsInRange.length > 30) {
+      setError(t('maxUnitsSelected', { count: 30 }));
+      setSnackbarOpen(true);
+      setSelectedUnits(new Set());
+      return;
+    }
+
+    // Create a new set with the selected unit IDs
+    const newSelectedUnits = new Set<string>();
+    unitsInRange.forEach(unit => newSelectedUnits.add(unit.id));
+    
     setSelectedUnits(newSelectedUnits);
     setError(null);
+    
+    // Reset quiz results when selection changes
+    setQuizResults(null);
   };
 
   const handleFetchQuizResults = async () => {
@@ -113,6 +171,7 @@ export default function AdminQuizResults() {
           const freeFormAnswer = lastFreeFormIndex !== undefined ? history.answers[lastFreeFormIndex] : '';
 
           return {
+            userId: history.userId,
             userName: user?.name || 'Unknown',
             userEmail: user?.email || 'Unknown',
             unitName: unit?.name || 'Unknown',
@@ -121,21 +180,27 @@ export default function AdminQuizResults() {
           };
         })
       );
-      // sort results by unitName
-      results.sort((a, b) => a.unitName.localeCompare(b.unitName));
-      // go through each quizHistory, check if answers correctness and put it to QuizResults
-      // Group results by unit
-      const resultsByUnit = results.reduce((acc, result) => {
-        if (!acc[result.unitName]) {
-          acc[result.unitName] = [];
+
+      // Group results by user
+      const resultsByUser = results.reduce((acc, result) => {
+        if (!acc[result.userId]) {
+          acc[result.userId] = {
+            userName: result.userName,
+            userEmail: result.userEmail,
+            scores: {},
+            freeFormAnswers: {}
+          };
         }
-        acc[result.unitName].push(result);
+        acc[result.userId].scores[result.unitName] = result.score;
+        acc[result.userId].freeFormAnswers[result.unitName] = result.freeFormAnswer;
         return acc;
-      }, {} as Record<string, QuizResult[]>);
-      setQuizResults(Object.values(resultsByUnit).flat());
+      }, {} as Record<string, QuizResult>);
+
+      setQuizResults(Object.values(resultsByUser));
       setError(null);
     } catch (err) {
       setError(t('failedToLoadQuizResults'));
+      setSnackbarOpen(true);
       console.error('Error fetching quiz results:', err);
     } finally {
       setButtonLoading(false);
@@ -148,14 +213,6 @@ export default function AdminQuizResults() {
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <CircularProgress />
         </Box>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Alert severity="error">{error}</Alert>
       </Container>
     );
   }
@@ -178,30 +235,56 @@ export default function AdminQuizResults() {
 
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
-          {t('Select Units')}
+          {t('Select Units Range')}
         </Typography>
         <Grid container spacing={2}>
-          {units.map((unit) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={unit.id}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedUnits.has(unit.id)}
-                    onChange={() => handleUnitToggle(unit.id)}
-                    disabled={!selectedUnits.has(unit.id) && selectedUnits.size >= 30}
-                  />
-                }
-                label={unit.name}
-                sx={{ width: '100%' }}
-              />
-            </Grid>
-          ))}
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel id="start-unit-label">{t('Start Unit')}</InputLabel>
+              <Select
+                labelId="start-unit-label"
+                id="start-unit-select"
+                value={startUnitId}
+                label={t('Start Unit')}
+                onChange={handleStartUnitChange}
+              >
+                {units.map((unit) => (
+                  <MenuItem key={unit.id} value={unit.id}>
+                    {unit.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel id="end-unit-label">{t('End Unit')}</InputLabel>
+              <Select
+                labelId="end-unit-label"
+                id="end-unit-select"
+                value={endUnitId}
+                label={t('End Unit')}
+                onChange={handleEndUnitChange}
+              >
+                {units.map((unit) => (
+                  <MenuItem key={unit.id} value={unit.id}>
+                    {unit.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
         </Grid>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            {t('Selected Units')}: {selectedUnits.size}
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           color="primary"
           onClick={handleFetchQuizResults}
-          disabled={selectedUnits.size === 0 || buttonLoading}
+          disabled={selectedUnits.size === 0 || buttonLoading || error !== null}
           sx={{ mt: 2 }}
         >
           {buttonLoading ? (
@@ -213,11 +296,16 @@ export default function AdminQuizResults() {
             t('Fetch Results')
           )}
         </Button>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert severity="error" onClose={handleSnackbarClose}>
             {error}
           </Alert>
-        )}
+        </Snackbar>
         {!error && !buttonLoading && quizResults && quizResults.length === 0 && selectedUnits.size > 0 && (
           <Alert severity="info" sx={{ mt: 2 }}>
             {t('Result not found. Try selecting different units.')}
@@ -227,84 +315,73 @@ export default function AdminQuizResults() {
 
       {quizResults && quizResults.length > 0 && (
         <Box>
-          {Array.from(new Set(quizResults.map(result => result.unitName))).map(unitName => (
-            <Box key={unitName} sx={{ mb: 4 }}>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                {unitName}
-              </Typography>
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>{t('name')}</TableCell>
-                      <TableCell>{t('email')}</TableCell>
-                      <TableCell align="right">{t('score')}</TableCell>
-                      <TableCell align="center">{t('Text Answer')}</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {quizResults.filter(result => result.unitName === unitName).map((result, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{result.userName}</TableCell>
-                        <TableCell>{result.userEmail}</TableCell>
-                        <TableCell align="right">{result.score.toFixed(2)}%</TableCell>
-                        <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          <Tooltip title={result.freeFormAnswer || '-'} arrow>
-                            <Typography noWrap>
-                              {result.freeFormAnswer || '-'}
-                            </Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('name')}</TableCell>
+                  <TableCell>{t('email')}</TableCell>
+                  {Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name))).map(unitName => (
+                    <TableCell key={unitName} align="right">
+                      <Tooltip title={unitName} arrow>
+                        <Typography>{shortenUnitName(unitName)}</Typography>
+                      </Tooltip>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {quizResults.map((result) => (
+                  <TableRow key={`${result.userEmail}-${result.userName}`}>
+                    <TableCell>{result.userName}</TableCell>
+                    <TableCell>{result.userEmail}</TableCell>
+                    {Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name))).map(unitName => (
+                      <TableCell key={unitName} align="right">
+                        {result.scores[unitName] ? (
+                          <Tooltip title={`${unitName}: ${result.freeFormAnswers[unitName] || '-'}`} arrow>
+                            <Typography>{result.scores[unitName].toFixed(2)}%</Typography>
                           </Tooltip>
-                        </TableCell>
-                      </TableRow>
+                        ) : '-'}
+                      </TableCell>
                     ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
           
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1, mb:3 }}>
+          <Box sx={{ display: 'flex', gap: 2, mt: 1, mb:3 }}>
             <Button
               variant="contained"
               color="primary"
+              disabled={buttonLoading}
               onClick={async () => {
+                if (buttonLoading) return;
                 try {
                   setButtonLoading(true);
-                  const XLSX = await import('xlsx');
-                  // Create workbook
-                  const wb = XLSX.utils.book_new();
+                  const selectedUnitNames = Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name)));
                   
-                  // Group results by unit
-                  const resultsByUnit = quizResults.reduce((acc, result) => {
-                    if (!acc[result.unitName]) {
-                      acc[result.unitName] = [];
-                    }
-                    acc[result.unitName].push(result);
-                    return acc;
-                  }, {} as Record<string, QuizResult[]>);
+                  const scoresHeaders = ['Name', 'Email', ...selectedUnitNames.map(name => `${shortenUnitName(name)} Score (%)`)].join(',');
+                  const scoresRows = quizResults.map(result => [
+                    result.userName,
+                    result.userEmail,
+                    ...selectedUnitNames.map(unitName => 
+                      result.scores[unitName] ? result.scores[unitName].toFixed(2) : '-'
+                    )
+                  ].join(','));
 
-                  // Create a sheet for each unit
-                  Object.entries(resultsByUnit).forEach(([unitName, results]) => {
-                    // Prepare data for this unit
-                    const sheetData = results.map(result => {
-                      return {
-                        'Name': result.userName,
-                        'Email': result.userEmail,
-                        'Score (%)': result.score.toFixed(2),
-                        'Free-form Answer': result.freeFormAnswer || '-'
-                      };
-                    });
-
-                    // Create worksheet
-                    const ws = XLSX.utils.json_to_sheet(sheetData);
-                    XLSX.utils.book_append_sheet(wb, ws, unitName);
-                  });
-
-                  // Save the file
-                  XLSX.writeFile(wb, `${course?.name || 'quiz-results'}.xlsx`);
+                  const scoresCSV = [scoresHeaders, ...scoresRows].join('\n');
+                  // Add BOM for UTF-8 encoding recognition
+                  const scoresContent = new Uint8Array([0xEF, 0xBB, 0xBF, ...new TextEncoder().encode(scoresCSV)]);
+                  const scoresBlob = new Blob([scoresContent], { type: 'text/csv;charset=utf-8;' });
+                  const scoresLink = document.createElement('a');
+                  scoresLink.href = URL.createObjectURL(scoresBlob);
+                  scoresLink.download = `${course?.name || 'quiz'}-scores.csv`;
+                  scoresLink.click();
+                  URL.revokeObjectURL(scoresLink.href);
                 } catch (error) {
-                  console.error('Error generating Excel file:', error);
-                  setError(t('failedToGenerateExcel'));
+                  console.error('Error generating scores CSV:', error);
+                  setError(t('failedToGenerateCSV'));
                 } finally {
                   setButtonLoading(false);
                 }
@@ -316,7 +393,61 @@ export default function AdminQuizResults() {
                   {t('Generating')}
                 </Box>
               ) : (
-                t('Download Excel')
+                t('Download Scores CSV')
+              )}
+            </Button>
+
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={buttonLoading}
+              onClick={async () => {
+                if (buttonLoading) return;
+                try {
+                  setButtonLoading(true);
+                  const selectedUnitNames = Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name)));
+                  
+                  const answersHeaders = ['Name', 'Email', 'Unit', 'Score', 'Free-form Answer'].join(',');
+                  const answersRows: string[] = [];
+                  
+                  quizResults.forEach(result => {
+                    selectedUnitNames.forEach(unitName => {
+                      if (result.freeFormAnswers[unitName]) {
+                        answersRows.push([
+                          result.userName,
+                          result.userEmail,
+                          shortenUnitName(unitName),
+                          result.scores[unitName]? result.scores[unitName].toFixed(2) : '-',
+                          `"${result.freeFormAnswers[unitName].replace(/"/g, '""')}"`
+                        ].join(','));
+                      }
+                    });
+                  });
+
+                  const answersCSV = [answersHeaders, ...answersRows].join('\n');
+                  // Add BOM for UTF-8 encoding recognition
+                  const answersContent = new Uint8Array([0xEF, 0xBB, 0xBF, ...new TextEncoder().encode(answersCSV)]);
+                  const answersBlob = new Blob([answersContent], { type: 'text/csv;charset=utf-8;' });
+                  const answersLink = document.createElement('a');
+                  answersLink.href = URL.createObjectURL(answersBlob);
+                  answersLink.download = `${course?.name || 'quiz'}-answers.csv`;
+                  answersLink.click();
+                  URL.revokeObjectURL(answersLink.href);
+                } catch (error) {
+                  console.error('Error generating answers CSV:', error);
+                  setError(t('failedToGenerateCSV'));
+                } finally {
+                  setButtonLoading(false);
+                }
+              }}
+            >
+              {buttonLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                  {t('Generating')}
+                </Box>
+              ) : (
+                t('Download Free-form Answers CSV')
               )}
             </Button>
           </Box>
@@ -325,3 +456,8 @@ export default function AdminQuizResults() {
     </Container>
   );
 }
+
+// Helper function to shorten unit names by taking the first part before whitespace
+const shortenUnitName = (unitName: string) => {
+  return unitName.split(/\s+/)[0] || unitName;
+};
