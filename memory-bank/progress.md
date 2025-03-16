@@ -80,6 +80,20 @@
    - Keep lesson data in unit documents
    - Optimize for on-demand loading
 
+### Admin Student Management
+- [ ] Course students page implementation
+  - Design document created
+  - Page at `/admin/course/{course-id}/students`
+  - Display student name, email, completed lessons count
+- [ ] Student progress tracking
+  - Calculate completed lessons from user progress data
+  - Show completion statistics
+- [ ] Student list with filtering and sorting
+  - Table with sortable columns
+  - Search/filter functionality
+- [ ] Navigation integration
+  - Add "View Students" button in course editor
+
 ### User & Group Management (On Hold)
 1. Admin Features
    - User management system

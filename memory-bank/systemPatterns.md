@@ -125,6 +125,46 @@
        async updateLesson(id: string, data: Partial<Lesson>): Promise<void>;
        async deleteLesson(id: string): Promise<void>;
        async reorderLessons(unitId: string, sourceIndex: number, destinationIndex: number): Promise<void>;
+       
+       // User and progress operations
+       async getUserById(id: string): Promise<UserProfile | null>;
+       async getRegisteredUsersForCourse(courseId: string): Promise<string[]>;
+       async updateUserProgress(userId: string, courseId: string, lessonId: string, completed: boolean, completedAt: string, lessonName: string): Promise<void>;
+     }
+     ```
+
+2. Student Progress Tracking
+   - Calculate completed lessons from user progress data
+   - Track completion percentage
+   - Monitor student activity
+   - Example pattern:
+     ```typescript
+     // Pattern: Progress calculation from user data
+     function calculateCompletedLessons(userProfile: UserProfile, courseId: string): number {
+       const courseProgress = userProfile.progress?.[courseId] || {};
+       return Object.values(courseProgress).filter(progress => progress.completed).length;
+     }
+     
+     // Pattern: Student data aggregation
+     async function getStudentProgressForCourse(courseId: string): Promise<StudentProgress[]> {
+       // 1. Get all registered users for the course
+       const userIds = await firestoreService.getRegisteredUsersForCourse(courseId);
+       
+       // 2. Fetch user profiles in parallel
+       const userProfiles = await Promise.all(
+         userIds.map(userId => firestoreService.getUserById(userId))
+       );
+       
+       // 3. Calculate progress metrics for each user
+       return userProfiles
+         .filter(profile => profile !== null)
+         .map(profile => ({
+           userId: profile!.id,
+           name: profile!.name,
+           email: profile!.email,
+           completedLessons: calculateCompletedLessons(profile!, courseId),
+           // Additional metrics as needed
+         }));
      }
      ```
 

@@ -35,13 +35,35 @@
    - Implement batch loading
    - Add virtual scrolling for large courses
 
-3. User & Group Management (Pending)
+3. Admin Student Management
+   - Course students page implementation
+   - Student progress tracking
+   - Completed lessons count display
+   - Student list with filtering and sorting
+
+4. User & Group Management (Pending)
    - Comprehensive user management
    - Group assignment system
    - Member management
    - Group-based course access
 
 ## Recent Changes
+
+- Course Students Page Design (In Progress):
+  - Created design document for course students page
+  - Added reference to GitHub issue #30
+  - Defined component structure and data flow
+  - Outlined UI/UX design and implementation details
+  - Planned testing strategy and future enhancements
+  - Benefits:
+    * Better student progress tracking
+    * Enhanced admin capabilities
+    * Improved course management
+  - Implementation plan:
+    * Create CourseStudentsPage component
+    * Create CourseStudentsList component
+    * Implement data fetching and processing
+    * Add navigation from course editor
 
 - Course Card Reuse (Completed):
   - Created shared CourseCard component
@@ -120,7 +142,14 @@
    - Clear data flow through service layer
    - Array position determines order
 
-4. Testing Strategy
+4. Student Management
+   - Dedicated page for course students
+   - Leverage existing firestoreService methods
+   - Calculate completion metrics from user progress data
+   - Consistent UI with other admin pages
+   - Sortable and filterable student list
+
+5. Testing Strategy
    - Add performance benchmarks
    - Test with large datasets
    - Measure loading improvements

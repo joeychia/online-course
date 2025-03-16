@@ -12,6 +12,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import PeopleIcon from '@mui/icons-material/People';
 import { CourseSettings } from './CourseSettings';
 import { Course } from '../../../../types';
 
@@ -45,14 +46,24 @@ export const CourseHeader: React.FC<CourseHeaderProps> = ({
               {course?.name || (isLoading ? 'Loading...' : 'Course not found')}
             </Typography>
             {course && (
-              <Button
-                startIcon={<AssessmentIcon />}
-                variant="outlined"
-                onClick={() => navigate(`/admin/quiz/${course.id}`)}
-                disabled={isSaving}
-              >
-                View Quiz Results
-              </Button>
+              <Box display="flex" gap={2}>
+                <Button
+                  startIcon={<PeopleIcon />}
+                  variant="outlined"
+                  onClick={() => navigate(`/admin/course/${course.id}/students`)}
+                  disabled={isSaving}
+                >
+                  View Students
+                </Button>
+                <Button
+                  startIcon={<AssessmentIcon />}
+                  variant="outlined"
+                  onClick={() => navigate(`/admin/quiz/${course.id}`)}
+                  disabled={isSaving}
+                >
+                  View Quiz Results
+                </Button>
+              </Box>
             )}
           </Box>
           <Divider />
