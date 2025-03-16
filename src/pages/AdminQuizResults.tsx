@@ -27,6 +27,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { firestoreService } from '../services/firestoreService';
 import { useParams } from 'react-router-dom';
 import type { Course, CourseUnit } from '../types';
+import React from 'react';
 
 export default function AdminQuizResults() {
   const { courseId = '' } = useParams<{ courseId: string; }>();
@@ -46,7 +47,7 @@ export default function AdminQuizResults() {
     userName: string;
     userEmail: string;
     scores: Record<string, number>;
-    freeFormAnswers: Record<string, string>;
+    freeFormAnswers: Record<string, Array<{ question: string, answer: string }>>;
   };
 
   const [quizResults, setQuizResults] = useState<Array<QuizResult>|null>(null);
@@ -165,10 +166,13 @@ export default function AdminQuizResults() {
 
           // Find the last free-form question and its answer
           const questions = quiz?.questions || [];
-          const lastFreeFormIndex = questions.map((q, i) => ({ type: q.type, index: i }))
-            .filter(q => q.type === 'free_form')
-            .pop()?.index;
-          const freeFormAnswer = lastFreeFormIndex !== undefined ? history.answers[lastFreeFormIndex] : '';
+          const freeFormQuestions = questions
+            .map((q, i) => ({ question: q.text, index: i, type: q.type }))
+            .filter(q => q.type === 'free_form' && q.question && history.answers[q.index]);
+          const freeFormAnswers = freeFormQuestions.map(q => ({
+            question: q.question,
+            answer: history.answers[q.index]
+          }));
 
           return {
             userId: history.userId,
@@ -176,7 +180,7 @@ export default function AdminQuizResults() {
             userEmail: user?.email || 'Unknown',
             unitName: unit?.name || 'Unknown',
             score: history.score,
-            freeFormAnswer
+                        freeFormAnswers
           };
         })
       );
@@ -192,7 +196,7 @@ export default function AdminQuizResults() {
           };
         }
         acc[result.userId].scores[result.unitName] = result.score;
-        acc[result.userId].freeFormAnswers[result.unitName] = result.freeFormAnswer;
+        acc[result.userId].freeFormAnswers[result.unitName] = result.freeFormAnswers;
         return acc;
       }, {} as Record<string, QuizResult>);
 
@@ -205,6 +209,64 @@ export default function AdminQuizResults() {
     } finally {
       setButtonLoading(false);
     }
+  };
+
+  const handleDownloadScoreCSV = () => {
+    if (!quizResults || quizResults.length === 0) return;
+
+    // Get all unique unit names from all results
+    const allUnits = Array.from(new Set(quizResults.flatMap(r => Object.keys(r.scores))));
+
+    const csvContent = [
+      '\uFEFF' + ['Name', 'Email', ...allUnits.map(shortenUnitName)].join(','),
+      ...quizResults.map(result => [
+        result.userName,
+        result.userEmail,
+        ...allUnits.map(unitName => 
+          result.scores[unitName] !== undefined 
+            ? Math.ceil(result.scores[unitName])
+            : 'N/A'
+        )
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `quiz-results-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
+  const shortenUnitName = (name: string) => {
+    return name.split(/\s+/)[0] || name;
+  };
+
+  const handleDownloadFreeFormCSV = () => {
+    if (!quizResults || quizResults.length === 0) return;
+
+    // Get question headers from first entry matching table structure
+    const sampleEntry = quizResults[0].freeFormAnswers[Object.keys(quizResults[0].freeFormAnswers)[0]];
+    const questionHeaders = sampleEntry?.flatMap((_, i) => [`Question ${i + 1}`, `Answer ${i + 1}`]) || [];
+
+    const csvContent = [
+      '\uFEFF' + ['Name', 'Email', 'Unit', 'Score (%)', ...questionHeaders].join(','),
+      ...quizResults.flatMap(result =>
+        Object.entries(result.freeFormAnswers).map(([unitName, answers]) => [
+          result.userName,
+          result.userEmail,
+          shortenUnitName(unitName),
+          result.scores[unitName] !== undefined ? Math.ceil(result.scores[unitName]) : 'N/A',          ...answers.flatMap(qa => [qa.question, qa.answer])
+        ].join(','))
+      )
+    ].join('\n');
+  
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `free-form-responses-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
   };
 
   if (loading) {
@@ -314,150 +376,105 @@ export default function AdminQuizResults() {
       </Paper>
 
       {quizResults && quizResults.length > 0 && (
-        <Box>
-          <TableContainer component={Paper}>
+        <>
+          <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+            Assessment Scores
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleDownloadScoreCSV}
+              disabled={!quizResults || quizResults.length === 0}
+              sx={{ ml: 2 }}
+            >
+              Download Scores CSV
+            </Button>
+          </Typography>
+          <TableContainer component={Paper} sx={{ mb: 4 }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>{t('name')}</TableCell>
-                  <TableCell>{t('email')}</TableCell>
-                  {Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name))).map(unitName => (
-                    <TableCell key={unitName} align="right">
-                      <Tooltip title={unitName} arrow>
-                        <Typography>{shortenUnitName(unitName)}</Typography>
-                      </Tooltip>
-                    </TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  {Array.from(new Set(quizResults.flatMap(r => Object.keys(r.scores)))).map(unitName => (
+                    <TableCell key={unitName}>{shortenUnitName(unitName)}</TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {quizResults.map((result) => (
-                  <TableRow key={`${result.userEmail}-${result.userName}`}>
+                  <TableRow key={`${result.userEmail}-scores`}>
                     <TableCell>{result.userName}</TableCell>
-                    <TableCell>{result.userEmail}</TableCell>
-                    {Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name))).map(unitName => (
-                      <TableCell key={unitName} align="right">
-                        {result.scores[unitName] ? (
-                          <Tooltip title={`${unitName}: ${result.freeFormAnswers[unitName] || '-'}`} arrow>
-                            <Typography>{result.scores[unitName].toFixed(2)}%</Typography>
-                          </Tooltip>
-                        ) : '-'}
-                      </TableCell>
+                    <TableCell sx={{ maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {result.userEmail}
+                    </TableCell>
+                    {Array.from(new Set(Object.keys(result.scores))).map(unitName => (
+                      <TableCell key={unitName}>
+                        {Math.ceil(result.scores[unitName])}%                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-          
-          <Box sx={{ display: 'flex', gap: 2, mt: 1, mb:3 }}>
+          <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+            Free-form Responses
             <Button
               variant="contained"
-              color="primary"
-              disabled={buttonLoading}
-              onClick={async () => {
-                if (buttonLoading) return;
-                try {
-                  setButtonLoading(true);
-                  const selectedUnitNames = Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name)));
-                  
-                  const scoresHeaders = ['Name', 'Email', ...selectedUnitNames.map(name => `${shortenUnitName(name)} Score (%)`)].join(',');
-                  const scoresRows = quizResults.map(result => [
-                    result.userName,
-                    result.userEmail,
-                    ...selectedUnitNames.map(unitName => 
-                      result.scores[unitName] ? result.scores[unitName].toFixed(2) : '-'
-                    )
-                  ].join(','));
-
-                  const scoresCSV = [scoresHeaders, ...scoresRows].join('\n');
-                  // Add BOM for UTF-8 encoding recognition
-                  const scoresContent = new Uint8Array([0xEF, 0xBB, 0xBF, ...new TextEncoder().encode(scoresCSV)]);
-                  const scoresBlob = new Blob([scoresContent], { type: 'text/csv;charset=utf-8;' });
-                  const scoresLink = document.createElement('a');
-                  scoresLink.href = URL.createObjectURL(scoresBlob);
-                  scoresLink.download = `${course?.name || 'quiz'}-scores.csv`;
-                  scoresLink.click();
-                  URL.revokeObjectURL(scoresLink.href);
-                } catch (error) {
-                  console.error('Error generating scores CSV:', error);
-                  setError(t('failedToGenerateCSV'));
-                } finally {
-                  setButtonLoading(false);
-                }
-              }}
+              color="secondary"
+              onClick={handleDownloadFreeFormCSV}
+              disabled={!quizResults || quizResults.length === 0}
+              sx={{ ml: 2 }}
             >
-              {buttonLoading ? (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                  {t('Generating')}
-                </Box>
-              ) : (
-                t('Download Scores CSV')
-              )}
+              Download Free-form Responses
             </Button>
-
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={buttonLoading}
-              onClick={async () => {
-                if (buttonLoading) return;
-                try {
-                  setButtonLoading(true);
-                  const selectedUnitNames = Array.from(new Set(units.filter(unit => selectedUnits.has(unit.id)).map(unit => unit.name)));
+          </Typography>
+          <TableContainer component={Paper} sx={{ mb: 4 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Unit</TableCell>
                   
-                  const answersHeaders = ['Name', 'Email', 'Unit', 'Score', 'Free-form Answer'].join(',');
-                  const answersRows: string[] = [];
-                  
-                  quizResults.forEach(result => {
-                    selectedUnitNames.forEach(unitName => {
-                      if (result.freeFormAnswers[unitName]) {
-                        answersRows.push([
-                          result.userName,
-                          result.userEmail,
-                          shortenUnitName(unitName),
-                          result.scores[unitName]? result.scores[unitName].toFixed(2) : '-',
-                          `"${result.freeFormAnswers[unitName].replace(/"/g, '""')}"`
-                        ].join(','));
-                      }
-                    });
-                  });
-
-                  const answersCSV = [answersHeaders, ...answersRows].join('\n');
-                  // Add BOM for UTF-8 encoding recognition
-                  const answersContent = new Uint8Array([0xEF, 0xBB, 0xBF, ...new TextEncoder().encode(answersCSV)]);
-                  const answersBlob = new Blob([answersContent], { type: 'text/csv;charset=utf-8;' });
-                  const answersLink = document.createElement('a');
-                  answersLink.href = URL.createObjectURL(answersBlob);
-                  answersLink.download = `${course?.name || 'quiz'}-answers.csv`;
-                  answersLink.click();
-                  URL.revokeObjectURL(answersLink.href);
-                } catch (error) {
-                  console.error('Error generating answers CSV:', error);
-                  setError(t('failedToGenerateCSV'));
-                } finally {
-                  setButtonLoading(false);
-                }
-              }}
-            >
-              {buttonLoading ? (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                  {t('Generating')}
-                </Box>
-              ) : (
-                t('Download Free-form Answers CSV')
-              )}
-            </Button>
-          </Box>
-        </Box>
+                  <TableCell>Score</TableCell>
+                  {quizResults?.[0]?.freeFormAnswers[Object.keys(quizResults[0].freeFormAnswers)[0]]?.map((_, i) => (
+                    <React.Fragment key={i}>
+                      <TableCell>Question {i + 1}</TableCell>
+                      <TableCell>Answer {i + 1}</TableCell>
+                    </React.Fragment>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {quizResults?.map((result) =>
+                  Object.entries(result.freeFormAnswers).map(([unitName, answers]) => (
+                    <TableRow key={`${result.userEmail}-${unitName}`}>
+                      <TableCell>{result.userName}</TableCell>
+                      <TableCell sx={{ maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.userEmail}</TableCell>
+                      <TableCell>{shortenUnitName(unitName)}</TableCell>
+                      
+                      <TableCell>{Math.ceil(result.scores[unitName])}%</TableCell>                      {answers.map((qa, index) => (
+                        <React.Fragment key={index}>
+                          <TableCell sx={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+  <Tooltip title={qa.question} disableInteractive={false} disableTouchListener={false}>
+    <span>{qa.question}</span>
+  </Tooltip>
+</TableCell>
+                          <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+  <Tooltip title={qa.answer} disableInteractive={false} disableTouchListener={false}>
+    <span>{qa.answer}</span>
+  </Tooltip>
+</TableCell>
+                        </React.Fragment>
+                      ))}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
       )}
     </Container>
   );
 }
-
-// Helper function to shorten unit names by taking the first part before whitespace
-const shortenUnitName = (unitName: string) => {
-  return unitName.split(/\s+/)[0] || unitName;
-};
