@@ -1,20 +1,34 @@
 const CACHE_VERSION = '1.0.0';
-const CACHE_NAME = `online-course-v${CACHE_VERSION}-${new Date().toISOString().split('T')[0]}`;
 const STATIC_CACHE = `static-v${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `dynamic-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
-  '/',
   '/index.html',
   '/manifest.json',
   '/favicon.ico',
   '/icons/favicon-96x96.png',
   '/icons/web-app-manifest-192x192.png',
-  '/icons/web-app-manifest-512x512.png'
+  '/icons/web-app-manifest-512x512.png',
+  // Cache all JavaScript files
+  '/assets/**/*.js',
+  // Cache all CSS files
+  '/assets/**/*.css'
 ];
+
+// Check if URL should be cached based on file extension
+const shouldCacheURL = (url) => {
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    return pathname === '/index.html' ||
+           pathname.endsWith('.js') ||
+           pathname.endsWith('.css');
+  } catch {
+    return false;
+  }
+};
 
 // Function to clean up old caches
 const clearOldCaches = async () => {
-  const cacheKeepList = [CACHE_NAME, STATIC_CACHE, DYNAMIC_CACHE];
+  const cacheKeepList = [STATIC_CACHE];
   const keyList = await caches.keys();
   const cachesToDelete = keyList.filter(key => !cacheKeepList.includes(key));
   return Promise.all(cachesToDelete.map(key => caches.delete(key)));
@@ -32,34 +46,71 @@ self.addEventListener('install', (event) => {
   );
 });
 
+// Check if URL is from allowed domains
+const isAllowedDomain = (url) => {
+  try {
+    const urlObj = new URL(url);
+    return (
+      urlObj.hostname === 'localhost' ||
+      urlObj.hostname.endsWith('.web.app') ||
+      urlObj.hostname === 'class.eccseattle.org'
+    );
+  } catch {
+    return false;
+  }
+};
+
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
-      // Try to get the response from the static cache first
-      const staticResponse = await caches.match(event.request, { cacheName: STATIC_CACHE });
-      if (staticResponse) {
-        return staticResponse;
+      const url = event.request.url;
+      const shouldCache = isAllowedDomain(url) && shouldCacheURL(url);
+
+      // For non-allowed domains, directly return network response without caching
+      if (!shouldCache) {
+        return fetch(event.request).catch(() => {
+          console.log(`[ServiceWorker] Network request failed for non-allowed domain: ${url}`);
+          throw new Error('Network request failed');
+        });
       }
 
-      try {
-        // If not in static cache, try network
-        const networkResponse = await fetch(event.request);
+      // Try to get the response from cache first
+      const cachedResponse = await caches.match(event.request);
+      
+      // Start the network request in the background
+      const networkPromise = fetch(event.request).then(networkResponse => {
+        // Clone the response early before using it
+        const responseToCache = networkResponse.clone();
         
-        // Cache successful responses in the dynamic cache
+        // Cache successful GET responses for allowed file types
         if (networkResponse.ok && event.request.method === 'GET') {
-          const dynamicCache = await caches.open(DYNAMIC_CACHE);
-          dynamicCache.put(event.request, networkResponse.clone());
+          caches.open(STATIC_CACHE).then(cache => {
+            cache.put(event.request, responseToCache);
+            console.log(`[ServiceWorker] Updated cache for: ${url}`);
+          });
         }
-        
         return networkResponse;
-      } catch (error) {
-        // If network fails, try dynamic cache
-        const cachedResponse = await caches.match(event.request, { cacheName: DYNAMIC_CACHE });
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        throw error;
+      }).catch(() => {
+        // Network failed, already serving from cache if available
+        console.log(`[ServiceWorker] Network request failed for: ${url}`);
+        return null;
+      });
+
+      // Return cached response immediately if available
+      if (cachedResponse) {
+        console.log(`[ServiceWorker] Cache hit for: ${url}`);
+        // Update cache in background
+        event.waitUntil(networkPromise);
+        return cachedResponse;
       }
+      console.log(`[ServiceWorker] Cache miss for: ${url}`);
+
+      // If no cache, wait for network response
+      const response = await networkPromise;
+      if (!response) {
+        throw new Error('Both cache and network failed');
+      }
+      return response;
     })()
   );
 });
