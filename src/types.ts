@@ -43,6 +43,7 @@ export interface Lesson {
   "video-title"?: string;
   "video-url"?: string;
   quizId: string | null;
+  disableNote?: boolean;
 }
 
 export interface Quiz {

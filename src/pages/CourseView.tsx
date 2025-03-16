@@ -230,7 +230,7 @@ export default function CourseView() {
       lesson={currentLesson}
       onComplete={handleLessonComplete}
       isCompleted={completedLessons.includes(currentLesson.id)}
-      enableNote={course.settings.enableNote}
+      enableNote={!!(course.settings.enableNote && currentLesson.disableNote !== true)}
     />
   ) : (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
