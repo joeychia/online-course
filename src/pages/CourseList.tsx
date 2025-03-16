@@ -141,20 +141,37 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container maxWidth="lg" sx={{ my: 4 }}>
       {!currentUser && (
         <Alert 
-          severity="info" 
+          severity="warning"
+          variant="filled"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            my: 4,
+            '& .MuiAlert-message': {
+              fontSize: '1.4rem', // Increased font size
+              textAlign: 'left',
+              flex: 1
+            }
+          }}
           action={
             <Button 
               color="inherit" 
               size="large" 
               onClick={handleSignInClick}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                },
+                fontSize: '1.2rem' // Increased button text size
+              }}
             >
               {t('signIn')}
             </Button>
           }
-          sx={{ mb: 3, fontSize: 'var(--font-size-h6)' }}
         >
           {t('signInMessage')}
         </Alert>
