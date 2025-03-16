@@ -16,6 +16,7 @@ import {
   Checkbox,
   Button,
   Grid,
+  Tooltip,
 } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
@@ -39,8 +40,7 @@ export default function AdminQuizResults() {
         userEmail: string;
         unitName: string;
         score: number;
-        answers: Record<string, string>;
-        correctAnswers: (boolean|undefined)[];
+        freeFormAnswer: string;
     };
 
   const [quizResults, setQuizResults] = useState<Array<QuizResult>|null>(null);
@@ -105,27 +105,19 @@ export default function AdminQuizResults() {
             u.id === history.unitId
           );
 
-          // Filter single choice questions and their answers
-          const singleChoiceQuestions = quiz?.questions.filter(q => q.type === 'single_choice') || [];
-          const correctAnswers = singleChoiceQuestions.map((question, index) => {
-            if (!question.options) {
-                return undefined;
-            }
-            const userAnswer = parseInt(history.answers[index]); 
-            if (userAnswer >=0 && userAnswer < question.options.length) {
-              const option = question.options[userAnswer];
-              return option.isCorrect;
-            }
-            return undefined;
-          });
+          // Find the last free-form question and its answer
+          const questions = quiz?.questions || [];
+          const lastFreeFormIndex = questions.map((q, i) => ({ type: q.type, index: i }))
+            .filter(q => q.type === 'free_form')
+            .pop()?.index;
+          const freeFormAnswer = lastFreeFormIndex !== undefined ? history.answers[lastFreeFormIndex] : '';
 
           return {
             userName: user?.name || 'Unknown',
             userEmail: user?.email || 'Unknown',
             unitName: unit?.name || 'Unknown',
             score: history.score,
-            answers: history.answers,
-            correctAnswers
+            freeFormAnswer
           };
         })
       );
@@ -247,9 +239,7 @@ export default function AdminQuizResults() {
                       <TableCell>{t('name')}</TableCell>
                       <TableCell>{t('email')}</TableCell>
                       <TableCell align="right">{t('score')}</TableCell>
-                      {quizResults.find(r => r.unitName === unitName)?.correctAnswers.map((_, idx) => (
-                        <TableCell key={idx} align="center">{`Q${idx + 1}`}</TableCell>
-                      ))}
+                      <TableCell align="center">{t('Text Answer')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -258,11 +248,13 @@ export default function AdminQuizResults() {
                         <TableCell>{result.userName}</TableCell>
                         <TableCell>{result.userEmail}</TableCell>
                         <TableCell align="right">{result.score.toFixed(2)}%</TableCell>
-                        {result.correctAnswers.map((isCorrect, idx) => (
-                          <TableCell key={idx} align="center">
-                            {isCorrect === undefined ? '-' : isCorrect ? '✓' : '✗'}
-                          </TableCell>
-                        ))}
+                        <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <Tooltip title={result.freeFormAnswer || '-'} arrow>
+                            <Typography noWrap>
+                              {result.freeFormAnswer || '-'}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -295,18 +287,12 @@ export default function AdminQuizResults() {
                   Object.entries(resultsByUnit).forEach(([unitName, results]) => {
                     // Prepare data for this unit
                     const sheetData = results.map(result => {
-                      const row: any = {
+                      return {
                         'Name': result.userName,
                         'Email': result.userEmail,
-                        'Score (%)': result.score.toFixed(2)
+                        'Score (%)': result.score.toFixed(2),
+                        'Free-form Answer': result.freeFormAnswer || '-'
                       };
-                      
-                      // Add columns for each question
-                      result.correctAnswers.forEach((isCorrect, idx) => {
-                        row[`Q${idx + 1}`] = isCorrect === undefined ? '-' : isCorrect ? '✓' : '✗';
-                      });
-                      
-                      return row;
                     });
 
                     // Create worksheet
