@@ -16,6 +16,7 @@ import QuizResults from './pages/QuizResults';
 // Lazy load admin-related components
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminQuizResults = lazy(() => import('./pages/AdminQuizResults'));
+const CourseStudentsPage = lazy(() => import('./pages/CourseStudentsPage'));
 
 import WeChatBrowserWarning from './components/WeChatBrowserWarning';
 
@@ -142,6 +143,15 @@ function App() {
                       <Layout>
                         <Suspense fallback={<div>Loading admin quiz results...</div>}>
                           <AdminQuizResults />
+                        </Suspense>
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/course/:courseId/students" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Suspense fallback={<div>Loading course students...</div>}>
+                          <CourseStudentsPage />
                         </Suspense>
                       </Layout>
                     </ProtectedRoute>

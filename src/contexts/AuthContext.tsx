@@ -13,6 +13,8 @@ export interface AuthContextType {
     signUp: (email: string, password: string) => Promise<FirebaseUser>;
     signOut: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
+    user: FirebaseUser | null;
+    isAdmin: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -65,7 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInWithGoogle: authService.signInWithGoogle,
         signUp: authService.signUp,
         signOut: authService.signOut,
-        resetPassword: authService.resetPassword
+        resetPassword: authService.resetPassword,
+        user: currentUser,
+        isAdmin: userProfile?.roles?.['admin'] || false
     };
 
     return (
