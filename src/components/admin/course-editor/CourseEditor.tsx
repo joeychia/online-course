@@ -352,6 +352,7 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
             // Also reload the unit details to update the lessons list
             await loadUnitDetails(selectedUnitForLesson, true);
           }}
+          onAddLesson={addLesson} // Pass the addLesson function to handle lesson count updates
         />
       )}
 

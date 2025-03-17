@@ -23,6 +23,7 @@ interface LessonEditorProps {
   isNewLesson?: boolean;
   onClose: () => void;
   onSave: () => void;
+  onAddLesson?: (unitId: string, name: string, lessonData?: Partial<Lesson>) => Promise<boolean>;
 }
 
 export const LessonEditor: React.FC<LessonEditorProps> = ({
@@ -30,7 +31,8 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   lessonId,
   isNewLesson = false,
   onClose,
-  onSave
+  onSave,
+  onAddLesson
 }) => {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [isQuizEditorOpen, setIsQuizEditorOpen] = useState(false);
@@ -92,32 +94,42 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
       }
 
       if (isNewLesson) {
-        // Create a new lesson
-        const newLessonId = `lesson_${Date.now()}`; // Generate a new ID
-        
-        // Create the lesson in Firestore with all required fields
-        await firestoreService.createLesson(newLessonId, {
-          id: newLessonId,
-          unitId, // This is guaranteed to be a string from props
-          name: name || 'New Lesson',
-          content: content || '',
-          quizId: quizId || null,
-          ...(lessonData.disableNote !== undefined ? { disableNote: lessonData.disableNote } : {}),
-          ...(lessonData['video-title'] ? { 'video-title': lessonData['video-title'] } : {}),
-          ...(lessonData['video-url'] ? { 'video-url': lessonData['video-url'] } : {})
-        });
-        
-        // Add the new lesson to the unit's lessons array
-        const newLesson = {
-          id: newLessonId,
-          name: name,
-          hasQuiz: !!quizId
-        };
-        
-        const updatedLessons = [...unit.lessons, newLesson];
-        
-        // Update the unit with the new lesson
-        await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
+        if (onAddLesson) {
+          // Use the provided addLesson function which handles updating the lesson count
+          const success = await onAddLesson(unitId, name, lessonData);
+          if (!success) {
+            throw new Error('Failed to add lesson');
+          }
+        } else {
+          // Fallback to direct creation if onAddLesson is not provided
+          const newLessonId = `lesson_${Date.now()}`; // Generate a new ID
+          
+          // Create the lesson in Firestore with all required fields
+          await firestoreService.createLesson(newLessonId, {
+            id: newLessonId,
+            unitId, // This is guaranteed to be a string from props
+            name: name || 'New Lesson',
+            content: content || '',
+            quizId: quizId || null,
+            ...(lessonData.disableNote !== undefined ? { disableNote: lessonData.disableNote } : {}),
+            ...(lessonData['video-title'] ? { 'video-title': lessonData['video-title'] } : {}),
+            ...(lessonData['video-url'] ? { 'video-url': lessonData['video-url'] } : {})
+          });
+          
+          // Add the new lesson to the unit's lessons array
+          const newLesson = {
+            id: newLessonId,
+            name: name,
+            hasQuiz: !!quizId
+          };
+          
+          const updatedLessons = [...unit.lessons, newLesson];
+          
+          // Update the unit with the new lesson
+          await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
+          
+          console.warn('LessonEditor: onAddLesson prop not provided, lesson count may not be updated correctly');
+        }
       } else if (lessonId) {
         // Update existing lesson
         await firestoreService.updateLesson(lessonId, lessonData);

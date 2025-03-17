@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Course, CourseUnit, UnitLesson } from '../../../../types';
+import { Course, CourseUnit, UnitLesson, Lesson } from '../../../../types';
 import { firestoreService } from '../../../../services/firestoreService';
 
 interface UseLessonOperationsProps {
@@ -34,7 +34,11 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
     return cleanUnit;
   };
 
-  const addLesson = useCallback(async (unitId: string, name: string) => {
+  const addLesson = useCallback(async (
+    unitId: string, 
+    name: string,
+    lessonData?: Partial<Lesson>
+  ) => {
     if (!course || !name.trim() || !unitId) return false;
     setIsSaving(true);
     setError(null);
@@ -47,12 +51,16 @@ export const useLessonOperations = ({ course, reloadCourse }: UseLessonOperation
         throw new Error('Unit not found');
       }
 
+      // Create lesson with basic required fields and any additional data provided
       await firestoreService.createLesson(newLessonId, {
         id: newLessonId,
         name: name.trim(),
-        content: '',
+        content: lessonData?.content || '',
         unitId,
-        quizId: null
+        quizId: lessonData?.quizId || null,
+        ...(lessonData?.disableNote !== undefined ? { disableNote: lessonData.disableNote } : {}),
+        ...(lessonData?.['video-title'] ? { 'video-title': lessonData['video-title'] } : {}),
+        ...(lessonData?.['video-url'] ? { 'video-url': lessonData['video-url'] } : {})
       });
 
       const newLesson: UnitLesson = {
