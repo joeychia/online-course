@@ -86,7 +86,9 @@ describe('AdminDashboard', () => {
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
       signUp: vi.fn(),
-      resetPassword: vi.fn()
+      resetPassword: vi.fn(),
+      user: mockFirebaseUser,
+      isAdmin: false
     });
     mockedFirestoreService.getUserById.mockResolvedValue(null);
 
@@ -108,7 +110,9 @@ describe('AdminDashboard', () => {
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
       signUp: vi.fn(),
-      resetPassword: vi.fn()
+      resetPassword: vi.fn(),
+      user: mockFirebaseUser,
+      isAdmin: false
     });
     mockedFirestoreService.getUserById.mockResolvedValue({
       ...mockUserProfile,
@@ -135,7 +139,9 @@ describe('AdminDashboard', () => {
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
       signUp: vi.fn(),
-      resetPassword: vi.fn()
+      resetPassword: vi.fn(),
+      user: mockFirebaseUser,
+      isAdmin: true
     });
     mockedFirestoreService.getUserById.mockResolvedValue({
       ...mockUserProfile,
@@ -165,7 +171,9 @@ describe('AdminDashboard', () => {
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
       signUp: vi.fn(),
-      resetPassword: vi.fn()
+      resetPassword: vi.fn(),
+      user: null,
+      isAdmin: false
     });
 
     render(
@@ -189,7 +197,9 @@ describe('AdminDashboard', () => {
       signOut: vi.fn(),
       signInWithGoogle: vi.fn(),
       signUp: vi.fn(),
-      resetPassword: vi.fn()
+      resetPassword: vi.fn(),
+      user: mockFirebaseUser,
+      isAdmin: false
     });
     mockedFirestoreService.getUserById.mockRejectedValue(new Error('Failed to fetch user'));
 

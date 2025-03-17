@@ -1,8 +1,8 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import CourseStudentsList from '../components/admin/CourseStudentsList';
 import { firestoreService } from '../services/firestoreService';
 import { vi } from 'vitest';
+import { LanguageProvider } from '../contexts/LanguageContext';
 
 // Mock firestoreService
 vi.mock('../services/firestoreService', () => ({
@@ -12,11 +12,12 @@ vi.mock('../services/firestoreService', () => ({
   }
 }));
 
-// Mock DataGrid component
+// Mock DataGrid component and GridPaginationModel
 vi.mock('@mui/x-data-grid', () => ({
-  DataGrid: ({ rows, columns }: any) => (
+  // @ts-ignore - Ignore unused parameters
+  DataGrid: ({ rows }: any) => (
     <div data-testid="data-grid">
-      {rows.map((row: any) => (
+      {rows && rows.length > 0 && rows.map((row: any) => (
         <div key={row.id} data-testid="student-row">
           <span>{row.name}</span>
           <span>{row.email}</span>
@@ -24,7 +25,9 @@ vi.mock('@mui/x-data-grid', () => ({
         </div>
       ))}
     </div>
-  )
+  ),
+  // Export any other types or constants that might be imported
+  GridPaginationModel: {}
 }));
 
 describe('CourseStudentsList', () => {
@@ -60,7 +63,11 @@ describe('CourseStudentsList', () => {
   it('shows loading state initially', () => {
     (firestoreService.getRegisteredUsersForCourse as jest.Mock).mockResolvedValue([]);
     
-    render(<CourseStudentsList courseId="course123" />);
+    render(
+      <LanguageProvider>
+        <CourseStudentsList courseId="course123" />
+      </LanguageProvider>
+    );
     
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -72,7 +79,11 @@ describe('CourseStudentsList', () => {
         Promise.resolve(mockStudents.find(student => student.id === userId))
       );
 
-    render(<CourseStudentsList courseId="course123" />);
+    render(
+      <LanguageProvider>
+        <CourseStudentsList courseId="course123" />
+      </LanguageProvider>
+    );
 
     await waitFor(() => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
@@ -88,7 +99,11 @@ describe('CourseStudentsList', () => {
   it('handles empty student list', async () => {
     (firestoreService.getRegisteredUsersForCourse as jest.Mock).mockResolvedValue([]);
 
-    render(<CourseStudentsList courseId="course123" />);
+    render(
+      <LanguageProvider>
+        <CourseStudentsList courseId="course123" />
+      </LanguageProvider>
+    );
 
     await waitFor(() => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
@@ -101,7 +116,11 @@ describe('CourseStudentsList', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     (firestoreService.getRegisteredUsersForCourse as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
 
-    render(<CourseStudentsList courseId="course123" />);
+    render(
+      <LanguageProvider>
+        <CourseStudentsList courseId="course123" />
+      </LanguageProvider>
+    );
 
     await waitFor(() => {
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
@@ -115,7 +134,11 @@ describe('CourseStudentsList', () => {
     (firestoreService.getRegisteredUsersForCourse as jest.Mock).mockResolvedValue(['user1']);
     (firestoreService.getUserById as jest.Mock).mockResolvedValue(mockStudents[0]);
 
-    render(<CourseStudentsList courseId="course123" />);
+    render(
+      <LanguageProvider>
+        <CourseStudentsList courseId="course123" />
+      </LanguageProvider>
+    );
 
     await waitFor(() => {
       const studentRow = screen.getByTestId('student-row');

@@ -202,4 +202,122 @@
    - Clear separation of concerns
    - Configurable actions based on context
 
+### Testing Patterns
+1. Component Testing
+   - Mock external dependencies
+   - Test component behavior in isolation
+   - Verify UI interactions
+   - Example structure:
+     ```typescript
+     // Mock dependencies
+     vi.mock('../services/firestoreService', () => ({
+       firestoreService: {
+         getRegisteredUsersForCourse: vi.fn(),
+         getUserById: vi.fn()
+       }
+     }));
+
+     // Mock UI components with simplified implementations
+     vi.mock('@mui/x-data-grid', () => ({
+       DataGrid: ({ rows, ...rest }: any) => (
+         <div data-testid="data-grid">
+           {rows && rows.length > 0 && rows.map((row: any) => (
+             <div key={row.id} data-testid="student-row">
+               <span>{row.name}</span>
+               <span>{row.email}</span>
+               <span>{row.completedLessons}</span>
+             </div>
+           ))}
+         </div>
+       ),
+       GridPaginationModel: {}
+     }));
+     ```
+
+2. Test-Specific Component Implementations
+   - Create simplified versions of complex components for testing
+   - Focus on testable behavior rather than implementation details
+   - Example pattern:
+     ```typescript
+     // Test-specific version of a complex component
+     const TestCourseStudentsPage: React.FC<CourseStudentsPageProps> = ({ 
+       isAdmin = true, 
+       courseId = '123' 
+     }) => {
+       if (!isAdmin) {
+         return <MockNavigate to="/" replace />;
+       }
+
+       if (!courseId) {
+         return <MockNavigate to="/admin" replace />;
+       }
+
+       return (
+         <div>
+           <div>
+             <button>Back</button>
+             <h1>Course Students</h1>
+           </div>
+           <MockCourseStudentsList courseId={courseId} />
+         </div>
+       );
+     };
+     ```
+
+3. Mock Context Providers
+   - Provide test-specific context values
+   - Ensure all required properties are included
+   - Example pattern:
+     ```typescript
+     // Mock auth context with all required properties
+     const mockAuthContext = {
+       currentUser: mockFirebaseUser,
+       userProfile: mockUserProfile,
+       loading: false,
+       signIn: vi.fn(),
+       signOut: vi.fn(),
+       signInWithGoogle: vi.fn(),
+       signUp: vi.fn(),
+       resetPassword: vi.fn(),
+       user: mockFirebaseUser,  // Required by AuthContextType
+       isAdmin: false           // Required by AuthContextType
+     };
+
+     // Render with context provider
+     render(
+       <AuthContext.Provider value={mockAuthContext}>
+         <MemoryRouter>
+           <ComponentUnderTest />
+         </MemoryRouter>
+       </AuthContext.Provider>
+     );
+     ```
+
+4. Modern API Patterns
+   - Use current API versions in components
+   - Update deprecated patterns
+   - Example pattern:
+     ```typescript
+     // Modern pagination API for DataGrid
+     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+       page: 0,
+       pageSize: 10,
+     });
+
+     const handlePaginationModelChange = (newModel: GridPaginationModel) => {
+       setPaginationModel(newModel);
+     };
+
+     return (
+       <DataGrid
+         rows={data}
+         columns={columns}
+         paginationModel={paginationModel}
+         onPaginationModelChange={handlePaginationModelChange}
+         pageSizeOptions={[10, 25, 50]}
+         disableRowSelectionOnClick
+       />
+     );
+     ```
+
 [Rest of the file remains unchanged...]

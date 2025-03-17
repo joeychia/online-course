@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useEffect, useState } from 'react';
+import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import { Box, CircularProgress } from '@mui/material';
 import { firestoreService } from '../../services/firestoreService';
-import { UserProfile } from '../../types';
 import { useTranslation } from '../../hooks/useTranslation';
 
 interface CourseStudentsListProps {
@@ -20,6 +19,16 @@ const CourseStudentsList: React.FC<CourseStudentsListProps> = ({ courseId }) => 
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const { t } = useTranslation();
+  
+  // Set up pagination
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: 10,
+  });
+
+  const handlePaginationModelChange = (newModel: GridPaginationModel) => {
+    setPaginationModel(newModel);
+  };
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -95,9 +104,10 @@ const CourseStudentsList: React.FC<CourseStudentsListProps> = ({ courseId }) => 
       <DataGrid
         rows={students}
         columns={columns}
-        pageSize={10}
-        rowsPerPageOptions={[10, 25, 50]}
-        disableSelectionOnClick
+        paginationModel={paginationModel}
+        onPaginationModelChange={handlePaginationModelChange}
+        pageSizeOptions={[10, 25, 50]}
+        disableRowSelectionOnClick
         autoHeight
       />
     </Box>
