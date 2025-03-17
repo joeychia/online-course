@@ -49,6 +49,23 @@
 
 ## Recent Changes
 
+- Lesson Editor Improvement (In Progress):
+  - Created design document for lesson editor improvement
+  - Planned to skip the initial "name only" dialog when creating lessons
+  - Designed new mode for LessonEditor to handle both editing and creating
+  - Planned changes to save new lessons only when user clicks "Add" button
+  - Hide quiz section when creating new lessons
+  - Benefits:
+    * Streamlined lesson creation process
+    * All lesson properties editable in one step
+    * Improved user experience for course creators
+    * Clearer distinction between editing and creating modes
+  - Implementation plan:
+    * Add isNewLesson prop to LessonEditor
+    * Modify CourseEditor to open LessonEditor directly
+    * Update UI based on creation/editing mode
+    * Change save behavior for new lessons
+
 - Test and Build Fixes (Completed):
   - Updated CourseStudentsList component to use modern DataGrid pagination API
   - Fixed TypeScript errors in test files by adding missing properties to mock objects

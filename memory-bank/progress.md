@@ -67,6 +67,19 @@
 
 ## In Progress Features 🚧
 
+### Lesson Editor Improvement
+- [ ] Streamline lesson creation process
+  - Design document created
+  - Skip initial "name only" dialog
+  - Open full lesson editor directly with default "New Lesson" title
+  - Save new lesson only when user clicks "Add" button
+  - Hide quiz section when creating new lessons
+- [ ] Implementation plan
+  - Add isNewLesson prop to LessonEditor
+  - Modify CourseEditor to open LessonEditor directly
+  - Update UI based on creation/editing mode
+  - Change save behavior for new lessons
+
 ### Critical Performance Optimization
 1. Large Course Loading
    - Implement lazy loading for units
@@ -207,7 +220,13 @@
 ## Next Actions 📋
 
 ### High Priority
-1. Performance Optimization
+1. Lesson Editor Improvement
+   - Implement new lesson creation flow
+   - Modify LessonEditor to support creation mode
+   - Update UI based on mode
+   - Test new functionality
+
+2. Performance Optimization
    - Implement lazy loading pattern
    - Add loading states
    - Optimize data loading
