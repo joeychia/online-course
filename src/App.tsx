@@ -147,7 +147,7 @@ function App() {
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/admin/course/:courseId/students" element={
+                  <Route path="/admin/courses/:courseId/students" element={
                     <ProtectedRoute>
                       <Layout>
                         <Suspense fallback={<div>Loading course students...</div>}>

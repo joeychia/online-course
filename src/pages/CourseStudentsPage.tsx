@@ -22,7 +22,7 @@ const CourseStudentsPage: React.FC = () => {
   }
 
   const handleBack = () => {
-    navigate(`/admin/course/${courseId}`);
+    navigate(`/admin/courses/${courseId}`);
   };
 
   return (

@@ -50,7 +50,7 @@ export const CourseHeader: React.FC<CourseHeaderProps> = ({
                 <Button
                   startIcon={<PeopleIcon />}
                   variant="outlined"
-                  onClick={() => navigate(`/admin/course/${course.id}/students`)}
+                  onClick={() => navigate(`/admin/courses/${course.id}/students`)}
                   disabled={isSaving}
                 >
                   View Students
