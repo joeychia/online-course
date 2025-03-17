@@ -29,7 +29,10 @@ mockUseAuth.mockReturnValue({
   signIn: vi.fn(),
   signInWithGoogle: vi.fn(),
   signUp: vi.fn(),
-  signOut: vi.fn()
+  signOut: vi.fn(),
+  resetPassword: vi.fn(),
+  user: null,
+  isAdmin: false
 });
 
 // Mock useAuth hook
@@ -126,7 +129,9 @@ const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOpti
     signOut: vi.fn(),
     signInWithGoogle: vi.fn(),
     signUp: vi.fn(),
-    resetPassword: vi.fn()
+    resetPassword: vi.fn(),
+    user: mockFirebaseUser,
+    isAdmin: false
   };
   mockUseAuth.mockReturnValue(mockAuthValue);
 
