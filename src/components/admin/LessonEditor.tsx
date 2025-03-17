@@ -19,7 +19,8 @@ import QuizEditor from './QuizEditor';
 
 interface LessonEditorProps {
   unitId: string;
-  lessonId: string;
+  lessonId?: string;
+  isNewLesson?: boolean;
   onClose: () => void;
   onSave: () => void;
 }
@@ -27,6 +28,7 @@ interface LessonEditorProps {
 export const LessonEditor: React.FC<LessonEditorProps> = ({
   unitId,
   lessonId,
+  isNewLesson = false,
   onClose,
   onSave
 }) => {
@@ -34,12 +36,24 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   const [isQuizEditorOpen, setIsQuizEditorOpen] = useState(false);
 
   useEffect(() => {
-    loadLesson();
-  }, [lessonId]);
+    if (isNewLesson) {
+      // Initialize with default values for a new lesson
+      setLesson({
+        id: `lesson_${Date.now()}`, // Temporary ID, will be replaced when saved
+        name: 'New Lesson',
+        content: '',
+        unitId,
+        quizId: null
+      });
+    } else if (lessonId) {
+      // Load existing lesson
+      loadLesson(lessonId);
+    }
+  }, [lessonId, isNewLesson, unitId]);
 
-  const loadLesson = async () => {
+  const loadLesson = async (id: string) => {
     try {
-      const loadedLesson = await firestoreService.getLessonById(lessonId);
+      const loadedLesson = await firestoreService.getLessonById(id);
       if (loadedLesson) {
         // Ensure unitId is set from props
         setLesson({ ...loadedLesson, unitId });
@@ -58,36 +72,65 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
     try {
       // Start with required fields
       const { name, content, quizId, unitId } = lesson;
-      const updateData: Partial<Lesson> = { name, content, quizId, unitId };
+      const lessonData: Partial<Lesson> = { name, content, quizId, unitId };
 
       // Only include video fields if they exist and are non-empty strings
       if (typeof lesson['video-title'] === 'string' && lesson['video-title'].length > 0) {
-        updateData['video-title'] = lesson['video-title'];
+        lessonData['video-title'] = lesson['video-title'];
       }
       if (typeof lesson['video-url'] === 'string' && lesson['video-url'].length > 0) {
-        updateData['video-url'] = lesson['video-url'];
+        lessonData['video-url'] = lesson['video-url'];
       }
 
       // Include disableNote field
-      updateData.disableNote = lesson.disableNote || false;
+      lessonData.disableNote = lesson.disableNote || false;
 
-      // Update the lesson document
-      await firestoreService.updateLesson(lessonId, updateData);
-      
-      // Also update the lesson name in the parent unit's lessons array
-      if (unitId) {
-        const unit = await firestoreService.getUnitById(unitId);
-        if (unit) {
-          // Find and update the lesson in the unit's lessons array
-          const updatedLessons = unit.lessons.map(lessonItem => 
-            lessonItem.id === lessonId 
-              ? { ...lessonItem, name: name } 
-              : lessonItem
-          );
-          
-          // Update the unit with the modified lessons array
-          await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
-        }
+      // Get the unit to update its lessons array
+      const unit = await firestoreService.getUnitById(unitId);
+      if (!unit) {
+        throw new Error('Unit not found');
+      }
+
+      if (isNewLesson) {
+        // Create a new lesson
+        const newLessonId = `lesson_${Date.now()}`; // Generate a new ID
+        
+        // Create the lesson in Firestore with all required fields
+        await firestoreService.createLesson(newLessonId, {
+          id: newLessonId,
+          unitId, // This is guaranteed to be a string from props
+          name: name || 'New Lesson',
+          content: content || '',
+          quizId: quizId || null,
+          ...(lessonData.disableNote !== undefined ? { disableNote: lessonData.disableNote } : {}),
+          ...(lessonData['video-title'] ? { 'video-title': lessonData['video-title'] } : {}),
+          ...(lessonData['video-url'] ? { 'video-url': lessonData['video-url'] } : {})
+        });
+        
+        // Add the new lesson to the unit's lessons array
+        const newLesson = {
+          id: newLessonId,
+          name: name,
+          hasQuiz: !!quizId
+        };
+        
+        const updatedLessons = [...unit.lessons, newLesson];
+        
+        // Update the unit with the new lesson
+        await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
+      } else if (lessonId) {
+        // Update existing lesson
+        await firestoreService.updateLesson(lessonId, lessonData);
+        
+        // Update the lesson name in the parent unit's lessons array
+        const updatedLessons = unit.lessons.map(lessonItem => 
+          lessonItem.id === lessonId 
+            ? { ...lessonItem, name: name, hasQuiz: !!quizId } 
+            : lessonItem
+        );
+        
+        // Update the unit with the modified lessons array
+        await firestoreService.updateUnit(unitId, { lessons: updatedLessons });
       }
       
       onSave();
@@ -142,7 +185,9 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
 
   return (
     <Dialog open={true} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogTitle>Edit Lesson: {lesson?.name}</DialogTitle>
+      <DialogTitle>
+        {isNewLesson ? 'Add New Lesson' : `Edit Lesson: ${lesson?.name}`}
+      </DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={2} my={2}>
           <TextField
@@ -150,6 +195,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             fullWidth
             value={lesson?.name ?? ''}
             onChange={(e) => setLesson(prev => prev ? { ...prev, name: e.target.value } : null)}
+            autoFocus={isNewLesson} // Auto focus on name field for new lessons
           />
           
           <TextField
@@ -183,23 +229,27 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             />
           </Box>
 
-          <Divider sx={{ my: 2 }} />
-
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Button
-              startIcon={<EditIcon />}
-              variant="outlined"
-              onClick={() => setIsQuizEditorOpen(true)}
-            >
-              {lesson?.quizId ? 'Edit Quiz' : 'Add Quiz'}
-            </Button>
-          </Box>
+          {/* Only show quiz section for existing lessons */}
+          {!isNewLesson && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Button
+                  startIcon={<EditIcon />}
+                  variant="outlined"
+                  onClick={() => setIsQuizEditorOpen(true)}
+                >
+                  {lesson?.quizId ? 'Edit Quiz' : 'Add Quiz'}
+                </Button>
+              </Box>
+            </>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button onClick={handleSave} variant="contained">
-          Save
+          {isNewLesson ? 'Add' : 'Save'}
         </Button>
       </DialogActions>
 

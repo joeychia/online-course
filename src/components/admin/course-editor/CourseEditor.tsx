@@ -64,6 +64,7 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
   const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
   const [editingUnitName, setEditingUnitName] = useState('');
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
+  const [isNewLesson, setIsNewLesson] = useState(false);
   const [selectedQuizUnit, setSelectedQuizUnit] = useState<{ unitId: string; lessonId: string } | null>(null);
   const [deleteLessonDialogOpen, setDeleteLessonDialogOpen] = useState(false);
   const [lessonToDelete, setLessonToDelete] = useState<{ unitId: string; lessonId: string } | null>(null);
@@ -252,14 +253,16 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
           onAddLesson={(unitId) => {
             const unit = course.units.find(u => u.id === unitId);
             if (unit) {
+              // Open LessonEditor directly in creation mode
               setSelectedUnitForLesson(unitId);
-              setSelectedUnitName(unit.name);
-              setIsLessonDialogOpen(true);
+              setIsNewLesson(true);
+              setSelectedLesson(null); // No lesson ID for new lesson
             }
           }}
           onEditLesson={(unitId, lessonId) => {
             setSelectedLesson(lessonId);
             setSelectedUnitForLesson(unitId);
+            setIsNewLesson(false); // Ensure we're in edit mode, not creation mode
           }}
           onDeleteLesson={handleDeleteLesson}
           onViewQuizResults={(unitId, lessonId) => {
@@ -332,13 +335,16 @@ export const CourseEditor: React.FC<CourseEditorProps> = ({ courseId }) => {
         />
       )}
 
-      {selectedLesson && selectedUnitForLesson && (
+      {/* Show LessonEditor for both editing existing lessons and creating new ones */}
+      {selectedUnitForLesson && (isNewLesson || selectedLesson) && (
         <LessonEditor
           unitId={selectedUnitForLesson}
-          lessonId={selectedLesson}
+          lessonId={selectedLesson || undefined}
+          isNewLesson={isNewLesson}
           onClose={() => {
             setSelectedLesson(null);
             setSelectedUnitForLesson(null);
+            setIsNewLesson(false);
           }}
           onSave={async () => {
             // Reload course data
