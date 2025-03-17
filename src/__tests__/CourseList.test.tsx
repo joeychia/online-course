@@ -3,12 +3,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CourseList from '../pages/CourseList';
 import { firestoreService } from '../services/firestoreService';
-import type { Course, UserProfile } from '../types';
-import type { User as FirebaseUser } from 'firebase/auth';
+import type { Course } from '../types';
 import type { AuthContextType } from '../contexts/AuthContext';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { FontSizeProvider } from '../contexts/FontSizeContext';
+import { createMockAuthContext } from '../test/mocks/authContextMock';
 
 // Mock the firestoreService
 vi.mock('../services/firestoreService', () => ({
@@ -22,18 +22,11 @@ const mockedFirestoreService = firestoreService as any;
 
 // Create a mock function for useAuth
 const mockUseAuth = vi.fn() as unknown as ReturnType<typeof vi.fn> & { mockReturnValue: (value: AuthContextType) => void };
-mockUseAuth.mockReturnValue({
+mockUseAuth.mockReturnValue(createMockAuthContext({
   currentUser: null,
   userProfile: null,
-  loading: false,
-  signIn: vi.fn(),
-  signInWithGoogle: vi.fn(),
-  signUp: vi.fn(),
-  signOut: vi.fn(),
-  resetPassword: vi.fn(),
-  user: null,
-  isAdmin: false
-});
+  user: null
+}));
 
 // Mock useAuth hook
 vi.mock('../hooks/useAuth', () => ({
@@ -74,79 +67,7 @@ const mockCourses: Course[] = [
   }
 ];
 
-const mockFirebaseUser: FirebaseUser = {
-  uid: '123',
-  email: 'test@example.com',
-  displayName: 'Test User',
-  emailVerified: false,
-  isAnonymous: false,
-  metadata: {
-    creationTime: Date.now().toString(),
-    lastSignInTime: Date.now().toString()
-  },
-  providerData: [],
-  refreshToken: '',
-  tenantId: null,
-  delete: vi.fn(),
-  getIdToken: vi.fn(),
-  getIdTokenResult: vi.fn(),
-  reload: vi.fn(),
-  toJSON: vi.fn(),
-  phoneNumber: null,
-  photoURL: null,
-  providerId: 'firebase'
-};
-
-const mockUserProfile: UserProfile = {
-  id: '123',
-  name: 'Test User',
-  email: 'test@example.com',
-  roles: {
-    student: true,
-    instructor: false,
-    admin: false
-  },
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  registeredCourses: {},
-  progress: {},
-  groupIds: {},
-  notes: {},
-  QuizHistory: {}
-};
-
-interface RenderOptions {
-  user?: FirebaseUser | null;
-}
-
-// @ts-ignore - This is used in tests
-const renderWithProviders = (ui: React.ReactElement, { user = null }: RenderOptions = {}) => {
-  const mockAuthValue: AuthContextType = {
-    currentUser: mockFirebaseUser,
-    userProfile: mockUserProfile as UserProfile | null,
-    loading: false,
-    signIn: vi.fn(),
-    signOut: vi.fn(),
-    signInWithGoogle: vi.fn(),
-    signUp: vi.fn(),
-    resetPassword: vi.fn(),
-    user: mockFirebaseUser,
-    isAdmin: false
-  };
-  mockUseAuth.mockReturnValue(mockAuthValue);
-
-  return render(
-    <ThemeProvider>
-      <FontSizeProvider>
-        <LanguageProvider>
-          <MemoryRouter>
-            {ui}
-          </MemoryRouter>
-        </LanguageProvider>
-      </FontSizeProvider>
-    </ThemeProvider>
-  );
-};
+// Note: We're using createMockAuthContext directly in the tests
 
 describe('CourseList', () => {
   beforeEach(() => {

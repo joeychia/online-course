@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useDataGridPagination } from '../../hooks/useDataGridPagination';
 import { Box, CircularProgress } from '@mui/material';
 import { firestoreService } from '../../services/firestoreService';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -20,15 +21,8 @@ const CourseStudentsList: React.FC<CourseStudentsListProps> = ({ courseId }) => 
   const [students, setStudents] = useState<StudentRow[]>([]);
   const { t } = useTranslation();
   
-  // Set up pagination
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: 0,
-    pageSize: 10,
-  });
-
-  const handlePaginationModelChange = (newModel: GridPaginationModel) => {
-    setPaginationModel(newModel);
-  };
+  // Use the pagination hook
+  const { paginationModel, handlePaginationModelChange } = useDataGridPagination();
 
   useEffect(() => {
     const fetchStudents = async () => {

@@ -6,6 +6,7 @@ import NavPanel from '../components/NavPanel';
 import { Course } from '../types';
 import { firestoreService } from '../services/firestoreService';
 import { AuthContext } from '../contexts/AuthContext';
+import { createMockAuthContext } from '../test/mocks/authContextMock';
 
 // Mock firestoreService
 vi.mock('../services/firestoreService', () => ({
@@ -29,71 +30,14 @@ const mockUnitData = {
   ]
 };
 
-// Mock auth context
-const mockAuthContext = {
-  currentUser: {
-    uid: 'test-user',
-    email: 'test@example.com',
-    displayName: 'Test User',
-    emailVerified: false,
-    isAnonymous: false,
-    metadata: {
-      creationTime: Date.now().toString(),
-      lastSignInTime: Date.now().toString()
-    },
-    providerData: [],
-    refreshToken: '',
-    tenantId: null,
-    delete: vi.fn(),
-    getIdToken: vi.fn(),
-    getIdTokenResult: vi.fn(),
-    reload: vi.fn(),
-    toJSON: vi.fn(),
-    phoneNumber: null,
-    photoURL: null,
-    providerId: 'firebase'
-  },
+// Create mock auth context using the factory
+const mockAuthContext = createMockAuthContext({
   userProfile: {
-    id: 'test-user',
-    name: 'Test User',
-    email: 'test@example.com',
+    ...createMockAuthContext().userProfile,
     roles: { student: true, instructor: false, admin: false },
-    progress: {},
-    registeredCourses: {},
-    groupIds: {},
-    notes: {},
-    QuizHistory: {}
-  },
-  loading: false,
-  signIn: vi.fn(),
-  signOut: vi.fn(),
-  signInWithGoogle: vi.fn(),
-  signUp: vi.fn(),
-  resetPassword: vi.fn(),
-  user: {
-    uid: 'test-user',
-    email: 'test@example.com',
-    displayName: 'Test User',
-    emailVerified: false,
-    isAnonymous: false,
-    metadata: {
-      creationTime: Date.now().toString(),
-      lastSignInTime: Date.now().toString()
-    },
-    providerData: [],
-    refreshToken: '',
-    tenantId: null,
-    delete: vi.fn(),
-    getIdToken: vi.fn(),
-    getIdTokenResult: vi.fn(),
-    reload: vi.fn(),
-    toJSON: vi.fn(),
-    phoneNumber: null,
-    photoURL: null,
-    providerId: 'firebase'
-  },
-  isAdmin: false
-};
+    progress: {}
+  }
+});
 
 // Get the mocked firestoreService
 const mockedFirestoreService = firestoreService as any;
@@ -147,6 +91,7 @@ const mockProgress = {
 
 
 
+// Helper function to render with router and auth context
 const renderWithRouter = async (ui: React.ReactElement) => {
   const result = render(
     <AuthContext.Provider value={mockAuthContext}>

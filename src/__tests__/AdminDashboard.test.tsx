@@ -4,47 +4,8 @@ import AdminDashboard from '../pages/AdminDashboard';
 import { useAuth } from '../hooks/useAuth';
 import { firestoreService } from '../services/firestoreService';
 import { MemoryRouter } from 'react-router-dom';
-import type { User as FirebaseUser } from 'firebase/auth';
-import type { UserProfile } from '../types';
-
-const mockFirebaseUser: FirebaseUser = {
-  uid: '123',
-  email: 'test@example.com',
-  displayName: 'Test User',
-  emailVerified: false,
-  isAnonymous: false,
-  metadata: {
-    creationTime: Date.now().toString(),
-    lastSignInTime: Date.now().toString()
-  },
-  providerData: [],
-  refreshToken: '',
-  tenantId: null,
-  delete: vi.fn(),
-  getIdToken: vi.fn(),
-  getIdTokenResult: vi.fn(),
-  reload: vi.fn(),
-  toJSON: vi.fn(),
-  phoneNumber: null,
-  photoURL: null,
-  providerId: 'firebase'
-};
-
-const mockUserProfile: UserProfile = {
-  id: '123',
-  name: 'Test User',
-  email: 'test@example.com',
-  roles: {
-    student: false,
-    instructor: false,
-    admin: false
-  },
-  registeredCourses: {},
-  progress: {},
-  groupIds: {},
-  notes: {},
-  QuizHistory: {}
-};
+import { mockUserProfile, createMockAuthContext } from '../test/mocks/authContextMock';
+import { MockNavigate } from '../test/mocks/components/Navigation';
 
 // Mock dependencies
 vi.mock('../hooks/useAuth');
@@ -68,7 +29,7 @@ vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    Navigate: () => <div data-testid="navigate">Navigate Component</div>
+    Navigate: () => <MockNavigate to="/" replace />
   };
 });
 
@@ -78,18 +39,10 @@ describe('AdminDashboard', () => {
   });
 
   it('shows loading state initially', () => {
-    vi.mocked(useAuth).mockReturnValue({
-      currentUser: mockFirebaseUser,
+    vi.mocked(useAuth).mockReturnValue(createMockAuthContext({
       userProfile: null,
-      loading: false,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signInWithGoogle: vi.fn(),
-      signUp: vi.fn(),
-      resetPassword: vi.fn(),
-      user: mockFirebaseUser,
       isAdmin: false
-    });
+    }));
     mockedFirestoreService.getUserById.mockResolvedValue(null);
 
     render(
@@ -102,18 +55,10 @@ describe('AdminDashboard', () => {
   });
 
   it('redirects when user is not admin', async () => {
-    vi.mocked(useAuth).mockReturnValue({
-      currentUser: mockFirebaseUser,
+    vi.mocked(useAuth).mockReturnValue(createMockAuthContext({
       userProfile: null,
-      loading: false,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signInWithGoogle: vi.fn(),
-      signUp: vi.fn(),
-      resetPassword: vi.fn(),
-      user: mockFirebaseUser,
       isAdmin: false
-    });
+    }));
     mockedFirestoreService.getUserById.mockResolvedValue({
       ...mockUserProfile,
       roles: { student: false, instructor: false, admin: false }
@@ -131,18 +76,10 @@ describe('AdminDashboard', () => {
   });
 
   it('renders admin dashboard for admin users', async () => {
-    vi.mocked(useAuth).mockReturnValue({
-      currentUser: mockFirebaseUser,
+    vi.mocked(useAuth).mockReturnValue(createMockAuthContext({
       userProfile: null,
-      loading: false,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signInWithGoogle: vi.fn(),
-      signUp: vi.fn(),
-      resetPassword: vi.fn(),
-      user: mockFirebaseUser,
       isAdmin: true
-    });
+    }));
     mockedFirestoreService.getUserById.mockResolvedValue({
       ...mockUserProfile,
       name: 'Admin User',
@@ -163,18 +100,12 @@ describe('AdminDashboard', () => {
   });
 
   it('handles case when currentUser is null', async () => {
-    vi.mocked(useAuth).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue(createMockAuthContext({
       currentUser: null,
       userProfile: null,
-      loading: false,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signInWithGoogle: vi.fn(),
-      signUp: vi.fn(),
-      resetPassword: vi.fn(),
       user: null,
       isAdmin: false
-    });
+    }));
 
     render(
       <MemoryRouter>
@@ -189,18 +120,10 @@ describe('AdminDashboard', () => {
   });
 
   it('handles error when fetching user profile', async () => {
-    vi.mocked(useAuth).mockReturnValue({
-      currentUser: mockFirebaseUser,
+    vi.mocked(useAuth).mockReturnValue(createMockAuthContext({
       userProfile: null,
-      loading: false,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-      signInWithGoogle: vi.fn(),
-      signUp: vi.fn(),
-      resetPassword: vi.fn(),
-      user: mockFirebaseUser,
       isAdmin: false
-    });
+    }));
     mockedFirestoreService.getUserById.mockRejectedValue(new Error('Failed to fetch user'));
 
     render(

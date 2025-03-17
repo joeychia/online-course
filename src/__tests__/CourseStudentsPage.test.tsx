@@ -1,27 +1,21 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { createTestComponent } from '../test/helpers/createTestComponent';
+import { MockNavigate } from '../test/mocks/components/Navigation';
 
 // Create a simplified test version of the component instead of mocking everything
 const MockCourseStudentsList = ({ courseId }: { courseId: string }) => (
   <div data-testid="course-students-list">Course Students List for {courseId}</div>
 );
 
-const MockNavigate = ({ to, replace }: { to: string; replace?: boolean }) => (
-  <div data-testid="navigate" data-to={to} data-replace={replace ? 'true' : 'false'}>
-    Redirecting to {to}
-  </div>
-);
-
-// Test-specific version of CourseStudentsPage that doesn't rely on complex dependencies
+// Define the props interface for the test component
 interface CourseStudentsPageProps {
   isAdmin?: boolean;
   courseId?: string;
 }
 
-const TestCourseStudentsPage: React.FC<CourseStudentsPageProps> = ({ 
-  isAdmin = true, 
-  courseId = '123' 
-}) => {
+// Create a test-specific version using our helper function
+const TestCourseStudentsPage = createTestComponent<CourseStudentsPageProps>(
+  ({ isAdmin = true, courseId = '123' }) => {
   if (!isAdmin) {
     return <MockNavigate to="/" replace />;
   }
@@ -39,7 +33,7 @@ const TestCourseStudentsPage: React.FC<CourseStudentsPageProps> = ({
       <MockCourseStudentsList courseId={courseId} />
     </div>
   );
-};
+}, { isAdmin: true, courseId: '123' });
 
 describe('CourseStudentsPage', () => {
   it('renders course students list for admin users', () => {

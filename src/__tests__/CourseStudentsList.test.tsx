@@ -26,8 +26,15 @@ vi.mock('@mui/x-data-grid', () => ({
       ))}
     </div>
   ),
-  // Export any other types or constants that might be imported
   GridPaginationModel: {}
+}));
+
+// Mock the pagination hook
+vi.mock('../hooks/useDataGridPagination', () => ({
+  useDataGridPagination: () => ({
+    paginationModel: { page: 0, pageSize: 10 },
+    handlePaginationModelChange: vi.fn()
+  })
 }));
 
 describe('CourseStudentsList', () => {
