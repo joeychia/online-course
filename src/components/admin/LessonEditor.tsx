@@ -7,7 +7,9 @@ import {
   Button,
   TextField,
   Box,
-  Divider
+  Divider,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { Lesson } from '../../types';
@@ -65,6 +67,9 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
       if (typeof lesson['video-url'] === 'string' && lesson['video-url'].length > 0) {
         updateData['video-url'] = lesson['video-url'];
       }
+
+      // Include disableNote field
+      updateData.disableNote = lesson.disableNote || false;
 
       // Update the lesson document
       await firestoreService.updateLesson(lessonId, updateData);
@@ -159,6 +164,16 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             fullWidth
             value={lesson?.['video-url'] ?? ''}
             onChange={(e) => handleVideoFieldChange('video-url', e.target.value)}
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={lesson?.disableNote || false}
+                onChange={(e) => setLesson(prev => prev ? { ...prev, disableNote: e.target.checked } : null)}
+              />
+            }
+            label="Disable Notes"
           />
 
           <Box>

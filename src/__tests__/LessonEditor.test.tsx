@@ -249,7 +249,8 @@ describe('LessonEditor', () => {
         'video-url': TEST_DATA.VIDEO_URL + '/updated',
         content: TEST_DATA.CONTENT + TEST_DATA.UPDATED_SUFFIX,
         quizId: null,
-        unitId: 'unit_1'
+        unitId: 'unit_1',
+        disableNote: false
       });
       expect(mockOnSave).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();
@@ -371,7 +372,8 @@ describe('LessonEditor', () => {
         name: TEST_DATA.LESSON_NAME,
         content: TEST_DATA.CONTENT,
         quizId: null,
-        unitId: 'unit_1'
+        unitId: 'unit_1',
+        disableNote: false
       });
       expect(mockOnSave).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();
