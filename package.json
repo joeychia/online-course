@@ -25,6 +25,7 @@
     "@firebase/performance": "^0.7.1",
     "@mui/icons-material": "^5.16.14",
     "@mui/material": "^5.16.14",
+    "@mui/x-data-grid": "^7.27.3",
     "@toast-ui/react-editor": "^3.2.3",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-calendar-heatmap": "^1.9.0",
