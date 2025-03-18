@@ -1,10 +1,11 @@
-import { Box, Container, Typography, Paper, Accordion, AccordionSummary, AccordionDetails, Link } from '@mui/material';
+import { Box, Container, Typography, Paper, Accordion, AccordionSummary, AccordionDetails, Link, useTheme } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTranslation } from '../hooks/useTranslation';
 import { convertChinese } from '../utils/chineseConverter';
 
 export default function Help() {
   const { t, language } = useTranslation();
+  const theme = useTheme();
 
   const newUserGuide = [
     {
@@ -41,22 +42,23 @@ export default function Help() {
     {
       question: '我可以在課程中做筆記嗎？',
       answer: '是的，每堂課都有內建的筆記功能，可自動儲存您的筆記。'
-    },
-    {
-      question: '網站有App嗎？',
-      answer: '本網站可以安裝為App使用，請依照您使用的手機瀏覽器選擇安裝步驟：\
-\
-手機版Chrome瀏覽器：\
-1. 點擊右上角選單按鈕\
-2. 在選單中點擊「加到主畫面」選項\
-3. 點擊「安裝」按鈕即可完成\
-\
-手機版Safari瀏覽器：\
-1. 點擊底部工具列的「分享」按鈕 \
-2. 在分享選單中，向上滑動並點擊「加入主畫面」選項 \
-3. 點擊右上角的「新增」按鈕即可完成安裝'
     }
   ];
+
+  const pwaInstall = {
+    title: '安裝為應用程式',
+    content: `本網站可以安裝為App使用，請依照您使用的手機瀏覽器選擇安裝步驟：
+
+手機版Chrome瀏覽器：
+1. 點擊右上角選單按鈕
+2. 在選單中點擊「加到主畫面」選項
+3. 點擊「安裝」按鈕即可完成
+
+手機版Safari瀏覽器：
+1. 點擊底部工具列的「分享」按鈕
+2. 在分享選單中，向上滑動並點擊「加入主畫面」選項
+3. 點擊右上角的「新增」按鈕即可完成安裝`
+  };
 
   return (
     <Container maxWidth="lg">
@@ -64,7 +66,32 @@ export default function Help() {
         <Typography variant="h4" component="h1" gutterBottom>
           {t('help')}
         </Typography>
-
+        {/* PWA Installation Section */}
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h5" gutterBottom>
+            {convertChinese(pwaInstall.title, language)}
+          </Typography>
+          <Box sx={{ 
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            gap: 4,
+            mt: 2
+          }}>
+            <img
+              src="/PWA.png"
+              alt={convertChinese('安裝為應用程式示範', language)}
+              style={{ 
+                width: '400px',
+                borderRadius: '8px',
+                boxShadow: theme.shadows[4]
+              }}
+            />
+            <Typography color="text.secondary" whiteSpace="pre-line">
+              {convertChinese(pwaInstall.content, language)}
+            </Typography>
+          </Box>
+        </Paper>
         {/* New User Guide Section */}
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h5" gutterBottom>
@@ -107,10 +134,12 @@ export default function Help() {
           </Box>
         </Paper>
 
+
+
         {/* Contact Section */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h5" gutterBottom>
-          {convertChinese('新手指南', language)}
+          {convertChinese('聯繫我們', language)}
           </Typography>
           <Box sx={{ mt: 2 }}>
             <Typography paragraph>

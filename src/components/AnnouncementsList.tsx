@@ -4,6 +4,7 @@ import { firestoreService } from '../services/firestoreService';
 import { useAuth } from '../hooks/useAuth';
 import { Announcement, Course } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
+import MarkdownViewer from '../components/MarkdownViewer';
 
 
 export default function AnnouncementsList() {
@@ -78,9 +79,9 @@ export default function AnnouncementsList() {
                     {announcement.courseId ? t('forCourse', {course: courseIdToName[announcement.courseId]}) : t('forEveryone')}
                   </Typography>
                 </Box>
-                <Typography variant="body1" gutterBottom>
-                  {announcement.content}
-                </Typography>
+                <MarkdownViewer
+                    content={announcement.content}
+                />
                 <Typography variant="body2" color="text.secondary">
                   {new Date(announcement.publishDate).toLocaleDateString()}~  
                   {new Date(announcement.expireDate).toLocaleDateString()}
