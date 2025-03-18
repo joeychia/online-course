@@ -14,7 +14,7 @@ import {
     addDoc,
     limit,
     QueryConstraint,
-    collectionGroup
+    collectionGroup,
 } from 'firebase/firestore';
 import type { 
     Course, 
@@ -25,7 +25,8 @@ import type {
     Note, 
     UserProfile, 
     QuizHistory,
-    CourseUnit
+    CourseUnit,
+    Announcement
 } from '../types';
 import { withTimeout } from './utils';
 import { db } from './firestoreConfig';
@@ -559,6 +560,19 @@ export class FirestoreService {
         await withTimeout(setDoc(userRef, user));
     }
 
+    async getAllUsersEmails(): Promise<string[]> {
+        try {
+            const usersRef = collection(db, 'users');
+            const snapshot = await getDocs(usersRef);
+            return snapshot.docs
+                .map(doc => doc.data().email)
+                .filter(email => typeof email === 'string' && email.includes('@'));
+        } catch (error) {
+            console.error('Error fetching user emails:', error);
+            throw new Error('Failed to retrieve user emails');
+        }
+    }
+
     async updateUserProgress(userId: string, courseId: string, lessonId: string, completed: boolean, completedAt: string, lessonName: string): Promise<void> {
         const userRef = doc(db, 'users', userId);
         const user = await this.getUserById(userId);
@@ -724,6 +738,30 @@ export class FirestoreService {
             return [];
         }
     }
+    async createAnnouncement(announcement: Omit<Announcement, 'id'>) {
+        const traceId = performanceService.traceFirestoreWrite('announcements', 'create');
+        try {
+            // Handle null/undefined courseId explicitly
+            const cleanedAnnouncement = {
+                ...announcement,
+                courseId: announcement.courseId || null
+            };
+            const docRef = await withTimeout(addDoc(collection(db, 'announcements'), cleanedAnnouncement));
+            performanceService.stopTrace(traceId);
+            return docRef.id;
+        } catch (error) {
+            performanceService.stopTrace(traceId, { error: 'failed' });
+            throw error;
+        }
+    }
+    
+    async getActiveAnnouncements() {
+      const q = query(
+        collection(db, 'announcements'),
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+   }
 }
 
 export const firestoreService = new FirestoreService();

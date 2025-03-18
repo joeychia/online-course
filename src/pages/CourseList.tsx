@@ -18,6 +18,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { firestoreService } from '../services/firestoreService';
 import CourseCard from '../components/CourseCard';
+import AnnouncementsList from '../components/AnnouncementsList';
 
 export default function CourseList({ myCourses = false }: { myCourses?: boolean }) {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -177,6 +178,9 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
         </Alert>
       )}
       
+      <Box sx={{ mb: 4 }}>
+        <AnnouncementsList />
+      </Box>
       <Typography variant="h4" gutterBottom>
         {myCourses? t('myCourses') : t('availableCourses')}
       </Typography>

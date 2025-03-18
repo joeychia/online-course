@@ -437,5 +437,25 @@ export const translations: Translations = {
   date: {
     'zh-TW': '日期',
     'zh-CN': '日期'
-  }
+  },
+  announcements: {
+    'zh-TW': '系統公告',
+    'zh-CN': '系统公告'
+  },
+  noAnnouncements: {
+    'zh-TW': '目前沒有公告',
+    'zh-CN': '目前没有公告'
+  },
+  failedToLoadAnnouncements: {
+    'zh-TW': '載入公告失敗',
+    'zh-CN': '加载公告失败'
+  },
+  forCourse: {
+    'zh-TW': '課程{{course}}的學員：',
+    'zh-CN': '课程{{course}}的学员：'
+  },
+  forEveryone: {
+    'zh-TW': '所有人：',
+    'zh-CN': '所有人：'
+  },
 };

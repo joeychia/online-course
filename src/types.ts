@@ -120,3 +120,13 @@ export interface Note {
   text: string;
   updatedAt: string;
 }
+
+export interface Announcement {
+  id: string;
+  content: string;
+  publishDate: string;
+  expireDate: string;
+  courseId?: string;
+  createdAt: string;
+  createdBy: string;
+}

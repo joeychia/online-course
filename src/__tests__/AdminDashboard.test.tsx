@@ -4,6 +4,7 @@ import AdminDashboard from '../pages/AdminDashboard';
 import { useAuth } from '../hooks/useAuth';
 import { firestoreService } from '../services/firestoreService';
 import { MemoryRouter } from 'react-router-dom';
+import { LanguageProvider } from '../contexts/LanguageContext';
 import { mockUserProfile, createMockAuthContext } from '../test/mocks/authContextMock';
 import { MockNavigate } from '../test/mocks/components/Navigation';
 
@@ -47,7 +48,9 @@ describe('AdminDashboard', () => {
 
     render(
       <MemoryRouter>
-        <AdminDashboard />
+        <LanguageProvider>
+          <AdminDashboard />
+        </LanguageProvider>
       </MemoryRouter>
     );
 
@@ -66,7 +69,9 @@ describe('AdminDashboard', () => {
 
     render(
       <MemoryRouter>
-        <AdminDashboard />
+        <LanguageProvider>
+          <AdminDashboard />
+        </LanguageProvider>
       </MemoryRouter>
     );
 
@@ -89,7 +94,9 @@ describe('AdminDashboard', () => {
 
     render(
       <MemoryRouter>
-        <AdminDashboard />
+        <LanguageProvider>
+          <AdminDashboard />
+        </LanguageProvider>
       </MemoryRouter>
     );
 
@@ -109,7 +116,9 @@ describe('AdminDashboard', () => {
 
     render(
       <MemoryRouter>
-        <AdminDashboard />
+        <LanguageProvider>
+          <AdminDashboard />
+        </LanguageProvider>
       </MemoryRouter>
     );
 
@@ -128,7 +137,9 @@ describe('AdminDashboard', () => {
 
     render(
       <MemoryRouter>
-        <AdminDashboard />
+        <LanguageProvider>
+          <AdminDashboard />
+        </LanguageProvider>
       </MemoryRouter>
     );
 
