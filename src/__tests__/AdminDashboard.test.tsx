@@ -13,7 +13,8 @@ vi.mock('../hooks/useAuth');
 // Mock firestoreService
 vi.mock('../services/firestoreService', () => ({
   firestoreService: {
-    getUserById: vi.fn()
+    getUserById: vi.fn(),
+    getActiveAnnouncements: vi.fn().mockResolvedValue([])
   }
 }));
 

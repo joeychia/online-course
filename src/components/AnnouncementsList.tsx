@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Paper, Typography, Card, CardContent, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Card, CardContent, CircularProgress } from '@mui/material';
 import { firestoreService } from '../services/firestoreService';
 import { useAuth } from '../hooks/useAuth';
 import { Announcement, Course } from '../types';
@@ -11,7 +11,6 @@ export default function AnnouncementsList() {
   const { t } = useTranslation();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
@@ -31,8 +30,6 @@ export default function AnnouncementsList() {
         announcementsData = validAnnouncements;
 
         setAnnouncements(announcementsData as Announcement[]);
-      } catch (err) {
-        setError(t('failedToLoadAnnouncements'));
       } finally {
         setLoading(false);
       }
@@ -66,20 +63,12 @@ export default function AnnouncementsList() {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        {t('announcements')}
-      </Typography>
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {announcements.length > 0 && (
+        <>
+        <Typography variant="h4" gutterBottom>
+            {t('announcements')}
+        </Typography>
 
-      {announcements.length === 0 ? (
-        <Alert severity="info">{t('noAnnouncements')}</Alert>
-      ) : (
-        <Paper elevation={2} sx={{ p: 2 }}>
           {announcements.map((announcement) => (
             <Card key={announcement.id} sx={{ mb: 2, '&:last-child': { mb: 0 } }}>
               <CardContent>
@@ -99,7 +88,7 @@ export default function AnnouncementsList() {
               </CardContent>
             </Card>
           ))}
-        </Paper>
+        </>
       )}
     </Box>
   );
