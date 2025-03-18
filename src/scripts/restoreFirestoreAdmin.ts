@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { Course, Unit, Lesson, Quiz, UserProfile } from '../types';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ interface BackupData {
 }
 
 // Check and guide for service account file
-const serviceAccountPath = join(process.cwd(), 'service-account-test.json');
+const serviceAccountPath = join(process.cwd(), 'service-account.json');
 if (!existsSync(serviceAccountPath)) {
     console.error('Service account file not found!');
     console.log('\nTo use this script, you need to:');
@@ -120,7 +121,8 @@ export async function restoreFromBackup(backupFilePath: string) {
 }
 
 // Allow running from command line
-if (import.meta.url === new URL(process.argv[1], 'file:').href) {
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const files = listBackupFiles();
     
     console.log('Available backup files:');

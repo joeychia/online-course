@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { Course, Unit, Lesson, Quiz } from '../types';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ interface BackupData {
 }
 
 // Read service account JSON
-const serviceAccountPath = join(process.cwd(), 'service-account-test.json');
+const serviceAccountPath = join(process.cwd(), 'service-account.json');
 if (!existsSync(serviceAccountPath)) {
     console.error('Service account file not found!');
     console.log('\nTo use this script, you need to:');
@@ -24,23 +25,56 @@ if (!existsSync(serviceAccountPath)) {
     console.log('3. Click "Generate New Private Key"');
     console.log('4. Save the downloaded file as "service-account.json"');
     console.log(`5. Place it in the project root directory: ${process.cwd()}\n`);
-    console.warn(`WANNING! NEVER SHARE THIS FILE NOR COMMIT IT TO GITHUB! \n`);
+    console.warn(`WARNING! NEVER SHARE THIS FILE NOR COMMIT IT TO GITHUB!\n`);
     process.exit(1);
 }
 console.log('Using service account file:', serviceAccountPath);
-const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf-8'));
+
+interface ServiceAccount {
+    project_id: string;
+    private_key: string;
+    client_email: string;
+}
+
+let serviceAccount: ServiceAccount;
+try {
+    const serviceAccountContent = readFileSync(serviceAccountPath, 'utf-8');
+    console.log('Service account file read successfully');
+    const parsedAccount = JSON.parse(serviceAccountContent);
+    
+    // Validate required service account fields
+    if (!parsedAccount.project_id || !parsedAccount.private_key || !parsedAccount.client_email) {
+        throw new Error('Invalid service account file: missing required fields');
+    }
+    serviceAccount = parsedAccount;
+    console.log('Service account file parsed and validated successfully');
+} catch (error) {
+    console.error('Error processing service account file:', error instanceof Error ? error.message : 'Unknown error');
+    if (error instanceof Error) {
+        console.error('Error stack trace:', error.stack);
+    }
+    throw error;
+}
 
 // Initialize Firebase Admin
+console.log('Initializing Firebase Admin...');
 const app = initializeApp({
-    credential: cert(serviceAccount)
+    credential: cert({
+        projectId: serviceAccount.project_id,
+        privateKey: serviceAccount.private_key,
+        clientEmail: serviceAccount.client_email
+    })
 });
+console.log('Firebase Admin initialized successfully');
 
+console.log('Getting Firestore instance...');
 const db = getFirestore(app);
+console.log('Firestore instance obtained successfully');
 
-export async function backupCourse(courseId: string) {
+export async function backupCourse(courseId: string): Promise<void> {
     try {
         console.log('Starting course backup...');
-        console.log('Using project:', process.env.VITE_FIREBASE_PROJECT_ID);
+        console.log('Using project:', serviceAccount.project_id);
         console.log('Backing up course:', courseId);
 
         const backupData: BackupData = {
@@ -95,7 +129,7 @@ export async function backupCourse(courseId: string) {
         // Save to file
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `course-${courseId}-backup-${timestamp}.json`;
-        const backupDir = join(process.cwd(), 'src/data/backups');
+        const backupDir = join(process.cwd(), 'src', 'data', 'backups');
         const filePath = join(backupDir, filename);
 
         // Create backups directory if it doesn't exist
@@ -107,86 +141,100 @@ export async function backupCourse(courseId: string) {
         console.log(`Backup saved to: ${filePath}`);
         console.log('Backup completed successfully!');
     } catch (error) {
-        console.error('Error backing up course:', error);
-        process.exit(1);
-    } finally {
-        process.exit(0);
+        console.error('Error backing up course:', error instanceof Error ? error.message : 'Unknown error');
+        if (error instanceof Error) {
+            console.error('Error stack trace:', error.stack);
+        }
+        throw error;
     }
 }
 
 async function getAllCourses(): Promise<{ id: string; name: string }[]> {
-    const coursesSnapshot = await db.collection('courses').get();
-    return coursesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        name: (doc.data() as Course).name
-    }));
+    try {
+        const coursesSnapshot = await db.collection('courses').get();
+        return coursesSnapshot.docs.map(doc => ({
+            id: doc.id,
+            name: (doc.data() as Course).name
+        }));
+    } catch (error) {
+        console.error('Error getting all courses:', error instanceof Error ? error.message : 'Unknown error');
+        throw error;
+    }
 }
 
-async function backupAllCourses() {
-    console.log('Starting backup of all courses...');
-    const courses = await getAllCourses();
-    const consolidatedData: BackupData = {
-        courses: {},
-        units: {},
-        lessons: {},
-        quizzes: {}
-    };
+async function backupAllCourses(): Promise<void> {
+    try {
+        console.log('Starting backup of all courses...');
+        const courses = await getAllCourses();
+        const consolidatedData: BackupData = {
+            courses: {},
+            units: {},
+            lessons: {},
+            quizzes: {}
+        };
 
-    for (const course of courses) {
-        // Backup individual course
-        await backupCourse(course.id);
+        for (const course of courses) {
+            // Backup individual course
+            await backupCourse(course.id);
 
-        // Add to consolidated data
-        const courseDoc = await db.doc(`courses/${course.id}`).get();
-        consolidatedData.courses[course.id] = courseDoc.data() as Course;
+            // Add to consolidated data
+            const courseDoc = await db.doc(`courses/${course.id}`).get();
+            consolidatedData.courses[course.id] = courseDoc.data() as Course;
 
-        // Get units directly from course data
-        for (const unitInfo of consolidatedData.courses[course.id].units) {
-            const unitId = unitInfo.id;
-            const unitDoc = await db.doc(`units/${unitId}`).get();
-            if (!unitDoc.exists) {
-                console.warn(`Unit ${unitId} not found, skipping...`);
-                continue;
-            }
-            consolidatedData.units[unitId] = unitDoc.data() as Unit;
+            // Get units directly from course data
+            for (const unitInfo of consolidatedData.courses[course.id].units) {
+                const unitId = unitInfo.id;
+                const unitDoc = await db.doc(`units/${unitId}`).get();
+                if (!unitDoc.exists) {
+                    console.warn(`Unit ${unitId} not found, skipping...`);
+                    continue;
+                }
+                consolidatedData.units[unitId] = unitDoc.data() as Unit;
 
-            const lessonsSnapshot = await db.collection('lessons')
-                .where('unitId', '==', unitId)
-                .get();
+                const lessonsSnapshot = await db.collection('lessons')
+                    .where('unitId', '==', unitId)
+                    .get();
 
-            for (const lessonDoc of lessonsSnapshot.docs) {
-                const lessonId = lessonDoc.id;
-                const lessonData = lessonDoc.data() as Lesson;
-                consolidatedData.lessons[lessonId] = lessonData;
+                for (const lessonDoc of lessonsSnapshot.docs) {
+                    const lessonId = lessonDoc.id;
+                    const lessonData = lessonDoc.data() as Lesson;
+                    consolidatedData.lessons[lessonId] = lessonData;
 
-                if (lessonData.quizId) {
-                    const quizDoc = await db.doc(`quizzes/${lessonData.quizId}`).get();
-                    if (quizDoc.exists) {
-                        consolidatedData.quizzes![lessonData.quizId] = quizDoc.data() as Quiz;
+                    if (lessonData.quizId) {
+                        const quizDoc = await db.doc(`quizzes/${lessonData.quizId}`).get();
+                        if (quizDoc.exists) {
+                            consolidatedData.quizzes![lessonData.quizId] = quizDoc.data() as Quiz;
+                        }
                     }
                 }
             }
         }
+
+        // Save consolidated backup
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `all-courses-backup-${timestamp}.json`;
+        const backupDir = join(process.cwd(), 'src', 'data', 'backups');
+        const filePath = join(backupDir, filename);
+
+        if (!existsSync(backupDir)) {
+            mkdirSync(backupDir, { recursive: true });
+        }
+
+        writeFileSync(filePath, JSON.stringify(consolidatedData, null, 2));
+        console.log(`Consolidated backup saved to: ${filePath}`);
+        console.log('All courses backup completed successfully!');
+        process.exit(0);
+    } catch (error) {
+        console.error('Error backing up all courses:', error instanceof Error ? error.message : 'Unknown error');
+        if (error instanceof Error) {
+            console.error('Error stack trace:', error.stack);
+        }
+        throw error;
     }
-
-    // Save consolidated backup
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `all-courses-backup-${timestamp}.json`;
-    const backupDir = join(process.cwd(), 'src/data/backups');
-    const filePath = join(backupDir, filename);
-
-    if (!existsSync(backupDir)) {
-        mkdirSync(backupDir, { recursive: true });
-    }
-
-    writeFileSync(filePath, JSON.stringify(consolidatedData, null, 2));
-    console.log(`Consolidated backup saved to: ${filePath}`);
-    console.log('All courses backup completed successfully!');
-    process.exit(0);
 }
 
 // Allow running from command line
-if (import.meta.url === new URL(process.argv[1], 'file:').href) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const courseId = process.argv[2];
     if (!courseId) {
         // List all available courses and prompt for selection
