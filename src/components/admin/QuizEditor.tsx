@@ -37,6 +37,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
   const [error, setError] = useState<string | null>(null);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importText, setImportText] = useState('');
+  
 
   const addQuestion = () => {
     if (!selectedQuiz) {
@@ -201,38 +202,27 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     try {
-      console.debug('[QuizEditor] Attempting to parse quiz text');
+      reportError(null);
       const questions = parseQuizText(importText);
-      if (questions.length === 0) {
-        console.debug('[QuizEditor] No valid questions found in import text');
-        setError('No valid questions found in the text');
-        return;
-      }
-
-      const newQuiz = {
-        id: `quiz_${Date.now()}`,
-        questions
-      };
-      console.debug('[QuizEditor] Successfully imported quiz:', { 
-        quizId: newQuiz.id, 
-        questionCount: questions.length 
-      });
-
-      setSelectedQuiz(newQuiz);
+      setSelectedQuiz(prev => ({
+        ...prev,
+        questions: prev ? [...prev.questions, ...questions] : questions,
+        id: prev?.id || `quiz_${Date.now()}`
+      }));
       setIsImportDialogOpen(false);
-      setImportText('');
-      setError(null);
     } catch (err) {
-      console.error('[QuizEditor] Error parsing quiz text:', err);
-      setError('Failed to parse quiz text');
+      const message = err instanceof Error ? err.message : 'Invalid quiz format';
+      setError(message);
+      console.error('Import error:', err);
     }
   };
 
   const parseQuizText = (text: string) => {
     console.debug('[QuizEditor] Starting quiz text parsing');
     const questions: QuizQuestion[] = [];
+    const errors: string[] = [];
     
     // Split by one or more blank lines and remove any leading/trailing whitespace
     const questionBlocks = text.split(/\n\s*\n+/).map(block => block.trim()).filter(block => block);
@@ -247,7 +237,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
       // Look for question line (number followed by dot and text)
       const questionMatch = lines[0]?.match(/^\d+\.\s*(.+)/);
       if (!questionMatch) {
-        console.debug(`[QuizEditor] Block ${blockIndex + 1}: No valid question format found in first line`);
+        errors.push(`Block ${blockIndex + 1}: Missing question number format`);
         return;
       }
 
@@ -283,8 +273,17 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
         }
       }
 
-      // If we found all components of a valid question
-      if (options.length > 0 && answerFound) {
+      // Handle free-form questions if no options/answer found
+      if (options.length === 0 && !answerFound) {
+        console.debug(`[QuizEditor] Block ${blockIndex + 1}: Creating free-form question`);
+        questions.push({
+          type: 'free_form',
+          text: questionMatch[1].trim(),
+          options: []
+        });
+      }
+      // Handle single-choice questions
+      else if (options.length > 0 && answerFound) {
         // Set the correct answer
         const correctIndex = correctAnswer.charCodeAt(0) - 'A'.charCodeAt(0);
         if (correctIndex >= 0 && correctIndex < options.length) {
@@ -315,6 +314,9 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
       }
     });
 
+    if (errors.length > 0) {
+      throw new Error(`Validation errors:\n${errors.join('\n')}`);
+    }
     return questions;
   };
 
@@ -345,7 +347,7 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Paste your quiz questions in the format below:
             <br />
-            1. Question text
+            1. Some single choice question text
             <br />
             A. Option A
             <br />
@@ -356,7 +358,12 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
             D. Option D
             <br />
             答案：A
+            <br /><br />
+            2. Some freeform question text
+            <br /><br />
+            3. Another freeform question text
           </Typography>
+          
           <TextareaAutosize
             minRows={10}
             style={{
@@ -375,13 +382,12 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quizId, onSave }) => {
             Import
           </Button>
         </DialogActions>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2, mx: 2 }}>
+            {error}
+          </Alert>
+        )}
       </Dialog>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 4 }}>
-          {error}
-        </Alert>
-      )}
 
       {selectedQuiz && (
         <Stack spacing={4}>
