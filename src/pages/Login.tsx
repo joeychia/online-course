@@ -138,6 +138,13 @@ export default function Login() {
             navigate('/');
         } catch (err) {
             console.error(err);
+            // Handle popup closure error
+            if (err instanceof Error && 
+                (err.message.includes('popup_closed_by_user') || 
+                 err.message.includes('cancelled'))) {
+                setLoading(false);
+                return;
+            }
             const errorMessage = err instanceof Error ? err.message : String(err);
             showMessage(`${t('failedToSignIn')} ${errorMessage}`);
         } finally {
