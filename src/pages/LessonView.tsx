@@ -464,22 +464,7 @@ const LessonView: React.FC<LessonViewProps> = ({
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h2" sx={{ fontWeight: 'bold' }}>
               {t('personalNotes')}
-              {(noteSaved || noteLastUpdated) && (
-                <Typography 
-                  component="span" 
-                  variant="body2" 
-                  color="text.secondary"
-                  sx={{ 
-                    ml: { xs: 0, sm: 1 },
-                    display: { xs: 'block', sm: 'inline' },
-                    mt: { xs: 1, sm: 0 }
-                  }}
-                >
-                  {t('lastUpdate', { date: noteSaved ? new Date().toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') : new Date(noteLastUpdated!).toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') })}
-                </Typography>
-              )}
             </Typography>
-            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
               <Button
                 variant="contained"
                 onClick={handleSaveNote}
@@ -496,7 +481,6 @@ const LessonView: React.FC<LessonViewProps> = ({
               >
                 {isSaving ? t('saving') : t('saveAndComplete')}
               </Button>
-            </Stack>
           </Stack>
           <RichTextEditor
             value={note}
