@@ -30,7 +30,7 @@
       }
     </style>
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
+    <script defer async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -43,8 +43,9 @@
   <body style="margin:0">
     <div id="root"></div>
     <div class="loading-spinner"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
+
+    <script defer type="module" src="/src/main.tsx"></script>
+    <script defer>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/serviceWorker.js')
