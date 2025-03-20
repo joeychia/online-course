@@ -102,7 +102,6 @@ export default function Login() {
 
     const handleGoogleSignIn = async () => {
         try {
-            setLoading(true);
             let userCredential;
             try {
                 userCredential = await signInWithGoogle();
@@ -142,13 +141,10 @@ export default function Login() {
             if (err instanceof Error && 
                 (err.message.includes('popup_closed_by_user') || 
                  err.message.includes('cancelled'))) {
-                setLoading(false);
                 return;
             }
             const errorMessage = err instanceof Error ? err.message : String(err);
             showMessage(`${t('failedToSignIn')} ${errorMessage}`);
-        } finally {
-            setLoading(false);
         }
     };
 
