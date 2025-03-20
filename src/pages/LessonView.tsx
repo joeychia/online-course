@@ -86,7 +86,6 @@ const LessonView: React.FC<LessonViewProps> = ({
   const { currentUser } = useAuth();
   const { t, language } = useTranslation();
   const [note, setNote] = useState(lesson?.userNote || '');
-  const [noteLastUpdated, setNoteLastUpdated] = useState<string | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizReminderOpen, setQuizReminderOpen] = useState(false);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -181,7 +180,6 @@ const LessonView: React.FC<LessonViewProps> = ({
         const existingNote = await firestoreService.getNoteForLesson(currentUser.uid, lesson.id);
         if (existingNote) {
           setNote(existingNote.text);
-          setNoteLastUpdated(existingNote.updatedAt);
         }
       } catch (err) {
         console.error('Error loading note:', err);
@@ -464,22 +462,7 @@ const LessonView: React.FC<LessonViewProps> = ({
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h2" sx={{ fontWeight: 'bold' }}>
               {t('personalNotes')}
-              {(noteSaved || noteLastUpdated) && (
-                <Typography 
-                  component="span" 
-                  variant="body2" 
-                  color="text.secondary"
-                  sx={{ 
-                    ml: { xs: 0, sm: 1 },
-                    display: { xs: 'block', sm: 'inline' },
-                    mt: { xs: 1, sm: 0 }
-                  }}
-                >
-                  {t('lastUpdate', { date: noteSaved ? new Date().toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') : new Date(noteLastUpdated!).toLocaleString(language === 'zh-TW' ? 'zh-TW' : 'zh-CN') })}
-                </Typography>
-              )}
             </Typography>
-            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
               <Button
                 variant="contained"
                 onClick={handleSaveNote}
@@ -496,7 +479,6 @@ const LessonView: React.FC<LessonViewProps> = ({
               >
                 {isSaving ? t('saving') : t('saveAndComplete')}
               </Button>
-            </Stack>
           </Stack>
           <RichTextEditor
             value={note}
