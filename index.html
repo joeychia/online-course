@@ -13,7 +13,7 @@
         display: inline-block;
         width: 50px;
         height: 50px;
-        border: 3px solid rgba(25, 118, 210, 0.3);
+        border: 3px solid rgba(12, 222, 51, 0.3);
         border-radius: 50%;
         border-top-color: #1976d2;
         animation: spin 1s ease-in-out infinite;
@@ -48,7 +48,7 @@
     <script defer>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/serviceWorker.js')
+          navigator.serviceWorker.register('/serviceWorker.js', { updateViaCache: 'none' })
             .then(registration => {
               console.log('ServiceWorker registration successful');
             })

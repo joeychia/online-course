@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.0.0';
+const CACHE_VERSION = '1.2.0';
 const STATIC_CACHE = `static-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/index.html',
@@ -61,6 +61,14 @@ const isAllowedDomain = (url) => {
 };
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Handle keep-alive requests
+  if (url.pathname === '/keep-alive') {
+    event.respondWith(new Response('', { status: 200, headers: {'Cache-Control': 'no-store'} }));
+    return;
+  }
+
   event.respondWith(
     (async () => {
       const url = event.request.url;
@@ -84,10 +92,16 @@ self.addEventListener('fetch', (event) => {
         
         // Cache successful GET responses for allowed file types
         if (networkResponse.ok && event.request.method === 'GET') {
-          caches.open(STATIC_CACHE).then(cache => {
-            cache.put(event.request, responseToCache);
-            console.log(`[ServiceWorker] Updated cache for: ${url}`);
-          });
+          const cacheControl = networkResponse.headers.get('Cache-Control');
+          
+          if (cacheControl && cacheControl.includes('stale-while-revalidate')) {
+            console.log(`[ServiceWorker] Bypassing cache for SWR resource: ${url}`);
+          } else {
+            caches.open(STATIC_CACHE).then(cache => {
+              cache.put(event.request, responseToCache);
+              console.log(`[ServiceWorker] Updated cache for: ${url}`);
+            });
+          }
         }
         return networkResponse;
       }).catch(() => {
@@ -100,7 +114,17 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) {
         console.log(`[ServiceWorker] Cache hit for: ${url}`);
         // Update cache in background
-        event.waitUntil(networkPromise);
+        event.waitUntil(networkPromise.then(networkResponse => {
+          if (networkResponse) {
+            const cacheControl = networkResponse.headers.get('Cache-Control');
+            if (cacheControl && cacheControl.includes('stale-while-revalidate')) {
+              caches.open(STATIC_CACHE).then(cache => {
+                cache.put(event.request, networkResponse.clone());
+                console.log(`[ServiceWorker] Updated SWR resource in cache: ${url}`);
+              });
+            }
+          }
+        }));
         return cachedResponse;
       }
       console.log(`[ServiceWorker] Cache miss for: ${url}`);
@@ -131,5 +155,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  } else if (event.data.type === 'KEEP_ALIVE') {
+    event.ports[0]?.postMessage({status: 'alive'});
   }
 });
