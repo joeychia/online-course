@@ -161,8 +161,8 @@ export const translations: Translations = {
     'zh-CN': '保存中...'
   },
   saveAndComplete: {
-    'zh-TW': '保存筆記並完成課程',
-    'zh-CN': '保存笔记并完成课程'
+    'zh-TW': '保存並完成課程',
+    'zh-CN': '保存并完成课程'
   },
   previousScore: {
     'zh-TW': '上次成績：{{score}}/{{total}} 於 {{date}}',
