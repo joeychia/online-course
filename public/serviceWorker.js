@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.2.0';
+const CACHE_VERSION = '1.2.1';
 const STATIC_CACHE = `static-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/index.html',
@@ -18,9 +18,10 @@ const shouldCacheURL = (url) => {
   try {
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;
-    return pathname === '/index.html' ||
+    return !url.includes('google-analytics') && 
+           (pathname === '/index.html' ||
            pathname.endsWith('.js') ||
-           pathname.endsWith('.css');
+           pathname.endsWith('.css'));
   } catch {
     return false;
   }
@@ -53,8 +54,8 @@ const isAllowedDomain = (url) => {
     return (
       urlObj.hostname === 'localhost' ||
       urlObj.hostname.endsWith('.web.app') ||
-      urlObj.hostname === 'class.eccseattle.org'
-    );
+      urlObj.hostname.endsWith('.eccseattle.org')
+    ) && !urlObj.hostname.includes('google-analytics');
   } catch {
     return false;
   }
