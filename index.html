@@ -35,7 +35,10 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', '%VITE_GA_MEASUREMENT_ID%');
+      gtag('config', '%VITE_GA_MEASUREMENT_ID%', {
+  'custom_map': {'dimension1': 'display_mode'},
+  'display_mode': window.matchMedia('(display-mode: standalone)').matches ? 'pwa' : 'browser'
+});
     </script>
   </head>
   <body style="margin:0">
