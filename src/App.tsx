@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
 import Login from './pages/Login';
+import PasswordReset from './pages/PasswordReset';
 import Notebook from './pages/Notebook';
 import Help from './pages/Help';
 import { useAuth } from './hooks/useAuth';
@@ -49,6 +50,7 @@ function App() {
               <Router>
                 <Routes>
                   <Route path="/login" element={<Login />} />
+                  <Route path="/reset-password" element={<PasswordReset />} />
                   
                   {/* Public routes */}
                   <Route path="/" element={

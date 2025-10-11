@@ -7,7 +7,9 @@ import {
     type User as FirebaseUser,
     GoogleAuthProvider,
     signInWithPopup,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    confirmPasswordReset,
+    verifyPasswordResetCode
 } from 'firebase/auth';
 import { app } from './firebaseConfig';
 
@@ -44,6 +46,14 @@ class AuthService {
 
     async resetPassword(email: string): Promise<void> {
         await sendPasswordResetEmail(auth, email);
+    }
+
+    async verifyPasswordResetCode(oobCode: string): Promise<string> {
+        return await verifyPasswordResetCode(auth, oobCode);
+    }
+
+    async confirmPasswordReset(oobCode: string, newPassword: string): Promise<void> {
+        await confirmPasswordReset(auth, oobCode, newPassword);
     }
 }
 

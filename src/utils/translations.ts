@@ -319,6 +319,38 @@ export const translations: Translations = {
     'zh-TW': '請輸入電子郵件以重設密碼。',
     'zh-CN': '请输入电子邮件以重设密码。'
   },
+  resetPassword: {
+    'zh-TW': '重設密碼',
+    'zh-CN': '重设密码'
+  },
+  newPassword: {
+    'zh-TW': '新密碼',
+    'zh-CN': '新密码'
+  },
+  confirmNewPassword: {
+    'zh-TW': '確認新密碼',
+    'zh-CN': '确认新密码'
+  },
+  resetPasswordFor: {
+    'zh-TW': '重設密碼',
+    'zh-CN': '重设密码'
+  },
+  passwordResetSuccess: {
+    'zh-TW': '密碼重設成功！',
+    'zh-CN': '密码重设成功！'
+  },
+  invalidResetLink: {
+    'zh-TW': '無效或過期的密碼重設連結',
+    'zh-CN': '无效或过期的密码重设链接'
+  },
+  verifyingResetLink: {
+    'zh-TW': '正在驗證密碼重設連結...',
+    'zh-CN': '正在验证密码重设链接...'
+  },
+  backToLogin: {
+    'zh-TW': '返回登入',
+    'zh-CN': '返回登录'
+  },
 
 
   // Quiz View
