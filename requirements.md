@@ -33,6 +33,7 @@ frontend:
   - Firebase Auth
   - Responsive design
   - PWA support
+  - Toast UI Editor (Markdown support)
 
 backend:
   - Firestore

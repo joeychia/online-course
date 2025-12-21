@@ -9,21 +9,26 @@ A modern online learning platform built with React, TypeScript, and Material-UI 
 - View course structure and first lesson of each unit
 - Browse available courses and their descriptions
 
-### User Features (Coming Soon)
+### User Features
 - Sign up/sign in functionality
 - Course registration and progress tracking
 - Note-taking for lessons
-- Quiz participation
-- Group joining and collaboration
+- Quiz participation and history
 - Progress-based lesson unlocking
-- Personal dashboard
+- Multi-language support (English, Simplified Chinese, Traditional Chinese)
 
-### Admin Features (Coming Soon)
+### Admin Features
 - Course management (create/edit/delete)
 - Unit and lesson management
+- Lesson editor with rich text support
 - Quiz creation and management
+- Student progress tracking
+
+### Upcoming Features
+- Group joining and collaboration
 - Group management
 - Grade tracking and monitoring
+- Personal dashboard
 
 ## Technical Stack
 
@@ -32,16 +37,16 @@ A modern online learning platform built with React, TypeScript, and Material-UI 
   - TypeScript
   - Material-UI v5
   - React Router v6
-  - Firebase Auth (planned)
-  - Real-time sync (planned)
+  - Firebase Auth
   - Responsive design
-  - PWA support (planned)
+  - PWA support
+  - Toast UI Editor (Markdown support)
 
 - **Backend**:
-  - Firebase Realtime Database (planned)
+  - Cloud Firestore
 
 - **Testing**:
-  - Vitest (planned)
+  - Vitest
 
 ## Getting Started
 
@@ -71,6 +76,9 @@ src/
 ├── pages/            # Page components
 ├── contexts/         # React contexts
 ├── types/           # TypeScript type definitions
+├── services/        # API and service layer
+├── hooks/           # Custom React hooks
+├── utils/           # Utility functions
 ├── config/          # Configuration files
 └── mockData.ts      # Temporary mock data
 ```
