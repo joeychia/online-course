@@ -3,16 +3,25 @@ import { getFirestore } from 'firebase-admin/firestore';
 import * as dotenv from 'dotenv';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
-import type { Course, Unit, Lesson, Quiz } from '../types';
+import type { Course, Unit, Lesson, Quiz, Grade, Note, UserProfile, QuizHistory, Announcement } from '../types';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+interface UserBackup {
+    profile: UserProfile;
+    quizHistory: { [key: string]: QuizHistory };
+}
 
 interface BackupData {
     courses: { [key: string]: Course };
     units: { [key: string]: Unit };
     lessons: { [key: string]: Lesson };
-    quizzes?: { [key: string]: Quiz };
+    quizzes: { [key: string]: Quiz };
+    users: { [key: string]: UserBackup };
+    notes: { [key: string]: Note };
+    grades: { [key: string]: Grade };
+    announcements: { [key: string]: Announcement };
 }
 
 // Read service account JSON
@@ -81,7 +90,11 @@ export async function backupCourse(courseId: string): Promise<void> {
             courses: {},
             units: {},
             lessons: {},
-            quizzes: {}
+            quizzes: {},
+            users: {},
+            notes: {},
+            grades: {},
+            announcements: {}
         };
 
         // Get course data
@@ -162,57 +175,101 @@ async function getAllCourses(): Promise<{ id: string; name: string }[]> {
     }
 }
 
-async function backupAllCourses(): Promise<void> {
+async function backupAllCollections(): Promise<void> {
     try {
-        console.log('Starting backup of all courses...');
-        const courses = await getAllCourses();
-        const consolidatedData: BackupData = {
+        console.log('Starting full database backup...');
+        
+        const backupData: BackupData = {
             courses: {},
             units: {},
             lessons: {},
-            quizzes: {}
+            quizzes: {},
+            users: {},
+            notes: {},
+            grades: {},
+            announcements: {}
         };
 
-        for (const course of courses) {
-            // Backup individual course
-            await backupCourse(course.id);
+        // 1. Courses
+        console.log('Backing up courses...');
+        const coursesSnapshot = await db.collection('courses').get();
+        coursesSnapshot.forEach(doc => {
+            backupData.courses[doc.id] = doc.data() as Course;
+        });
+        console.log(`Backed up ${Object.keys(backupData.courses).length} courses`);
 
-            // Add to consolidated data
-            const courseDoc = await db.doc(`courses/${course.id}`).get();
-            consolidatedData.courses[course.id] = courseDoc.data() as Course;
+        // 2. Units
+        console.log('Backing up units...');
+        const unitsSnapshot = await db.collection('units').get();
+        unitsSnapshot.forEach(doc => {
+            backupData.units[doc.id] = doc.data() as Unit;
+        });
+        console.log(`Backed up ${Object.keys(backupData.units).length} units`);
 
-            // Get units directly from course data
-            for (const unitInfo of consolidatedData.courses[course.id].units) {
-                const unitId = unitInfo.id;
-                const unitDoc = await db.doc(`units/${unitId}`).get();
-                if (!unitDoc.exists) {
-                    console.warn(`Unit ${unitId} not found, skipping...`);
-                    continue;
-                }
-                consolidatedData.units[unitId] = unitDoc.data() as Unit;
+        // 3. Lessons
+        console.log('Backing up lessons...');
+        const lessonsSnapshot = await db.collection('lessons').get();
+        lessonsSnapshot.forEach(doc => {
+            backupData.lessons[doc.id] = doc.data() as Lesson;
+        });
+        console.log(`Backed up ${Object.keys(backupData.lessons).length} lessons`);
 
-                const lessonsSnapshot = await db.collection('lessons')
-                    .where('unitId', '==', unitId)
-                    .get();
+        // 4. Quizzes
+        console.log('Backing up quizzes...');
+        const quizzesSnapshot = await db.collection('quizzes').get();
+        quizzesSnapshot.forEach(doc => {
+            backupData.quizzes[doc.id] = doc.data() as Quiz;
+        });
+        console.log(`Backed up ${Object.keys(backupData.quizzes).length} quizzes`);
 
-                for (const lessonDoc of lessonsSnapshot.docs) {
-                    const lessonId = lessonDoc.id;
-                    const lessonData = lessonDoc.data() as Lesson;
-                    consolidatedData.lessons[lessonId] = lessonData;
+        // 5. Users and Quiz History
+        console.log('Backing up users and quiz history...');
+        const usersSnapshot = await db.collection('users').get();
+        for (const userDoc of usersSnapshot.docs) {
+            const userId = userDoc.id;
+            const userData = userDoc.data() as UserProfile;
+            
+            const quizHistorySnapshot = await userDoc.ref.collection('quizHistory').get();
+            const quizHistory: { [key: string]: QuizHistory } = {};
+            
+            quizHistorySnapshot.forEach(qhDoc => {
+                quizHistory[qhDoc.id] = qhDoc.data() as QuizHistory;
+            });
 
-                    if (lessonData.quizId) {
-                        const quizDoc = await db.doc(`quizzes/${lessonData.quizId}`).get();
-                        if (quizDoc.exists) {
-                            consolidatedData.quizzes![lessonData.quizId] = quizDoc.data() as Quiz;
-                        }
-                    }
-                }
-            }
+            backupData.users[userId] = {
+                profile: userData,
+                quizHistory
+            };
         }
+        console.log(`Backed up ${Object.keys(backupData.users).length} users`);
 
-        // Save consolidated backup
+        // 6. Notes
+        console.log('Backing up notes...');
+        const notesSnapshot = await db.collection('notes').get();
+        notesSnapshot.forEach(doc => {
+            backupData.notes[doc.id] = doc.data() as Note;
+        });
+        console.log(`Backed up ${Object.keys(backupData.notes).length} notes`);
+
+        // 7. Grades
+        console.log('Backing up grades...');
+        const gradesSnapshot = await db.collection('grades').get();
+        gradesSnapshot.forEach(doc => {
+            backupData.grades[doc.id] = doc.data() as Grade;
+        });
+        console.log(`Backed up ${Object.keys(backupData.grades).length} grades`);
+
+        // 8. Announcements
+        console.log('Backing up announcements...');
+        const announcementsSnapshot = await db.collection('announcements').get();
+        announcementsSnapshot.forEach(doc => {
+            backupData.announcements[doc.id] = doc.data() as Announcement;
+        });
+        console.log(`Backed up ${Object.keys(backupData.announcements).length} announcements`);
+
+        // Save to file
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `all-courses-backup-${timestamp}.json`;
+        const filename = `full-backup-${timestamp}.json`;
         const backupDir = join(process.cwd(), 'src', 'data', 'backups');
         const filePath = join(backupDir, filename);
 
@@ -220,12 +277,13 @@ async function backupAllCourses(): Promise<void> {
             mkdirSync(backupDir, { recursive: true });
         }
 
-        writeFileSync(filePath, JSON.stringify(consolidatedData, null, 2));
-        console.log(`Consolidated backup saved to: ${filePath}`);
-        console.log('All courses backup completed successfully!');
+        writeFileSync(filePath, JSON.stringify(backupData, null, 2));
+        console.log(`Full backup saved to: ${filePath}`);
+        console.log('Full backup completed successfully!');
         process.exit(0);
+
     } catch (error) {
-        console.error('Error backing up all courses:', error instanceof Error ? error.message : 'Unknown error');
+        console.error('Error performing full backup:', error instanceof Error ? error.message : 'Unknown error');
         if (error instanceof Error) {
             console.error('Error stack trace:', error.stack);
         }
@@ -243,14 +301,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
             courses.forEach(course => {
                 console.log(`${course.id}: ${course.name}`);
             });
-            console.log('\nPlease enter a course ID (or "all" to backup all courses):');
+            console.log('\nPlease enter a course ID (or "all" to backup all tables):');
             process.stdin.setEncoding('utf-8');
             process.stdin.on('data', (data) => {
-                const inputCourseId = (data as any).trim();
-                if (inputCourseId === 'all') {
-                    backupAllCourses().then(() => process.exit(0));
-                } else if (inputCourseId) {
-                    backupCourse(inputCourseId).then(() => process.exit(0));
+                const input = (data as any).trim();
+                if (input === 'all') {
+                    backupAllCollections();
+                } else if (input) {
+                    backupCourse(input).then(() => process.exit(0));
                 } else {
                     console.error('Course ID cannot be empty');
                     process.exit(1);
@@ -261,7 +319,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
             process.exit(1);
         });
     } else if (courseId === 'all') {
-        backupAllCourses().then(() => process.exit(0));
+        backupAllCollections();
     } else {
         backupCourse(courseId).then(() => process.exit(0));
     }

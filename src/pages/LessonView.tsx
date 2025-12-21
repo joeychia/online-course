@@ -23,7 +23,7 @@ import { firestoreService } from '../services/firestoreService';
 import { useAuth } from '../hooks/useAuth';
 import SaveIcon from '@mui/icons-material/Save';
 import { useTranslation } from '../hooks/useTranslation';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, Link as RouterLink } from 'react-router-dom';
 import { getYouTubeVideoId } from '../utils/urlUtils';
 import { convertChinese } from '../utils/chineseConverter';
 import MarkdownViewer from '../components/MarkdownViewer';
@@ -79,12 +79,14 @@ const LessonView: React.FC<LessonViewProps> = ({
   isCompleted,
   enableNote = true,
 }) => {
+  const { t, language } = useTranslation();
+  const { currentUser } = useAuth();
+  const location = useLocation();
+
   const { lessonId } = useParams<{ lessonId: string }>();
   const [lesson, setLesson] = useState<ExtendedLesson>({ ...initialLesson, courseId });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { currentUser } = useAuth();
-  const { t, language } = useTranslation();
   const [note, setNote] = useState(lesson?.userNote || '');
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizReminderOpen, setQuizReminderOpen] = useState(false);
@@ -95,258 +97,262 @@ const LessonView: React.FC<LessonViewProps> = ({
   const [quizComplete, setQuizComplete] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [lessonId]);
+
+  useEffect(() => {
     if (initialLesson) {
-      setLesson({ ...initialLesson, courseId });
-      return;
-    }
-    
-    const fetchLesson = async () => {
-      try {
-        if (!lessonId) return;
-        const lessonData = await firestoreService.getLessonById(lessonId);
-        if (!lessonData) {
-          setError('Lesson not found');
-          return;
+        setLesson({ ...initialLesson, courseId });
+        return;
+      }
+      
+      const fetchLesson = async () => {
+        try {
+          if (!lessonId) return;
+          const lessonData = await firestoreService.getLessonById(lessonId);
+          if (!lessonData) {
+            setError('Lesson not found');
+            return;
+          }
+          setLesson({ ...lessonData, courseId });
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to load lesson');
+        } finally {
+          setLoading(false);
         }
-        setLesson({ ...lessonData, courseId });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load lesson');
-      } finally {
+      };
+    
+      fetchLesson();
+    }, [lessonId, initialLesson]);
+
+    useEffect(() => {
+      async function trackView() {
+        if (lesson?.unitId) {
+          const unit = await firestoreService.getUnitById(lesson.unitId);
+          if (unit) {
+            void analyticsService.trackLessonView({
+              courseId: lesson.courseId,
+              courseName: unit.courseId,
+              unitId: unit.id,
+              unitName: unit.name,
+              lessonId: lesson.id,
+              lessonName: lesson.name,
+            });
+          }
+        }
+      }
+      if (lesson) {
+        void trackView();
+      }
+    }, [lesson]);
+
+    // Load quiz and quiz history if lesson has quizId
+    useEffect(() => {
+      async function loadQuizData(): Promise<void> {
+        if (lesson?.quizId && currentUser) {
+          try {
+            const [quizData, historyData] = await Promise.all([
+              firestoreService.getQuizById(lesson.quizId),
+              firestoreService.getQuizHistoryForUserLesson(currentUser.uid, lesson.id)
+            ]);
+    
+            if (quizData) {
+              setQuiz(quizData);
+            } else {
+              setQuiz(null);
+            }
+            if (historyData) {
+              setQuizHistory(historyData);
+              setQuizComplete(true);
+            }
+          } catch (err) {
+            console.error('Error loading quiz data:', err);
+          }
+        } else {
+          setQuiz(null);
+          setQuizHistory(null);
+        }
         setLoading(false);
+      }
+      
+      void loadQuizData();
+    }, [lesson?.quizId, currentUser, lesson?.id]);
+
+    // Load existing note when component mounts
+    useEffect(() => {
+      async function loadNote(): Promise<void> {
+        if (!currentUser || !lesson) return;
+        try {
+          const existingNote = await firestoreService.getNoteForLesson(currentUser.uid, lesson.id);
+          if (existingNote) {
+            setNote(existingNote.text);
+          }
+        } catch (err) {
+          console.error('Error loading note:', err);
+        }
+      }
+      if (enableNote) {
+        void loadNote();
+      }
+    }, [lesson?.id, currentUser, lesson]);
+
+    const handleSaveNote = async (): Promise<void> => {
+      if (!currentUser || !lesson) return;
+      
+      try {
+        setIsSaving(true);
+        const unit = await firestoreService.getUnitById(lesson.unitId);
+        await firestoreService.saveNote(currentUser.uid, lesson.id, lesson.courseId, note, lesson.name, unit!.name);
+        setNoteSaved(true);
+    
+        // If there's no quiz, complete the lesson
+        if (!quiz) {
+          await onComplete(lesson.id);
+        } else if (quizComplete) {
+          await onComplete(lesson.id);
+        } else {
+          // If quiz hasn't completed, show a reminder dialog
+          setQuizReminderOpen(true);
+        }
+      } catch (err) {
+        console.error('Error saving note:', err);
+        alert(t('saveNoteError', { message: err instanceof Error ? err.message : 'Unknown error occurred' }));
+      } finally {
+        setIsSaving(false);
       }
     };
 
-    fetchLesson();
-  }, [lessonId, initialLesson]);
+    const handleQuizClose = () => {
+      if (quizComplete) {
+        void onComplete(lesson.id);
+      }
+      setQuizOpen(false);
+    };
 
-  useEffect(() => {
-    async function trackView() {
-      if (lesson?.unitId) {
-        const unit = await firestoreService.getUnitById(lesson.unitId);
-        if (unit) {
-          void analyticsService.trackLessonView({
+    const handleQuizSubmit = async (answers: Record<string, string>) => {
+      if (!lesson || !currentUser || !quiz) return;
+
+      try {
+          // Calculate score
+          let correct = 0;
+          Object.entries(answers).forEach(([questionIndex, answerId]) => {
+            const question = quiz.questions[parseInt(questionIndex, 10)];
+            if (question?.options && question.options[parseInt(answerId, 10)]?.isCorrect) {
+              correct++;
+            }
+          });
+
+          const total = quiz.questions.filter((question) => question.type === "single_choice").length;
+          const score = (correct / total) * 100;
+
+          void analyticsService.trackQuizComplete({
             courseId: lesson.courseId,
-            courseName: unit.courseId,
-            unitId: unit.id,
-            unitName: unit.name,
             lessonId: lesson.id,
             lessonName: lesson.name,
+            score
           });
-        }
-      }
-    }
-    if (lesson) {
-      void trackView();
-    }
-  }, [lesson]);
 
-  // Load quiz and quiz history if lesson has quizId
-  useEffect(() => {
-    async function loadQuizData(): Promise<void> {
-      if (lesson?.quizId && currentUser) {
-        try {
-          const [quizData, historyData] = await Promise.all([
-            firestoreService.getQuizById(lesson.quizId),
-            firestoreService.getQuizHistoryForUserLesson(currentUser.uid, lesson.id)
-          ]);
+          // Get unit name for quiz history title
+          const unit = await firestoreService.getUnitById(lesson.unitId);
+          const unitName = unit ? unit.name : '';
 
-          if (quizData) {
-            setQuiz(quizData);
-          } else {
-            setQuiz(null);
-          }
-          if (historyData) {
-            setQuizHistory(historyData);
-            setQuizComplete(true);
-          }
-        } catch (err) {
-          console.error('Error loading quiz data:', err);
-        }
-      } else {
-        setQuiz(null);
-        setQuizHistory(null);
-      }
-      setLoading(false);
-    }
-    
-    void loadQuizData();
-  }, [lesson?.quizId, currentUser, lesson?.id]);
-
-  // Load existing note when component mounts
-  useEffect(() => {
-    async function loadNote(): Promise<void> {
-      if (!currentUser || !lesson) return;
-      try {
-        const existingNote = await firestoreService.getNoteForLesson(currentUser.uid, lesson.id);
-        if (existingNote) {
-          setNote(existingNote.text);
-        }
+          // Update quiz history state with the new submission
+          const newQuizHistory = {
+            quizId: quiz.id,
+            userId: currentUser.uid,
+            courseId: lesson.courseId,
+            unitId: lesson.unitId,
+            lessonId: lesson.id,
+            answers,
+            correct,
+            total,
+            score: (correct / total) * 100,
+            completedAt: new Date().toISOString(),
+            title: unitName
+          };
+          setQuizHistory({
+            ...newQuizHistory,
+          });
+          await firestoreService.createQuizHistory(currentUser.uid, lesson.id, newQuizHistory);
+          setQuizComplete(true);
       } catch (err) {
-        console.error('Error loading note:', err);
+        console.error('Error submitting quiz:', err);
       }
+    };
+
+    if (loading) {
+      return (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <CircularProgress />
+        </Box>
+      );
     }
-    if (enableNote) {
-      void loadNote();
+
+    if (error || !lesson) {
+      return (
+        <Box p={2}>
+          <Typography color="error">{error || 'Lesson not found'}</Typography>
+        </Box>
+      );
     }
-  }, [lesson?.id, currentUser, lesson]);
 
-  const handleSaveNote = async (): Promise<void> => {
-    if (!currentUser || !lesson) return;
-    
-    try {
-      setIsSaving(true);
-      const unit = await firestoreService.getUnitById(lesson.unitId);
-      await firestoreService.saveNote(currentUser.uid, lesson.id, lesson.courseId, note, lesson.name, unit!.name);
-      setNoteSaved(true);
+    const videoId = lesson['video-url'] ? getYouTubeVideoId(lesson['video-url']) : null;
+    const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';
 
-      // If there's no quiz, complete the lesson
-      if (!quiz) {
-        await onComplete(lesson.id);
-      } else if (quizComplete) {
-        await onComplete(lesson.id);
-      } else {
-        // If quiz hasn't completed, show a reminder dialog
-        setQuizReminderOpen(true);
-      }
-    } catch (err) {
-      console.error('Error saving note:', err);
-      alert(t('saveNoteError', { message: err instanceof Error ? err.message : 'Unknown error occurred' }));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleQuizClose = () => {
-    if (quizComplete) {
-      void onComplete(lesson.id);
-    }
-    setQuizOpen(false);
-  };
-
-  const handleQuizSubmit = async (answers: Record<string, string>) => {
-    if (!lesson || !currentUser || !quiz) return;
-
-    try {
-        // Calculate score
-        let correct = 0;
-        Object.entries(answers).forEach(([questionIndex, answerId]) => {
-          const question = quiz.questions[parseInt(questionIndex, 10)];
-          if (question?.options && question.options[parseInt(answerId, 10)]?.isCorrect) {
-            correct++;
-          }
-        });
-
-        const total = quiz.questions.filter((question) => question.type === "single_choice").length;
-        const score = (correct / total) * 100;
-
-        void analyticsService.trackQuizComplete({
-          courseId: lesson.courseId,
-          lessonId: lesson.id,
-          lessonName: lesson.name,
-          score
-        });
-
-        // Get unit name for quiz history title
-        const unit = await firestoreService.getUnitById(lesson.unitId);
-        const unitName = unit ? unit.name : '';
-
-        // Update quiz history state with the new submission
-        const newQuizHistory = {
-          quizId: quiz.id,
-          userId: currentUser.uid,
-          courseId: lesson.courseId,
-          unitId: lesson.unitId,
-          lessonId: lesson.id,
-          answers,
-          correct,
-          total,
-          score: (correct / total) * 100,
-          completedAt: new Date().toISOString(),
-          title: unitName
-        };
-        setQuizHistory({
-          ...newQuizHistory,
-        });
-        await firestoreService.createQuizHistory(currentUser.uid, lesson.id, newQuizHistory);
-        setQuizComplete(true);
-    } catch (err) {
-      console.error('Error submitting quiz:', err);
-    }
-  };
-
-  if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-        <CircularProgress />
-      </Box>
-    );
-  }
+      <Box sx={{ flex: 1, height: 'auto', px: 0 }}>
+        <Box sx={{ mb: 3 }}>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Typography variant="h4" component="h1">
+              {convertChinese(lesson.name, language)}
+            </Typography>
+            {isCompleted && (
+              <Tooltip title="Lesson completed">
+                <CheckCircleIcon color="success" />
+              </Tooltip>
+            )}
+          </Stack>
+        </Box>
 
-  if (error || !lesson) {
-    return (
-      <Box p={2}>
-        <Typography color="error">{error || 'Lesson not found'}</Typography>
-      </Box>
-    );
-  }
-
-  const videoId = lesson['video-url'] ? getYouTubeVideoId(lesson['video-url']) : null;
-  const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';
-
-  return (
-    <Box sx={{ flex: 1, height: 'auto', px: 0 }}>
-      <Box sx={{ mb: 3 }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Typography variant="h4" component="h1">
-            {convertChinese(lesson.name, language)}
-          </Typography>
-          {isCompleted && (
-            <Tooltip title="Lesson completed">
-              <CheckCircleIcon color="success" />
-            </Tooltip>
-          )}
-        </Stack>
-      </Box>
-
-      {/* Video Section */}
-      {lesson['video-url'] && videoId && (
-        <>
-          <Typography variant="h6" gutterBottom>
-            {convertChinese(lesson['video-title'] || '', language)}
-          </Typography>
-            <Box 
-              sx={{
-                position: 'relative',
-                width: '100%',
-                paddingTop: '56.25%', // 16:9 aspect ratio
-                mb: 4,
-              }}
-            >
-              <Box
-                component="iframe"
-                src={`https://www.youtube.com/embed/${videoId}`}
-                title={lesson['video-title']}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+        {/* Video Section */}
+        {lesson['video-url'] && videoId && (
+          <>
+            <Typography variant="h6" gutterBottom>
+              {convertChinese(lesson['video-title'] || '', language)}
+            </Typography>
+              <Box 
                 sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
+                  position: 'relative',
                   width: '100%',
-                  height: '100%',
-                  border: 0,
+                  paddingTop: '56.25%', // 16:9 aspect ratio
+                  mb: 4,
                 }}
-              />
-            </Box>
-        </>
-      )}
-      {/* Lesson Content */}
-      <Box sx={{ mb: 4 }}>
-        <MarkdownViewer content={convertChinese(encodedContent, language)} />
-      </Box>
-            {/* Quiz Section */}
-            {quiz && (
+              >
+                <Box
+                  component="iframe"
+                  src={`https://www.youtube.com/embed/${videoId}`}
+                  title={lesson['video-title']}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 0,
+                  }}
+                />
+              </Box>
+          </>
+        )}
+        {/* Lesson Content */}
+        <Box sx={{ mb: 4 }}>
+          <MarkdownViewer content={convertChinese(encodedContent, language)} />
+        </Box>
+              {/* Quiz Section */}
+              {(quiz || (lesson.quizId && !currentUser)) && (
         <Paper sx={{ 
           p: 3, 
           mb: 4, 
@@ -378,18 +384,31 @@ const LessonView: React.FC<LessonViewProps> = ({
                 </Typography>
               )}
             </Box>
-            <Button 
-              variant="contained" 
-              color="primary"
-              onClick={() => {
-                // Reset quiz state and clear previous answers before opening
-                setQuizComplete(false);
-                setQuizHistory(null);
-                setQuizOpen(true);
-              }}
-            >
-              {t(quizHistory ? 'retakeQuiz' : 'startQuiz')}
-            </Button>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <Button 
+                variant="contained" 
+                color="primary"
+                disabled={!currentUser}
+                onClick={() => {
+                  // Reset quiz state and clear previous answers before opening
+                  setQuizComplete(false);
+                  setQuizHistory(null);
+                  setQuizOpen(true);
+                }}
+              >
+                {t(quizHistory ? 'retakeQuiz' : 'startQuiz')}
+              </Button>
+              {!currentUser && (
+                <Button 
+                  component={RouterLink} 
+                  to="/login" 
+                  state={{ from: { pathname: location.pathname } }}
+                  sx={{ mt: 1, textTransform: 'none' }}
+                >
+                  {t('loginToTakeQuiz')}
+                </Button>
+              )}
+            </Box>
           </Stack>
         </Paper>
       )}
@@ -448,13 +467,13 @@ const LessonView: React.FC<LessonViewProps> = ({
       </Dialog>
       
       {/* Notes Section or Completion Button */}
-      {enableNote && !quiz ? (
+      {enableNote && !lesson.quizId ? (
         <Paper sx={{ 
           p: 3, 
           mb: 4, 
           bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50'
         }}>
-          {!note && (
+          {!note && currentUser && (
             <Typography color="warning.main" sx={{ mb: 2 }}>
               {t('mustWriteNote')}
             </Typography>
@@ -466,7 +485,7 @@ const LessonView: React.FC<LessonViewProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSaveNote}
-                disabled={isSaving || note === ''}
+                disabled={isSaving || note === '' || !currentUser}
                 startIcon={
                   isSaving ? (
                     <CircularProgress size={20} sx={{ color: 'white' }} />
@@ -480,25 +499,48 @@ const LessonView: React.FC<LessonViewProps> = ({
                 {isSaving ? t('saving') : t('saveAndComplete')}
               </Button>
           </Stack>
-          <RichTextEditor
-            value={note}
-            onChange={setNote}
-            placeholder={t('writeNotesHere')}
-            enableMarkdown={false}
-          />
+          {!currentUser ? (
+            <Box sx={{ p: 2, bgcolor: 'action.hover', borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+              <Button 
+                component={RouterLink} 
+                to="/login" 
+                state={{ from: { pathname: location.pathname } }}
+                sx={{ textTransform: 'none' }}
+              >
+                {t('loginToTakeNotes')}
+              </Button>
+            </Box>
+          ) : (
+            <RichTextEditor
+              value={note}
+              onChange={setNote}
+              placeholder={t('writeNotesHere')}
+              enableMarkdown={false}
+            />
+          )}
         </Paper>
       ) : (!quiz && 
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
           <Button
             variant="contained"
             color="primary"
             size="large"
             onClick={() => onComplete(lesson.id)}
             startIcon={<CheckCircleIcon />}
-            disabled={isCompleted}
+            disabled={isCompleted || !currentUser}
           >
             {isCompleted ? t('lessonCompleted') : t('markAsComplete')}
           </Button>
+          {!currentUser && (
+            <Button 
+              component={RouterLink} 
+              to="/login" 
+              state={{ from: { pathname: location.pathname } }}
+              sx={{ mt: 1, textTransform: 'none' }}
+            >
+              {t('loginToTrackProgress')}
+            </Button>
+          )}
         </Box>
       )}
     </Box>

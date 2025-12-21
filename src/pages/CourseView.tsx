@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { TOOLBAR_HEIGHT } from '../components/NavPanel';
 import { 
   Box, 
@@ -25,14 +25,15 @@ import LessonView from './LessonView';
 
 
 export default function CourseView() {
-  const { courseId = '', unitId = '', lessonId = '' } = useParams<{ 
+  const { courseId = '', unitId, lessonId } = useParams<{ 
     courseId: string;
-    unitId: string;
-    lessonId: string;
+    unitId?: string;
+    lessonId?: string;
   }>();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const location = useLocation();
   const { t, language } = useTranslation();
+  const { currentUser } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
   const [units, setUnits] = useState<CourseUnit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
@@ -81,7 +82,18 @@ export default function CourseView() {
           
           if (userData) {
             setUserProgress(userData.progress[courseId] || {});
-            setIsRegistered(!!userData.registeredCourses?.[courseId]);
+            const isUserRegistered = !!userData.registeredCourses?.[courseId];
+            setIsRegistered(isUserRegistered);
+
+            // Auto-register if course is public and user is not registered
+            if (courseData.isPublic && !isUserRegistered && currentUser) {
+              try {
+                await firestoreService.registerCourse(currentUser.uid, courseId);
+                setIsRegistered(true);
+              } catch (error) {
+                console.error('Failed to auto-register:', error);
+              }
+            }
           }
         }
       } catch (err) {
@@ -239,7 +251,7 @@ export default function CourseView() {
           {course.name}
         </Typography>
 
-        {isRegistered ? (
+        {isRegistered || (course && course.isPublic) ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Box sx={{ flex: 1 }}>
               <CourseProgress 
@@ -248,25 +260,40 @@ export default function CourseView() {
                 units={units}
                 unitLessons={unitLessons}
               />
+              {isRegistered && (
+                <Box sx={{ mt: 'auto', m:1, textAlign: 'left' }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => navigate(`/quiz/${courseId}`)}
+                  >
+                    {t('seeQuizResults')}
+                  </Button>
+                </Box>
+              )}
+            </Box>
+            {isRegistered ? (
               <Box sx={{ mt: 'auto', m:1, textAlign: 'left' }}>
                 <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate(`/quiz/${courseId}`)}
+                  variant="outlined"
+                  color="error"
+                  onClick={handleDropCourse}
                 >
-                  {t('seeQuizResults')}
+                  {t('dropCourse')}
                 </Button>
               </Box>
-            </Box>
-            <Box sx={{ mt: 'auto', m:1, textAlign: 'left' }}>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleDropCourse}
-              >
-                {t('dropCourse')}
-              </Button>
-            </Box>
+            ) : (
+              <Box sx={{ mt: 'auto', m:1, textAlign: 'left', p: 2, bgcolor: 'action.hover', display: 'flex', justifyContent: 'center' }}>
+                 <Button 
+                  component={RouterLink} 
+                  to="/login" 
+                  state={{ from: { pathname: location.pathname } }}
+                  sx={{ textTransform: 'none' }}
+                 >
+                   {t('loginToTrackProgress')}
+                 </Button>
+              </Box>
+            )}
           </Box>
         ) : (
           <Paper sx={{ p: 3, mb: 3, bgcolor: 'error.light' }}>

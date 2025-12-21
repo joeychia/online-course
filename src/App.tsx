@@ -79,27 +79,21 @@ function App() {
                   
                   {/* Protected routes */}
                   <Route path="/:courseId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <CourseView />
-                      </Layout>
-                    </ProtectedRoute>
+                    <Layout>
+                      <CourseView />
+                    </Layout>
                   } />
                   
                   <Route path="/:courseId/:lessonId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <CourseView />
-                      </Layout>
-                    </ProtectedRoute>
+                    <Layout>
+                      <CourseView />
+                    </Layout>
                   } />
 
                   <Route path="/:courseId/:unitId/:lessonId" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <CourseView />
-                      </Layout>
-                    </ProtectedRoute>
+                    <Layout>
+                      <CourseView />
+                    </Layout>
                   } />
                   <Route path="/admin" element={
                     <ProtectedRoute>

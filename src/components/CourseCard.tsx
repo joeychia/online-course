@@ -10,12 +10,14 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  Chip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Course } from '../types';
 import { convertChinese } from '../utils/chineseConverter';
 import MarkdownViewer from './MarkdownViewer';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface CourseCardProps {
   course: Course;
@@ -33,6 +35,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   showDescriptionButton = true,
 }) => {
   const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleDescriptionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -62,6 +65,15 @@ const CourseCard: React.FC<CourseCardProps> = ({
           >
             {convertChinese(course.name, language)}
           </Typography>
+          {course.isPublic && (
+            <Chip 
+              label={t('publicAccess')} 
+              size="small" 
+              color="success" 
+              variant="outlined" 
+              sx={{ ml: 1, flexShrink: 0 }} 
+            />
+          )}
         </Box>
 
         <Stack direction="row" spacing={2} justifyContent="space-between">

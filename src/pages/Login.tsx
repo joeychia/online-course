@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Container,
     Box,
@@ -31,8 +31,11 @@ export default function Login() {
         severity: 'success' as 'success' | 'error'
     });
     const navigate = useNavigate();
+    const location = useLocation();
     const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
     const { t } = useTranslation();
+
+    const from = location.state?.from?.pathname || '/';
 
     const handleCloseSnackbar = () => {
         setSnackbar(prev => ({ ...prev, open: false }));
@@ -90,7 +93,7 @@ export default function Login() {
             } else {
                 await signIn(email, password);
             }
-            navigate('/');
+            navigate(from, { replace: true });
         } catch (err) {
             console.error(err);
             const errorMessage = err instanceof Error ? err.message : String(err);
@@ -134,17 +137,10 @@ export default function Login() {
                     },
                 });
             }
-            navigate('/');
-        } catch (err) {
-            console.error(err);
-            // Handle popup closure error
-            if (err instanceof Error && 
-                (err.message.includes('popup_closed_by_user') || 
-                 err.message.includes('cancelled'))) {
-                return;
-            }
-            const errorMessage = err instanceof Error ? err.message : String(err);
-            showMessage(`${t('failedToSignIn')} ${errorMessage}`);
+            navigate(from, { replace: true });
+        } catch (error) {
+            console.error(error);
+            showMessage(`${t('failedToSignIn')} ${error instanceof Error ? error.message : String(error)}`);
         }
     };
 

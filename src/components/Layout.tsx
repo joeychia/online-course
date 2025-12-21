@@ -172,30 +172,28 @@ export default function Layout({ children }: LayoutProps) {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, justifyContent: 'flex-end' }}>
-            {currentUser && (
-              <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                <Button
-                  component={RouterLink}
-                  to="/mycourses"
-                  color="inherit"
-                  startIcon={null}
-                  sx={menuButtonStyles}
-                >
-                  <SchoolIcon sx={{ fontSize: '1.75rem' }} />
-                  <span>{t('myCourses')}</span>
-                </Button>
-                <Button
-                  component={RouterLink}
-                  to={"/notebook"}
-                  color="inherit"
-                  startIcon={null}
-                  sx={menuButtonStyles}
-                >
-                  <MenuBookIcon sx={{ fontSize: '1.75rem' }} />
-                  <span>{t('myNotes')}</span>
-                </Button>
-              </Box>
-            )}
+            <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+              <Button
+                component={RouterLink}
+                to="/mycourses"
+                color="inherit"
+                startIcon={null}
+                sx={menuButtonStyles}
+              >
+                <SchoolIcon sx={{ fontSize: '1.75rem' }} />
+                <span>{t('myCourses')}</span>
+              </Button>
+              <Button
+                component={RouterLink}
+                to={"/notebook"}
+                color="inherit"
+                startIcon={null}
+                sx={menuButtonStyles}
+              >
+                <MenuBookIcon sx={{ fontSize: '1.75rem' }} />
+                <span>{t('myNotes')}</span>
+              </Button>
+            </Box>
             <Button
               color="inherit"
               onClick={handleSettingsMenu}
@@ -224,30 +222,28 @@ export default function Layout({ children }: LayoutProps) {
                 <HomeIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
                 <span>{t('homepage')}</span>
               </Button>
-              {currentUser && (
-                <Box sx={{ display: { sm: 'none' } }}>
-                  <Button
-                    component={RouterLink}
-                    to="/mycourses"
-                    color="inherit"
-                    fullWidth
-                    sx={{ justifyContent: 'flex-start', py: 1 }}
-                  >
-                    <SchoolIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
-                    <span>{t('myCourses')}</span>
-                  </Button>
-                  <Button
-                    component={RouterLink}
-                    to="/notebook"
-                    color="inherit"
-                    fullWidth
-                    sx={{ justifyContent: 'flex-start', py: 1 }}
-                  >
-                    <MenuBookIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
-                    <span>{t('myNotes')}</span>
-                  </Button>
-                </Box>
-              )}
+              <Box sx={{ display: { sm: 'none' } }}>
+                <Button
+                  component={RouterLink}
+                  to="/mycourses"
+                  color="inherit"
+                  fullWidth
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                >
+                  <SchoolIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                  <span>{t('myCourses')}</span>
+                </Button>
+                <Button
+                  component={RouterLink}
+                  to="/notebook"
+                  color="inherit"
+                  fullWidth
+                  sx={{ justifyContent: 'flex-start', py: 1 }}
+                >
+                  <MenuBookIcon sx={{ mr: 1, fontSize: '1.75rem' }} />
+                  <span>{t('myNotes')}</span>
+                </Button>
+              </Box>
               <Button
                 component={RouterLink}
                 to="/help"

@@ -490,4 +490,20 @@ export const translations: Translations = {
     'zh-TW': '所有人：',
     'zh-CN': '所有人：'
   },
+  loginToTakeQuiz: {
+    'zh-TW': '請登入以參加測驗',
+    'zh-CN': '请登录以参加测验'
+  },
+  loginToTakeNotes: {
+    'zh-TW': '請登入以撰寫筆記',
+    'zh-CN': '请登录以撰写笔记'
+  },
+  loginToTrackProgress: {
+    'zh-TW': '請登入以追蹤進度',
+    'zh-CN': '请登录以追踪进度'
+  },
+  publicAccess: {
+    'zh-TW': '公開',
+    'zh-CN': '公开'
+  },
 };

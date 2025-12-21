@@ -229,6 +229,10 @@ export default function NavPanel({
       return true;
     }
 
+    if (course.isPublic) {
+      return true;
+    }
+
     // If course has unlockLessonIndex, make that lesson accessible in each unit
     if (course.settings?.unlockLessonIndex !== undefined) {
       if(lessonIndex === course.settings.unlockLessonIndex) {
@@ -450,7 +454,7 @@ export default function NavPanel({
                             ) : isCompleted ? (
                               <CheckCircleIcon color="success" fontSize="small" data-testid={`lesson-complete-${lesson.id}`} />
                             ) : (
-                              <LockOpenIcon color="primary" fontSize="small" data-testid={`lesson-unlocked-${lesson.id}`} />
+                              !course.isPublic && <LockOpenIcon color="primary" fontSize="small" data-testid={`lesson-unlocked-${lesson.id}`} />
                             )}
                           </Stack>
                         </StyledListItem>

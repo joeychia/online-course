@@ -40,12 +40,16 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
           firestoreService.getAllCourses(),
           currentUser ? firestoreService.getUserById(currentUser.uid) : null
         ]);
-        if (myCourses && userProfileData) {
-          // Filter courses based on user's registeredCourses
-          const filteredCourses = coursesData.filter(course => 
-            userProfileData.registeredCourses && userProfileData.registeredCourses[course.id]
-          );
-          setCourses(filteredCourses);
+        if (myCourses) {
+          if (userProfileData) {
+            // Filter courses based on user's registeredCourses
+            const filteredCourses = coursesData.filter(course => 
+              userProfileData.registeredCourses && userProfileData.registeredCourses[course.id]
+            );
+            setCourses(filteredCourses);
+          } else {
+            setCourses([]);
+          }
         } else {
           setCourses(coursesData);
         }
@@ -188,13 +192,14 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
       <Grid container spacing={3}>
         {courses.map((course) => {
           const isRegistered = userProfile?.registeredCourses?.[course.id];
+          const canAccess = isRegistered || course.isPublic;
           
           return (
             <Grid item xs={12} sm={6} md={4} key={course.id}>
               <CourseCard
                 course={course}
-                onPrimaryAction={() => isRegistered ? navigate(`/${course.id}`) : handleRegisterCourse(course)}
-                primaryActionText={isRegistered ? t('enterCourse') : t('registerCourse')}
+                onPrimaryAction={() => canAccess ? navigate(`/${course.id}`) : handleRegisterCourse(course)}
+                primaryActionText={canAccess ? t('enterCourse') : t('registerCourse')}
                 language={language}
                 showDescriptionButton={true}
               />
