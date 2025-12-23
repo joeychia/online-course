@@ -124,23 +124,45 @@ export async function restoreFromBackup(backupFilePath: string) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const files = listBackupFiles();
-    
-    console.log('Available backup files:');
-    files.forEach((file, index) => {
-        console.log(`${index + 1}: ${file}`);
-    });
 
-    console.log('\nPlease enter the number of the backup file to restore:');
-    process.stdin.setEncoding('utf-8');
-    process.stdin.on('data', (data) => {
-        const input = parseInt((data as any).trim(), 10);
-        if (isNaN(input) || input < 1 || input > files.length) {
-            console.error('Invalid selection');
-            process.exit(1);
+    // Check if filename is provided as argument
+    if (process.argv[2]) {
+        const argFile = process.argv[2];
+        const match = files.find(f => f === argFile);
+        
+        if (match) {
+            console.log(`Using provided backup file: ${match}`);
+            const backupFilePath = join(process.cwd(), 'src/data/backups', match);
+            restoreFromBackup(backupFilePath);
+        } else {
+             // Check if it's a full path or just not in the list
+             if (existsSync(argFile)) {
+                 console.log(`Using provided backup file path: ${argFile}`);
+                 restoreFromBackup(argFile);
+             } else {
+                console.error(`File not found in backups directory or invalid path: ${argFile}`);
+                console.log('Available files:', files.join(', '));
+                process.exit(1);
+             }
         }
+    } else {
+        console.log('Available backup files:');
+        files.forEach((file, index) => {
+            console.log(`${index + 1}: ${file}`);
+        });
 
-        const selectedFile = files[input - 1];
-        const backupFilePath = join(process.cwd(), 'src/data/backups', selectedFile);
-        restoreFromBackup(backupFilePath);
-    });
+        console.log('\nPlease enter the number of the backup file to restore:');
+        process.stdin.setEncoding('utf-8');
+        process.stdin.on('data', (data) => {
+            const input = parseInt((data as any).trim(), 10);
+            if (isNaN(input) || input < 1 || input > files.length) {
+                console.error('Invalid selection');
+                process.exit(1);
+            }
+
+            const selectedFile = files[input - 1];
+            const backupFilePath = join(process.cwd(), 'src/data/backups', selectedFile);
+            restoreFromBackup(backupFilePath);
+        });
+    }
 }
