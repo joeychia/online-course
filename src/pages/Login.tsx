@@ -161,6 +161,7 @@ export default function Login() {
                         <Stack spacing={2}>
                             {isSignUp && (
                                 <TextField
+                                    name="name"
                                     label={t('name')}
                                     fullWidth
                                     variant="filled"
@@ -170,6 +171,7 @@ export default function Login() {
                                 />
                             )}
                             <TextField
+                                name="email"
                                 label={t('email')}
                                 type="email"
                                 fullWidth
@@ -179,6 +181,7 @@ export default function Login() {
                                 required
                             />
                             <TextField
+                                name="password"
                                 label={t('password')}
                                 type="password"
                                 fullWidth
@@ -193,6 +196,7 @@ export default function Login() {
                             )}
                             {isSignUp && (
                                 <TextField
+                                    name="confirmPassword"
                                     label={t('confirmPassword')}
                                     type="password"
                                     fullWidth
