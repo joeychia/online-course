@@ -5,9 +5,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const JSON_INPUT_FILE = path.resolve(__dirname, '../data/backups/course-qianlizhixing-2728.json');
-const CSV_INPUT_FILE = path.resolve(__dirname, '../data/backups/qlzx_2728.csv');
-const OUTPUT_FILE = path.resolve(__dirname, '../data/backups/course-qianlizhixing-2728-reconstructed.json');
+const JSON_INPUT_FILE = path.resolve(__dirname, '../data/backups/course-qianlizhixing-2627.json');
+const CSV_INPUT_FILE = path.resolve(__dirname, '../data/backups/qlzx_2627.csv');
+const OUTPUT_FILE = path.resolve(__dirname, '../data/backups/course-qianlizhixing-2627-reconstructed.json');
 
 interface Lesson {
   id: string;
@@ -238,16 +238,16 @@ async function reconstruct() {
 
   console.log(`Processed ${processedCount} lessons from CSV.`);
 
-  // 1. Fix Unit IDs in root 'units' object to match CSV format (unit_qlzx_2728_weekX)
+  // 1. Fix Unit IDs in root 'units' object to match CSV format (unit_qlzx_2627_weekX)
   const newUnits: Record<string, any> = {};
   if (backupData.units) {
     for (const [key, unit] of Object.entries(backupData.units)) {
       let newKey = key;
       let newId = unit.id;
 
-      const match = key.match(/^unit_qlzx_week(\d+)_2728$/);
+      const match = key.match(/^unit_qlzx_week(\d+)_2627$/);
       if (match) {
-        newKey = `unit_qlzx_2728_week${match[1]}`;
+        newKey = `unit_qlzx_2627_week${match[1]}`;
         newId = newKey;
       }
       
@@ -271,10 +271,10 @@ async function reconstruct() {
     for (const course of Object.values(backupData.courses)) {
       if (course.units && Array.isArray(course.units)) {
         course.units = course.units.map((u: any) => {
-           const match = u.id.match(/^unit_qlzx_week(\d+)_2728$/);
+           const match = u.id.match(/^unit_qlzx_week(\d+)_2627$/);
            let newUnitId = u.id;
            if (match) {
-             newUnitId = `unit_qlzx_2728_week${match[1]}`;
+             newUnitId = `unit_qlzx_2627_week${match[1]}`;
            }
            
            let unitName = u.name;
@@ -298,9 +298,9 @@ async function reconstruct() {
     for (const [key, lesson] of Object.entries(backupData.lessons)) {
       // Keep lesson_0
       if (key === 'lesson_0') {
-        // Fix unitId if needed: point to unit_0_2728 if unit_0 doesn't exist
-        if (lesson.unitId === 'unit_0' && backupData.units['unit_0_2728']) {
-           lesson.unitId = 'unit_0_2728';
+        // Fix unitId if needed: point to unit_0_2627 if unit_0 doesn't exist
+        if (lesson.unitId === 'unit_0' && backupData.units['unit_0_2627']) {
+           lesson.unitId = 'unit_0_2627';
         }
         finalLessons[key] = lesson;
         continue;
@@ -343,7 +343,7 @@ async function reconstruct() {
   }
 
   // Sort lessons within each unit (optional, but good for consistency)
-  // Assuming IDs like lesson_qlzx2728_dayX can be sorted by extracting the number
+  // Assuming IDs like lesson_qlzx2627_dayX can be sorted by extracting the number
   for (const unitId in unitLessonsMap) {
     unitLessonsMap[unitId].sort((a, b) => {
       // Handle lesson_0 special case
@@ -381,7 +381,7 @@ async function reconstruct() {
       // which contains partial lesson info (id, name, hasQuiz, etc.)
       
       // Based on previous grep, the unit object looks like:
-      // "unit_0_2728": { ..., "lessons": [ { "name": "...", "id": "...", "hasQuiz": false } ] }
+      // "unit_0_2627": { ..., "lessons": [ { "name": "...", "id": "...", "hasQuiz": false } ] }
       
       backupData.units[unitId].lessons = lessons.map(l => ({
         id: l.id,

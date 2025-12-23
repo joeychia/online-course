@@ -14,6 +14,7 @@ export interface Course {
     unlockLessonIndex: number;
     token?: string;
     enableNote?: boolean;
+    startDate?: string; // Format: "M/D/YYYY" or ISO string
   };
   units: CourseUnit[];
   groupIds: Record<string, boolean>;

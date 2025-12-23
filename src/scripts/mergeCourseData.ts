@@ -123,7 +123,7 @@ function escapeCsv(field: string | undefined): string {
 
 const originalCsvPath = path.resolve(process.cwd(), 'src/data/backups/original.csv');
 const targetCsvPath = path.resolve(process.cwd(), 'src/data/backups/target.csv');
-const outputCsvPath = path.resolve(process.cwd(), 'src/data/backups/qlzx_2728.csv');
+const outputCsvPath = path.resolve(process.cwd(), 'src/data/backups/qlzx_2627.csv');
 
 console.log('Reading files...');
 const originalData = readCsvFile(originalCsvPath);
@@ -305,8 +305,8 @@ for (let i = 1; i < targetData.length; i++) {
     
     if (match) {
       meditationText = match[1].trim();
-      // Remove from content
-      content = rawContent.replace(match[0], '').trim();
+      // Keep content as is, including meditation text
+      content = rawContent;
     } else {
       content = rawContent;
     }
@@ -380,7 +380,7 @@ for (const [unitId, data] of unitAggregations.entries()) {
   // Generate Unit Name
   // Format: "第X週 StartBook StartChap[-EndBook EndChap]"
   
-  // Extract week number from unitId (unit_qlzx_2728_weekX)
+  // Extract week number from unitId (unit_qlzx_2627_weekX)
   const weekMatch = unitId.match(/week(\d+)/);
   const weekNum = weekMatch ? weekMatch[1] : '';
   const weekTitle = weekNum ? `第${weekNum}週` : '';
@@ -436,7 +436,7 @@ for (const [unitId, data] of unitAggregations.entries()) {
   // Store generated name
   unitNames.set(unitId, unitName);
 
-  if (unitId === 'unit_qlzx_2728_week104') continue;
+  if (unitId === 'unit_qlzx_2627_week104') continue;
 
   // Aggregation Logic
   let aggregatedText = '\n\n【本週默想經文】';
