@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
+/*
 // Interfaces based on the CSV structures
 interface OriginalRow {
   bookId: string;
@@ -56,6 +57,7 @@ function parseCsvLine(line: string): string[] {
   result.push(current);
   return result;
 }
+*/
 
 // Function to read CSV file properly handling multi-line quoted fields
 function readCsvFile(filePath: string): string[][] {

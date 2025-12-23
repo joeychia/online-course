@@ -26,6 +26,7 @@ interface BackupData {
   lessons: Record<string, Lesson>;
 }
 
+/*
 // Simple CSV parser that handles quoted fields
 function parseCsvLine(line: string): string[] {
   const result: string[] = [];
@@ -62,6 +63,7 @@ function parseCsvLine(line: string): string[] {
   result.push(currentField);
   return result;
 }
+*/
 
 async function reconstruct() {
   console.log('Reading original JSON file for structure...');
