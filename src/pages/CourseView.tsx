@@ -21,6 +21,8 @@ import CourseProgress from '../components/CourseProgress';
 import { firestoreService } from '../services/firestoreService';
 import { useTranslation } from '../hooks/useTranslation';
 import LessonView from './LessonView';
+import { calculateStudyDay, extractLessonSnippets, getLessonIdForDay } from '../utils/courseUtils';
+import MarkdownViewer from '../components/MarkdownViewer';
 
 
 
@@ -43,6 +45,8 @@ export default function CourseView() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [todayLesson, setTodayLesson] = useState<Lesson | null>(null);
+  const [studyDay, setStudyDay] = useState<number | null>(null);
 
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
@@ -68,6 +72,7 @@ export default function CourseView() {
   useEffect(() => {
     async function loadCourseData() {
       if (!courseId) return;
+      setLoading(true);
 
       try {
         const [courseData, unitsData, userData] = await Promise.all([
@@ -79,6 +84,21 @@ export default function CourseView() {
         if (courseData) {
           setCourse(courseData);
           setUnits(unitsData);
+
+          // Handle study schedule
+          if (courseData.settings?.startDate) {
+            const day = calculateStudyDay(courseData.settings.startDate);
+            setStudyDay(day);
+            if (day > 0) {
+              const lessonId = getLessonIdForDay(day, courseId);
+              try {
+                const lesson = await firestoreService.getLessonById(lessonId);
+                setTodayLesson(lesson);
+              } catch (e) {
+                console.error('Failed to load today\'s lesson:', e);
+              }
+            }
+          }
           
           if (userData) {
             setUserProgress(userData.progress[courseId] || {});
@@ -98,6 +118,8 @@ export default function CourseView() {
         }
       } catch (err) {
         console.error('Error loading course data:', err);
+      } finally {
+        setLoading(false);
       }
     }
     loadCourseData();
@@ -244,12 +266,63 @@ export default function CourseView() {
       isCompleted={completedLessons.includes(currentLesson.id)}
       enableNote={!!(course.settings.enableNote && currentLesson.disableNote !== true)}
     />
-  ) : (
+  ) : course ? (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
       <Box sx={{ flex: 1 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           {course.name}
         </Typography>
+
+        {studyDay !== null && studyDay > 0 && (
+          <Paper sx={{ p: 3, mb: 4, bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+            <Typography variant="h5" gutterBottom>
+              {t('welcomeTo')} {course.name}
+            </Typography>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+              {t('planDay', { day: studyDay })}
+            </Typography>
+            
+            {todayLesson ? (
+              <Box sx={{ mt: 2, mb: 2 }}>
+                {(() => {
+                  const snippets = extractLessonSnippets(todayLesson);
+                  return (
+                    <>
+                      {snippets.reading && (
+                        <Typography variant="body1" sx={{ fontStyle: 'italic', mb: 1 }}>
+                          * {t('reading')}: {snippets.reading}
+                        </Typography>
+                      )}
+                      {snippets.meditation && (
+                        <Typography variant="body1" sx={{ fontStyle: 'italic', mb: 2 }}>
+                          * {t('meditation')}: {snippets.meditation}
+                        </Typography>
+                      )}
+                    </>
+                  );
+                })()}
+                <Button 
+                  variant="contained" 
+                  color="secondary"
+                  sx={{ mt: 2 }}
+                  onClick={() => handleSelectLesson(todayLesson.unitId, todayLesson.id)}
+                >
+                  {t('enterLesson')}
+                </Button>
+              </Box>
+            ) : (
+              <Typography variant="body1" sx={{ fontStyle: 'italic', mt: 1 }}>
+                {t('noLessonToday')}
+              </Typography>
+            )}
+          </Paper>
+        )}
+
+        {course.description && (
+          <Box sx={{ mb: 4 }}>
+            <MarkdownViewer content={course.description} />
+          </Box>
+        )}
 
         {isRegistered || (course && course.isPublic) ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -317,7 +390,7 @@ export default function CourseView() {
         )}
       </Box>
     </Box>
-  );
+  ) : null;
 
   return (
     <>

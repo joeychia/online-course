@@ -6,6 +6,30 @@ interface Translations {
 }
 
 export const translations: Translations = {
+  welcomeTo: {
+    'zh-TW': '歡迎來到',
+    'zh-CN': '欢迎来到'
+  },
+  planDay: {
+    'zh-TW': '今天是計劃第 {{day}} 天',
+    'zh-CN': '今天是计划第 {{day}} 天'
+  },
+  reading: {
+    'zh-TW': '讀經',
+    'zh-CN': '读经'
+  },
+  meditation: {
+    'zh-TW': '默想經文',
+    'zh-CN': '默想经文'
+  },
+  enterLesson: {
+    'zh-TW': '點擊進入',
+    'zh-CN': '点击进入'
+  },
+  noLessonToday: {
+    'zh-TW': '今天沒有安排的内容或課程尚未開始。',
+    'zh-CN': '今天没有安排的内容或课程尚未开始。'
+  },
   menu: {
     'zh-TW': '選單',
     'zh-CN': '菜单'
