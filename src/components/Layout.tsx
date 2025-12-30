@@ -339,6 +339,9 @@ export default function Layout({ children }: LayoutProps) {
                   <ToggleButton value="zh-CN" aria-label="simplified chinese">
                     <Typography>{t('simplified')}</Typography>
                   </ToggleButton>
+                  <ToggleButton value="en-US" aria-label="english">
+                    <Typography>{t('english')}</Typography>
+                  </ToggleButton>
                 </ToggleButtonGroup>
                 {currentUser && (
                   <>
