@@ -40,6 +40,44 @@ export function calculateStudyDay(startDateValue: any): number {
 }
 
 /**
+ * Calculates the calendar date for a specific study day number.
+ * Day 1 is the startDate.
+ */
+export function getScheduledDate(startDateValue: any, dayNumber: number): Date | null {
+  if (!startDateValue || dayNumber < 1) return null;
+
+  let startDate: Date;
+
+  if (typeof startDateValue === 'string') {
+    startDate = new Date(startDateValue);
+  } else if (startDateValue instanceof Date) {
+    startDate = startDateValue;
+  } else if (typeof startDateValue === 'object' && startDateValue.toDate && typeof startDateValue.toDate === 'function') {
+    // Firebase JS SDK Timestamp
+    startDate = startDateValue.toDate();
+  } else if (typeof startDateValue === 'object' && (startDateValue._seconds || startDateValue.seconds)) {
+    // Plain object representation of Timestamp
+    const seconds = startDateValue._seconds || startDateValue.seconds;
+    const nanoseconds = startDateValue._nanoseconds || startDateValue.nanoseconds || 0;
+    startDate = new Date(seconds * 1000 + nanoseconds / 1000000);
+  } else {
+    startDate = new Date(startDateValue);
+  }
+
+  if (isNaN(startDate.getTime())) {
+    console.error('Invalid startDate provided to getScheduledDate:', startDateValue);
+    return null;
+  }
+
+  startDate.setHours(0, 0, 0, 0);
+  
+  const targetDate = new Date(startDate);
+  targetDate.setDate(startDate.getDate() + dayNumber - 1);
+  
+  return targetDate;
+}
+
+/**
  * Extracts reading and meditation snippets from lesson content.
  */
 export function extractLessonSnippets(lesson: any): { reading: string; meditation: string } {

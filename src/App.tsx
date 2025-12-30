@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react';
 import Layout from './components/Layout';
 import CourseList from './pages/CourseList';
 import CourseView from './pages/CourseView';
+import CoursePreview from './pages/CoursePreview';
 import Login from './pages/Login';
 import PasswordReset from './pages/PasswordReset';
 import Notebook from './pages/Notebook';
@@ -76,6 +77,8 @@ function App() {
                       <Help />
                     </Layout>
                   } />
+
+                  <Route path="/:courseId/preview" element={<CoursePreview />} />
                   
                   {/* Protected routes */}
                   <Route path="/:courseId" element={

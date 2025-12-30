@@ -11,8 +11,8 @@ export const translations: Translations = {
     'zh-CN': '欢迎来到'
   },
   planDay: {
-    'zh-TW': '今天是計劃第 {{day}} 天',
-    'zh-CN': '今天是计划第 {{day}} 天'
+    'zh-TW': '今天是{{date}}，計劃的第 {{day}} 天',
+    'zh-CN': '今天是{{date}}，计划的第 {{day}} 天'
   },
   reading: {
     'zh-TW': '讀經',

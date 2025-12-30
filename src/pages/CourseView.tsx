@@ -89,7 +89,7 @@ export default function CourseView() {
           if (courseData.settings?.startDate) {
             const day = calculateStudyDay(courseData.settings.startDate);
             setStudyDay(day);
-            if (day > 0) {
+            if (day >= 0) {
               const lessonId = getLessonIdForDay(day, courseId);
               try {
                 const lesson = await firestoreService.getLessonById(lessonId);
@@ -273,13 +273,16 @@ export default function CourseView() {
           {course.name}
         </Typography>
 
-        {studyDay !== null && studyDay > 0 && (
+        {studyDay !== null && studyDay >= 0 && (
           <Paper sx={{ p: 3, mb: 4, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             <Typography variant="h5" gutterBottom>
               {t('welcomeTo')} {course.name}
             </Typography>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-              {t('planDay', { day: studyDay })}
+              {t('planDay', { 
+                day: studyDay, 
+                date: `${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日` 
+              })}
             </Typography>
             
             {todayLesson ? (

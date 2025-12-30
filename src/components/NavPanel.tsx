@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isFutureDate, formatOpenDate } from '../utils/dateUtils';
+import { getScheduledDate } from '../utils/courseUtils';
 import { 
   Box, 
   Typography, 
@@ -98,6 +99,20 @@ export default function NavPanel({
   const [nextLessonId, setNextLessonId] = useState<string | null>(null);
   const [nextUnitId, setNextUnitId] = useState<string | null>(null);
   const { currentUser } = useAuth();
+
+  const unitStartDays = useMemo(() => {
+    const map: Record<string, number> = {};
+    let count = 0;
+    units.forEach((unit, index) => {
+      map[unit.id] = count;
+      // Only count lessons if it's not the first unit (Unit 0)
+      // Assuming Unit 0 is the first unit in the list
+      if (index > 0) {
+        count += unit.lessonCount;
+      }
+    });
+    return map;
+  }, [units]);
   const [isAdmin, setIsAdmin] = useState(false);
 
 
@@ -432,6 +447,13 @@ export default function NavPanel({
                       const isAccessible = isLessonAccessible(index + 1, previousLessonId);
                       const isCompleted = progress[lesson.id]?.completed;
                       previousLessonId = lesson.id;
+                      
+                      // Identify Unit 0 as the first unit (index 0)
+                      const isUnit0 = units.findIndex(u => u.id === unit.id) === 0;
+                      
+                      const lessonDay = (unitStartDays[unit.id] || 0) + index + 1;
+                      // Don't show schedule date for Unit 0
+                      const scheduledDate = !isUnit0 && course.settings?.startDate ? getScheduledDate(course.settings.startDate, lessonDay) : null;
 
                       return (
                         <StyledListItem
@@ -449,6 +471,11 @@ export default function NavPanel({
                             }}>
                               {convertChinese(lesson.name, language)}
                             </Typography>
+                            {scheduledDate && (
+                              <Typography variant="caption" color="text.secondary" sx={{ mr: 1, whiteSpace: 'nowrap' }}>
+                                {scheduledDate.getMonth() + 1}/{scheduledDate.getDate()}
+                              </Typography>
+                            )}
                             {!isAccessible ? (
                               <LockIcon color="disabled" fontSize="small" data-testid={`lesson-lock-${lesson.id}`} />
                             ) : isCompleted ? (
