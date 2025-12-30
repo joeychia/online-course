@@ -274,7 +274,7 @@ export default function CourseView() {
         </Typography>
 
         {studyDay !== null && studyDay > 0 && (
-          <Paper sx={{ p: 3, mb: 4, bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+          <Paper sx={{ p: 3, mb: 4, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             <Typography variant="h5" gutterBottom>
               {t('welcomeTo')} {course.name}
             </Typography>
@@ -303,8 +303,15 @@ export default function CourseView() {
                 })()}
                 <Button 
                   variant="contained" 
-                  color="secondary"
-                  sx={{ mt: 2 }}
+                  sx={{ 
+                    mt: 2,
+                    bgcolor: 'background.paper',
+                    color: 'primary.main',
+                    fontWeight: 'bold',
+                    '&:hover': {
+                      bgcolor: 'grey.100', // Slightly darker white for hover
+                    }
+                  }}
                   onClick={() => handleSelectLesson(todayLesson.unitId, todayLesson.id)}
                 >
                   {t('enterLesson')}

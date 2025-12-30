@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import { Box, Typography, Card, CardContent, CircularProgress, alpha } from '@mui/material';
 import { firestoreService } from '../services/firestoreService';
 import { useAuth } from '../hooks/useAuth';
 import { Announcement, Course } from '../types';

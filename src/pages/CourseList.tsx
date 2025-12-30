@@ -149,12 +149,17 @@ export default function CourseList({ myCourses = false }: { myCourses?: boolean 
     <Container maxWidth="lg" sx={{ my: 4 }}>
       {!currentUser && (
         <Alert 
-          severity="warning"
+          severity="info"
           variant="filled"
           sx={{
             display: 'flex',
             alignItems: 'center',
             my: 4,
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            '& .MuiAlert-icon': {
+              color: 'inherit'
+            },
             '& .MuiAlert-message': {
               fontSize: '1.4rem', // Increased font size
               textAlign: 'left',

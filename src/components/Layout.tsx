@@ -129,8 +129,13 @@ export default function Layout({ children }: LayoutProps) {
     }}>
       <AppBar 
         position="fixed" 
+        elevation={0}
         sx={{ 
-          zIndex: theme => theme.zIndex.drawer + 1 
+          zIndex: theme => theme.zIndex.drawer + 1,
+          bgcolor: 'background.paper',
+          color: 'text.primary',
+          borderBottom: 1,
+          borderColor: 'divider'
         }}
       >
         <Toolbar 
@@ -152,9 +157,22 @@ export default function Layout({ children }: LayoutProps) {
             <Button
               color="inherit"
               onClick={handleMenuClick}
-              sx={menuButtonStyles}
+              sx={{
+                ...menuButtonStyles,
+                minWidth: 'auto',
+                p: 1
+              }}
             >
-              <MenuIcon sx={{ fontSize: '1.75rem' }} />
+              <Box 
+                component="img"
+                src="/icons/web-app-manifest-192x192.png"
+                alt="App Logo"
+                sx={{
+                  height: 40,
+                  width: 40,
+                  objectFit: 'contain'
+                }}
+              />
             </Button>
             <Button
               component={RouterLink}

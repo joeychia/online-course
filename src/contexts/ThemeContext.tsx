@@ -9,7 +9,10 @@ const lightTheme = createTheme({
       paper: '#ffffff',
     },
     primary: {
-      main: '#1976d2',
+      main: '#8B5A2B',
+    },
+    text: {
+      primary: '#333333',
     },
   },
 });
@@ -22,7 +25,7 @@ const darkTheme = createTheme({
       paper: '#1e1e1e',
     },
     primary: {
-      main: '#90caf9',
+      main: '#CDA478',
     },
     text: {
       primary: '#ffffff',

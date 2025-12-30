@@ -11,6 +11,7 @@ import {
   DialogContent,
   IconButton,
   Chip,
+  alpha,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -48,6 +49,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
         '&:hover': {
           boxShadow: 6,
         },
@@ -82,6 +84,13 @@ const CourseCard: React.FC<CourseCardProps> = ({
               startIcon={<DescriptionIcon />}
               onClick={handleDescriptionClick}
               size="small"
+              sx={{ 
+                color: 'text.secondary',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                  color: 'primary.main',
+                }
+              }}
             >
               {convertChinese('查看介紹', language)}
             </Button>
@@ -90,6 +99,13 @@ const CourseCard: React.FC<CourseCardProps> = ({
             onClick={onPrimaryAction}
             size="small"
             variant="contained"
+            sx={{
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              }
+            }}
           >
             {primaryActionText}
           </Button>
