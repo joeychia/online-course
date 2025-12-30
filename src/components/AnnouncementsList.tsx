@@ -71,7 +71,11 @@ export default function AnnouncementsList() {
         </Typography>
 
           {announcements.map((announcement) => (
-            <Card key={announcement.id} sx={{ mb: 2, '&:last-child': { mb: 0 } }}>
+            <Card key={announcement.id} sx={{ 
+              mb: 2, 
+              '&:last-child': { mb: 0 },
+              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.5)
+            }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <Box component="span" sx={{ fontSize: '1.2rem', lineHeight: 1 }}>⚠️</Box>

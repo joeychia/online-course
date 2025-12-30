@@ -198,7 +198,7 @@ export default function Layout({ children }: LayoutProps) {
                 startIcon={null}
                 sx={menuButtonStyles}
               >
-                <SchoolIcon sx={{ fontSize: '1.75rem' }} />
+                <SchoolIcon sx={{ fontSize: '1.75rem', color: 'primary.main' }} />
                 <span>{t('myCourses')}</span>
               </Button>
               <Button
@@ -208,7 +208,7 @@ export default function Layout({ children }: LayoutProps) {
                 startIcon={null}
                 sx={menuButtonStyles}
               >
-                <MenuBookIcon sx={{ fontSize: '1.75rem' }} />
+                <MenuBookIcon sx={{ fontSize: '1.75rem', color: 'primary.main' }} />
                 <span>{t('myNotes')}</span>
               </Button>
             </Box>
@@ -218,7 +218,7 @@ export default function Layout({ children }: LayoutProps) {
               aria-label="settings"
               sx={menuButtonStyles}
             >
-              <SettingsIcon sx={{ fontSize: '1.75rem' }} />
+              <SettingsIcon sx={{ fontSize: '1.75rem', color: 'primary.main' }} />
               <Box component="span" sx={{ display: { xs: 'none', sm: 'block' } }}>{t('settings')}</Box>
             </Button>
           </Box>
