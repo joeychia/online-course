@@ -20,8 +20,6 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminQuizResults = lazy(() => import('./pages/AdminQuizResults'));
 const CourseStudentsPage = lazy(() => import('./pages/CourseStudentsPage'));
 
-import WeChatBrowserWarning from './components/WeChatBrowserWarning';
-
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
