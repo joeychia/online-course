@@ -128,6 +128,49 @@ export default function CourseView() {
     loadCourseData();
   }, [courseId, currentUser]);
 
+  // Handle week/day routing
+  useEffect(() => {
+    const handleWeekDayRouting = async () => {
+      const searchParams = new URLSearchParams(location.search);
+      const weekStr = searchParams.get('week');
+      const dayStr = searchParams.get('day');
+
+      if (weekStr && dayStr && course && units.length > 0) {
+        // Only for courses with startDate
+        if (!course.settings?.startDate) return;
+
+        const week = parseInt(weekStr, 10);
+        const day = parseInt(dayStr, 10);
+
+        if (!isNaN(week) && !isNaN(day) && week >= 0 && week < units.length) {
+          const targetUnit = units[week];
+          let lessons = unitLessons[targetUnit.id];
+
+          if (!lessons) {
+            try {
+              lessons = await firestoreService.getLessonsIdNameForUnit(targetUnit.id);
+              // Update cache but don't wait for state update to proceed
+              setUnitLessons(prev => ({ ...prev, [targetUnit.id]: lessons }));
+            } catch (error) {
+              console.error('Error fetching lessons for routing:', error);
+            }
+          }
+
+          if (lessons && lessons.length > 0) {
+            const lessonIndex = day - 1;
+            if (lessonIndex >= 0 && lessonIndex < lessons.length) {
+              const targetLesson = lessons[lessonIndex];
+              // Remove query params by replacing URL
+              navigate(`/${courseId}/${targetUnit.id}/${targetLesson.id}`, { replace: true });
+            }
+          }
+        }
+      }
+    };
+
+    handleWeekDayRouting();
+  }, [course, units, location.search, unitLessons, navigate, courseId]);
+
   // Load lessons for expanded units
   useEffect(() => {
     async function loadUnitLessons(unitId: string) {
