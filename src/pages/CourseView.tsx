@@ -160,8 +160,13 @@ export default function CourseView() {
             const lessonIndex = day - 1;
             if (lessonIndex >= 0 && lessonIndex < lessons.length) {
               const targetLesson = lessons[lessonIndex];
-              // Remove query params by replacing URL
-              navigate(`/${courseId}/${targetUnit.id}/${targetLesson.id}`, { replace: true });
+              // Remove week/day query params but keep others like focus
+              const newSearchParams = new URLSearchParams(location.search);
+              newSearchParams.delete('week');
+              newSearchParams.delete('day');
+              const searchString = newSearchParams.toString();
+
+              navigate(`/${courseId}/${targetUnit.id}/${targetLesson.id}${searchString ? `?${searchString}` : ''}`, { replace: true });
             }
           }
         }
