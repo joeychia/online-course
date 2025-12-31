@@ -43,7 +43,6 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
 function App() {
   return (
     <>
-      <WeChatBrowserWarning />
       <ThemeProvider>
         <FontSizeProvider>
           <AuthProvider>
