@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -54,8 +54,11 @@ export default function Layout({ children }: LayoutProps) {
   const { language, setLanguage } = useLanguage();
   const { currentUser, userProfile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const isFocusMode = new URLSearchParams(location.search).get('focus') === 'true';
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -126,6 +129,8 @@ export default function Layout({ children }: LayoutProps) {
       '& h5': { fontSize: 'var(--font-size-h5)' },
       '& h6': { fontSize: 'var(--font-size-h6)' },
     }}>
+      {!isFocusMode && (
+        <>
       <AppBar 
         position="fixed" 
         elevation={0}
@@ -378,6 +383,8 @@ export default function Layout({ children }: LayoutProps) {
         </Toolbar>
       </AppBar>
       <Toolbar /> {/* This creates space for the fixed AppBar */}
+        </>
+      )}
       
       <Box component="main" sx={{ flex: 1, width: '100%' }}>
         {children}

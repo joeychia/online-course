@@ -36,11 +36,14 @@ export default function CourseView() {
   const location = useLocation();
   const { t, language } = useTranslation();
   const { currentUser } = useAuth();
+  
+  const isFocusMode = new URLSearchParams(location.search).get('focus') === 'true';
+
   const [course, setCourse] = useState<Course | null>(null);
   const [units, setUnits] = useState<CourseUnit[]>([]);
   const [unitLessons, setUnitLessons] = useState<{ [key: string]: Array<{ id: string; name: string }> }>({});
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(window.innerWidth >= 600);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(window.innerWidth >= 600 && !isFocusMode);
   const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -413,46 +416,50 @@ export default function CourseView() {
         top: 0,
         left: 0
       }}>
-        <Button
-          onClick={handleDrawerToggle}
-          sx={{
-            position: 'fixed',
-            left: { xs: 16, sm: 12 },
-            top: TOOLBAR_HEIGHT + 16,
-            zIndex: theme => theme.zIndex.drawer - 1,
-            minWidth: 'unset',
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            backgroundColor: theme => `${theme.palette.background.paper}99`, // 99 makes it 60% transparent
-            boxShadow: 2,
-            transition: 'background-color 0.2s ease',
-            '&:hover': {
-              backgroundColor: 'background.paper' // Solid background on hover
-            }
-          }}
-        >
-          <SegmentIcon />
-        </Button>
-        <NavPanel
-          course={course}
-          units={units}
-          progress={userProgress}
-          selectedUnitId={unitId}
-          selectedLessonId={lessonId}
-          onSelectLesson={handleSelectLesson}
-          isOpen={isDrawerOpen}
-          onToggle={handleDrawerToggle}
-        />
+        {!isFocusMode && (
+          <Button
+            onClick={handleDrawerToggle}
+            sx={{
+              position: 'fixed',
+              left: { xs: 16, sm: 12 },
+              top: TOOLBAR_HEIGHT + 16,
+              zIndex: theme => theme.zIndex.drawer - 1,
+              minWidth: 'unset',
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              backgroundColor: theme => `${theme.palette.background.paper}99`, // 99 makes it 60% transparent
+              boxShadow: 2,
+              transition: 'background-color 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'background.paper' // Solid background on hover
+              }
+            }}
+          >
+            <SegmentIcon />
+          </Button>
+        )}
+        {!isFocusMode && (
+          <NavPanel
+            course={course}
+            units={units}
+            progress={userProgress}
+            selectedUnitId={unitId}
+            selectedLessonId={lessonId}
+            onSelectLesson={handleSelectLesson}
+            isOpen={isDrawerOpen}
+            onToggle={handleDrawerToggle}
+          />
+        )}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
             p: { xs: 2, sm: 3 },
             width: '100%',
-            height: `calc(100vh - ${TOOLBAR_HEIGHT+30}px)`,
+            height: isFocusMode ? '100vh' : `calc(100vh - ${TOOLBAR_HEIGHT+30}px)`,
             overflow: 'auto',
-            mt: `${TOOLBAR_HEIGHT}px`,
+            mt: isFocusMode ? 0 : `${TOOLBAR_HEIGHT}px`,
             '& > *': {
               maxWidth: 'lg',
               mx: 'auto'
