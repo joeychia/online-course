@@ -313,16 +313,15 @@ const LessonView: React.FC<LessonViewProps> = ({
       
       if (!date) return null;
       
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const daysZh = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-      
-      const dayOfWeek = language === 'zh-TW' ? daysZh[date.getDay()] : days[date.getDay()];
-      const dateStr = date.toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'en-US', {
+      const locale = language === 'zh-TW' ? 'zh-TW' : 'en-US';
+      const weekday = date.toLocaleDateString(locale, { weekday: 'long' });
+      const datePart = date.toLocaleDateString(locale, {
+        year: 'numeric',
         month: 'numeric',
         day: 'numeric'
       });
       
-      return `${dateStr} ${dayOfWeek}`;
+      return `${datePart} ${weekday}`;
     })();
 
     return (
@@ -348,7 +347,7 @@ const LessonView: React.FC<LessonViewProps> = ({
                 {convertChinese(lesson['video-title'] || '', language)}
               </Typography>
               {scheduledDateInfo && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.primary">
                   {scheduledDateInfo}
                 </Typography>
               )}
