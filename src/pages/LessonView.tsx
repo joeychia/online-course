@@ -313,7 +313,7 @@ const LessonView: React.FC<LessonViewProps> = ({
       
       if (!date) return null;
       
-      const locale = language === 'zh-TW' ? 'zh-TW' : 'en-US';
+      const locale = language;
       const weekday = date.toLocaleDateString(locale, { weekday: 'long' });
       const datePart = date.toLocaleDateString(locale, {
         year: 'numeric',
