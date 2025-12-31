@@ -316,6 +316,7 @@ export default function CourseView() {
       onComplete={handleLessonComplete}
       isCompleted={completedLessons.includes(currentLesson.id)}
       enableNote={!!(course.settings.enableNote && currentLesson.disableNote !== true)}
+      startDate={course.settings?.startDate}
     />
   ) : course ? (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>

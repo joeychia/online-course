@@ -26,6 +26,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useParams, useLocation, Link as RouterLink } from 'react-router-dom';
 import { getYouTubeVideoId } from '../utils/urlUtils';
 import { convertChinese } from '../utils/chineseConverter';
+import { getScheduledDate } from '../utils/courseUtils';
 import MarkdownViewer from '../components/MarkdownViewer';
 
 // Function to encode URLs in markdown content
@@ -70,6 +71,7 @@ interface LessonViewProps {
   onComplete: (lessonId: string) => Promise<void>;
   isCompleted: boolean;
   enableNote?: boolean;
+  startDate?: any;
 }
 
 const LessonView: React.FC<LessonViewProps> = ({ 
@@ -78,6 +80,7 @@ const LessonView: React.FC<LessonViewProps> = ({
   onComplete,
   isCompleted,
   enableNote = true,
+  startDate,
 }) => {
   const { t, language } = useTranslation();
   const { currentUser } = useAuth();
@@ -299,6 +302,29 @@ const LessonView: React.FC<LessonViewProps> = ({
     const videoId = lesson['video-url'] ? getYouTubeVideoId(lesson['video-url']) : null;
     const encodedContent = lesson.content ? encodeMarkdownUrls(lesson.content) : '';
 
+    const scheduledDateInfo = (() => {
+      if (!startDate || !lesson?.id) return null;
+      
+      const dayMatch = lesson.id.match(/day(\d+)/i);
+      if (!dayMatch) return null;
+      
+      const dayNum = parseInt(dayMatch[1], 10);
+      const date = getScheduledDate(startDate, dayNum);
+      
+      if (!date) return null;
+      
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const daysZh = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      
+      const dayOfWeek = language === 'zh-TW' ? daysZh[date.getDay()] : days[date.getDay()];
+      const dateStr = date.toLocaleDateString(language === 'zh-TW' ? 'zh-TW' : 'en-US', {
+        month: 'numeric',
+        day: 'numeric'
+      });
+      
+      return `${dateStr} ${dayOfWeek}`;
+    })();
+
     return (
       <Box sx={{ flex: 1, height: 'auto', px: 0 }}>
         <Box sx={{ mb: 3 }}>
@@ -317,9 +343,16 @@ const LessonView: React.FC<LessonViewProps> = ({
         {/* Video Section */}
         {lesson['video-url'] && videoId && (
           <>
-            <Typography variant="h6" gutterBottom>
-              {convertChinese(lesson['video-title'] || '', language)}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="h6" sx={{ mb: 0 }}>
+                {convertChinese(lesson['video-title'] || '', language)}
+              </Typography>
+              {scheduledDateInfo && (
+                <Typography variant="body2" color="text.secondary">
+                  {scheduledDateInfo}
+                </Typography>
+              )}
+            </Box>
               <Box 
                 sx={{
                   position: 'relative',
