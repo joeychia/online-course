@@ -117,7 +117,13 @@ export default function CoursePreview() {
                   bgcolor: 'grey.100',
                 }
               }}
-              onClick={() => navigate(`/${courseId}/${todayLesson.unitId}/${todayLesson.id}`)}
+              onClick={() => {
+                if (courseId === 'course_qianlizhixing_2627') {
+                  navigate(`/${courseId}/${todayLesson.id}`);
+                } else {
+                  navigate(`/${courseId}/${todayLesson.unitId}/${todayLesson.id}`);
+                }
+              }}
             >
               {t('enterLesson')}
             </Button>
