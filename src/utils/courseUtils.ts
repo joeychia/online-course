@@ -133,7 +133,7 @@ export function extractLessonSnippets(lesson: any): { reading: string; meditatio
 export function getLessonIdForDay(day: number, courseId: string): string {
   // If it's the qlzx 2627 course, use lesson_qlzx_dayX as requested
   if (courseId === 'course_qianlizhixing_2627') {
-    return `lesson_qlzx_day${day}`;
+    return `lesson_qlzx2627_day${day}`;
   }
   
   // Fallback for other courses or future qlzx courses
