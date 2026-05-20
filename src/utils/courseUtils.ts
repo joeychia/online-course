@@ -28,14 +28,11 @@ export function calculateStudyDay(startDateValue: any): number {
     return 0;
   }
 
-  startDate.setHours(0, 0, 0, 0);
-  
+  const startUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const diffTime = today.getTime() - startDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
+  const todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffDays = Math.round((todayUTC - startUTC) / (1000 * 60 * 60 * 24));
+
   return diffDays + 1;
 }
 
